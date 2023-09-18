@@ -1,7 +1,7 @@
 ## Compilation
 
-- Uses .NET 7.0 Framework, download latest SDK [here](https://dotnet.microsoft.com/en-us/download/dotnet/7.0)
-- Release config is targetted for Linux Arm64, Debug config targets Windows x64. Other architecture may be specified within the command line.
+- Uses `.NET 7.0 Framework`, download latest SDK [here](https://dotnet.microsoft.com/en-us/download/dotnet/7.0)
+- `Release` config is targetted for Linux Arm64, `Debug` config targets Windows x64. Other architecture may be specified within the command line.
 
 The command below will compile the project into a executable program.
 ```bash
@@ -12,7 +12,7 @@ dotnet publish -c Release -o <output_folder>
 ## Execution
 
 1. **Set Enviroment Variables**
-    - **ASPNETCORE_ENVIRONMENT:** Specifies which enviroment the application runs in using linked **appsettings.ASPNETCORE_ENVIRONMENT.json**. Options include *Development*, *Staging*, and *Production*.
+    - **ASPNETCORE_ENVIRONMENT:** Specifies which enviroment the application runs in using linked `appsettings.ASPNETCORE_ENVIRONMENT.json`. Options include *Development*, *Staging*, and *Production*.
     - **ASPNETCORE_URLS:** Determines URLs the application will listen on. 
 
     You can set these via the commands:
@@ -23,9 +23,14 @@ dotnet publish -c Release -o <output_folder>
     **Note:** Use `set` instead of `export` on Windows.
 
 2. **Configure Database Connection**
-    In the associated appsettings.json, set a ConnectionString for local to the database you are connecting. 
+    In the associated appsettings.json, set a `ConnectionString` for `local` to the database you are connecting. Example:
+    ```json
+    "ConnectionStrings": {
+        "local": "Host=localhost;Port=5432;Database=postgres;Username=postgres;Password=[password]"
+    }
+    ```
 
-3. **Enable HTTPS Traffic**
+3. **Enable HTTPS**
     For local testing, you can enable HTTPS using the included dev-certs tool in .NET Core.
     ```bash
     dotnet dev-certs https --trust
