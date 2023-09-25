@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'HomeScreen.dart';
-import 'SignInPage.dart';
+import 'app/screens/testingScreen.dart';
 
 void main() {
-  runApp(HomeScreen());
+  runApp(const MaterialApp(title: "Smarter Sleep", home: TestingScreen()));
 }
-
+/*
 class SmarterSleep extends StatelessWidget {
   const SmarterSleep({super.key});
   @override
@@ -20,3 +19,4 @@ class SmarterSleep extends StatelessWidget {
     );
   }
 }
+*/
