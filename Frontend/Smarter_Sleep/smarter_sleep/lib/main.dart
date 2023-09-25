@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'HomeScreen.dart';
-import 'SignInPage.dart';
+//import 'SignInPage.dart';
 
 void main() {
-  runApp(HomeScreen());
+  runApp(SmarterSleep());
 }
 
 class SmarterSleep extends StatelessWidget {
@@ -11,12 +11,7 @@ class SmarterSleep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-            backgroundColor: Color.fromARGB(255, 217, 185, 255),
-            title: const Text('Smarter Sleep',
-                style: TextStyle(color: Color.fromARGB(255, 90, 68, 255)))),
-      ),
+      home: HomeScreen(),
     );
   }
 }
