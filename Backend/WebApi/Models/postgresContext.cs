@@ -6,6 +6,11 @@ namespace WebApi.Models;
 
 public partial class postgresContext : DbContext
 {
+    static postgresContext()
+    {
+        AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+    }
+    
     #pragma warning disable CS8618
     public postgresContext()
     {
@@ -115,10 +120,6 @@ public partial class postgresContext : DbContext
             entity.Property(e => e.UserId).HasColumnName("user_id");
             entity.Property(e => e.DayOfWeek).HasColumnType("day_of_week");
             entity.Property(e => e.WakeTime).HasColumnName("wake_time");
-
-            entity.HasOne(d => d.User).WithMany()
-                .HasForeignKey(d => d.UserId)
-                .HasConstraintName("custom_schedule_user_id_fkey");
         });
 
         modelBuilder.Entity<DailyStreak>(entity =>
