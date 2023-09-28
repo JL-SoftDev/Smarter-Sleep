@@ -1,3 +1,4 @@
+DROP TYPE IF EXISTS day_of_week CASCADE;
 CREATE TYPE day_of_week AS ENUM ('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday');
 
 DROP TABLE IF EXISTS app_user CASCADE;
@@ -98,6 +99,7 @@ CREATE TABLE challenge (
 
 DROP TABLE IF EXISTS user_challenge CASCADE;
 CREATE TABLE user_challenge (
+    id SERIAL PRIMARY KEY,
     user_id UUID NOT NULL,
     challenge_id INT NOT NULL,
     completed BOOLEAN DEFAULT FALSE,
@@ -105,8 +107,7 @@ CREATE TABLE user_challenge (
     expire_date TIMESTAMP,
     user_selected BOOLEAN NOT NULL, 
     FOREIGN KEY (user_id) REFERENCES app_user(user_id) ON DELETE CASCADE,
-    FOREIGN KEY (challenge_id) REFERENCES challenge(id),
-    PRIMARY KEY (user_id, challenge_id)
+    FOREIGN KEY (challenge_id) REFERENCES challenge(id)
 );
 
 DROP TABLE IF EXISTS transaction CASCADE;
