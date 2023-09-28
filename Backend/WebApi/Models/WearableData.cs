@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace WebApi.Models;
 
@@ -11,11 +12,12 @@ public partial class WearableData
 
     public DateTime? SleepEnd { get; set; }
 
-    public string? Hynogram { get; set; }
+    public string? Hypnogram { get; set; }
 
     public int? SleepScore { get; set; }
 
     public DateOnly SleepDate { get; set; }
 
+    [JsonIgnore]
     public virtual ICollection<SleepReview> SleepReviews { get; set; } = new List<SleepReview>();
 }

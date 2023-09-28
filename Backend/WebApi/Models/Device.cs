@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace WebApi.Models;
 
@@ -19,5 +20,6 @@ public partial class Device
 
     public string? Status { get; set; }
 
+    [JsonIgnore]
     public virtual AppUser User { get; set; } = null!;
 }

@@ -11,55 +11,55 @@ namespace WebApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class DailyStreaksController : ControllerBase
+    public class CustomSchedulesController : ControllerBase
     {
         private readonly postgresContext _context;
 
-        public DailyStreaksController(postgresContext context)
+        public CustomSchedulesController(postgresContext context)
         {
             _context = context;
         }
 
-        // GET: api/DailyStreaks
+        // GET: api/CustomSchedules
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<DailyStreak>>> GetDailyStreaks()
+        public async Task<ActionResult<IEnumerable<CustomSchedule>>> GetCustomSchedules()
         {
-          if (_context.DailyStreaks == null)
+          if (_context.CustomSchedules == null)
           {
               return NotFound();
           }
-            return await _context.DailyStreaks.ToListAsync();
+            return await _context.CustomSchedules.ToListAsync();
         }
 
-        // GET: api/DailyStreaks/5
+        // GET: api/CustomSchedules/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<DailyStreak>> GetDailyStreak(Guid id)
+        public async Task<ActionResult<CustomSchedule>> GetCustomSchedule(Guid id)
         {
-          if (_context.DailyStreaks == null)
+          if (_context.CustomSchedules == null)
           {
               return NotFound();
           }
-            var dailyStreak = await _context.DailyStreaks.FindAsync(id);
+            var customSchedule = await _context.CustomSchedules.FindAsync(id);
 
-            if (dailyStreak == null)
+            if (customSchedule == null)
             {
                 return NotFound();
             }
 
-            return dailyStreak;
+            return customSchedule;
         }
 
-        // PUT: api/DailyStreaks/5
+        // PUT: api/CustomSchedules/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutDailyStreak(Guid id, DailyStreak dailyStreak)
+        public async Task<IActionResult> PutCustomSchedule(Guid id, CustomSchedule customSchedule)
         {
-            if (id != dailyStreak.UserId)
+            if (id != customSchedule.UserId)
             {
                 return BadRequest();
             }
 
-            _context.Entry(dailyStreak).State = EntityState.Modified;
+            _context.Entry(customSchedule).State = EntityState.Modified;
 
             try
             {
@@ -67,7 +67,7 @@ namespace WebApi.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!DailyStreakExists(id))
+                if (!CustomScheduleExists(id))
                 {
                     return NotFound();
                 }
@@ -80,23 +80,23 @@ namespace WebApi.Controllers
             return NoContent();
         }
 
-        // POST: api/DailyStreaks
+        // POST: api/CustomSchedules
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<DailyStreak>> PostDailyStreak(DailyStreak dailyStreak)
+        public async Task<ActionResult<CustomSchedule>> PostCustomSchedule(CustomSchedule customSchedule)
         {
-          if (_context.DailyStreaks == null)
+          if (_context.CustomSchedules == null)
           {
-              return Problem("Entity set 'postgresContext.DailyStreaks'  is null.");
+              return Problem("Entity set 'postgresContext.CustomSchedules'  is null.");
           }
-            _context.DailyStreaks.Add(dailyStreak);
+            _context.CustomSchedules.Add(customSchedule);
             try
             {
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateException)
             {
-                if (DailyStreakExists(dailyStreak.UserId))
+                if (CustomScheduleExists(customSchedule.UserId))
                 {
                     return Conflict();
                 }
@@ -106,32 +106,32 @@ namespace WebApi.Controllers
                 }
             }
 
-            return CreatedAtAction("GetDailyStreak", new { id = dailyStreak.UserId }, dailyStreak);
+            return CreatedAtAction("GetCustomSchedule", new { id = customSchedule.UserId }, customSchedule);
         }
 
-        // DELETE: api/DailyStreaks/5
+        // DELETE: api/CustomSchedules/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteDailyStreak(Guid id)
+        public async Task<IActionResult> DeleteCustomSchedule(Guid id)
         {
-            if (_context.DailyStreaks == null)
+            if (_context.CustomSchedules == null)
             {
                 return NotFound();
             }
-            var dailyStreak = await _context.DailyStreaks.FindAsync(id);
-            if (dailyStreak == null)
+            var customSchedule = await _context.CustomSchedules.FindAsync(id);
+            if (customSchedule == null)
             {
                 return NotFound();
             }
 
-            _context.DailyStreaks.Remove(dailyStreak);
+            _context.CustomSchedules.Remove(customSchedule);
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private bool DailyStreakExists(Guid id)
+        private bool CustomScheduleExists(Guid id)
         {
-            return (_context.DailyStreaks?.Any(e => e.UserId == id)).GetValueOrDefault();
+            return (_context.CustomSchedules?.Any(e => e.UserId == id)).GetValueOrDefault();
         }
     }
 }

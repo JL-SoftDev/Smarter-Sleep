@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
-using WebApi.Models;
 
 namespace WebApi.Models;
 
 public partial class postgresContext : DbContext
 {
+    #pragma warning disable CS8618
     public postgresContext()
     {
     }
@@ -22,6 +22,10 @@ public partial class postgresContext : DbContext
 
     public virtual DbSet<ChallengeLog> ChallengeLogs { get; set; }
 
+    public virtual DbSet<CustomSchedule> CustomSchedules { get; set; }
+
+    public virtual DbSet<DailyStreak> DailyStreaks { get; set; }
+
     public virtual DbSet<Device> Devices { get; set; }
 
     public virtual DbSet<Item> Items { get; set; }
@@ -30,9 +34,13 @@ public partial class postgresContext : DbContext
 
     public virtual DbSet<SleepReview> SleepReviews { get; set; }
 
+    public virtual DbSet<SleepSetting> SleepSettings { get; set; }
+
     public virtual DbSet<Survey> Surveys { get; set; }
 
     public virtual DbSet<Transaction> Transactions { get; set; }
+
+    public virtual DbSet<UserChallenge> UserChallenges { get; set; }
 
     public virtual DbSet<WearableData> WearableData { get; set; }
 
@@ -41,6 +49,8 @@ public partial class postgresContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.HasPostgresEnum("day_of_week", new[] { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" });
+
         modelBuilder.Entity<AppUser>(entity =>
         {
             entity.HasKey(e => e.UserId).HasName("app_user_pkey");
@@ -94,6 +104,38 @@ public partial class postgresContext : DbContext
                 .HasForeignKey(d => d.TransactionId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("challenge_log_transaction_id_fkey");
+        });
+
+        modelBuilder.Entity<CustomSchedule>(entity =>
+        {
+            entity.HasKey(e => new {e.UserId, e.DayOfWeek});
+             
+            entity.ToTable("custom_schedule");
+
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.DayOfWeek).HasColumnType("day_of_week");
+            entity.Property(e => e.WakeTime).HasColumnName("wake_time");
+
+            entity.HasOne(d => d.User).WithMany()
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("custom_schedule_user_id_fkey");
+        });
+
+        modelBuilder.Entity<DailyStreak>(entity =>
+        {
+            entity.HasKey(e => e.UserId).HasName("daily_streak_pkey");
+
+            entity.ToTable("daily_streak");
+
+            entity.Property(e => e.UserId)
+                .ValueGeneratedNever()
+                .HasColumnName("user_id");
+            entity.Property(e => e.LastDate).HasColumnName("last_date");
+            entity.Property(e => e.StartDate).HasColumnName("start_date");
+
+            entity.HasOne(d => d.User).WithOne(p => p.DailyStreak)
+                .HasForeignKey<DailyStreak>(d => d.UserId)
+                .HasConstraintName("daily_streak_user_id_fkey");
         });
 
         modelBuilder.Entity<Device>(entity =>
@@ -167,6 +209,9 @@ public partial class postgresContext : DbContext
             entity.ToTable("sleep_review");
 
             entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("timestamp without time zone")
+                .HasColumnName("created_at");
             entity.Property(e => e.SmarterSleepScore).HasColumnName("smarter_sleep_score");
             entity.Property(e => e.SurveyId).HasColumnName("survey_id");
             entity.Property(e => e.UserId).HasColumnName("user_id");
@@ -185,6 +230,31 @@ public partial class postgresContext : DbContext
                 .HasConstraintName("sleep_review_wearable_log_id_fkey");
         });
 
+        modelBuilder.Entity<SleepSetting>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("sleep_settings_pkey");
+
+            entity.ToTable("sleep_settings");
+
+            entity.HasIndex(e => e.UserId, "sleep_settings_user_id_key").IsUnique();
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.ScheduledHypnogram)
+                .HasColumnType("character varying")
+                .HasColumnName("scheduled_hypnogram");
+            entity.Property(e => e.ScheduledSleep)
+                .HasColumnType("timestamp without time zone")
+                .HasColumnName("scheduled_sleep");
+            entity.Property(e => e.ScheduledWake)
+                .HasColumnType("timestamp without time zone")
+                .HasColumnName("scheduled_wake");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+
+            entity.HasOne(d => d.User).WithOne(p => p.SleepSetting)
+                .HasForeignKey<SleepSetting>(d => d.UserId)
+                .HasConstraintName("sleep_settings_user_id_fkey");
+        });
+
         modelBuilder.Entity<Survey>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("survey_pkey");
@@ -192,6 +262,9 @@ public partial class postgresContext : DbContext
             entity.ToTable("survey");
 
             entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("timestamp without time zone")
+                .HasColumnName("created_at");
             entity.Property(e => e.SleepDuration).HasColumnName("sleep_duration");
             entity.Property(e => e.SleepQuality).HasColumnName("sleep_quality");
             entity.Property(e => e.SurveyDate).HasColumnName("survey_date");
@@ -204,18 +277,48 @@ public partial class postgresContext : DbContext
             entity.ToTable("transaction");
 
             entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("timestamp without time zone")
+                .HasColumnName("created_at");
             entity.Property(e => e.Description)
                 .HasColumnType("character varying")
                 .HasColumnName("description");
             entity.Property(e => e.PointAmount).HasColumnName("point_amount");
-            entity.Property(e => e.Timestamp)
-                .HasColumnType("timestamp without time zone")
-                .HasColumnName("timestamp");
             entity.Property(e => e.UserId).HasColumnName("user_id");
 
             entity.HasOne(d => d.User).WithMany(p => p.Transactions)
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("transaction_user_id_fkey");
+        });
+
+        modelBuilder.Entity<UserChallenge>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("user_challenge_pkey");
+
+            entity.ToTable("user_challenge");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.ChallengeId).HasColumnName("challenge_id");
+            entity.Property(e => e.Completed)
+                .HasDefaultValueSql("false")
+                .HasColumnName("completed");
+            entity.Property(e => e.ExpireDate)
+                .HasColumnType("timestamp without time zone")
+                .HasColumnName("expire_date");
+            entity.Property(e => e.StartDate)
+                .HasColumnType("timestamp without time zone")
+                .HasColumnName("start_date");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.UserSelected).HasColumnName("user_selected");
+
+            entity.HasOne(d => d.Challenge).WithMany(p => p.UserChallenges)
+                .HasForeignKey(d => d.ChallengeId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("user_challenge_challenge_id_fkey");
+
+            entity.HasOne(d => d.User).WithMany(p => p.UserChallenges)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("user_challenge_user_id_fkey");
         });
 
         modelBuilder.Entity<WearableData>(entity =>
@@ -225,9 +328,9 @@ public partial class postgresContext : DbContext
             entity.ToTable("wearable_data");
 
             entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.Hynogram)
+            entity.Property(e => e.Hypnogram)
                 .HasColumnType("character varying")
-                .HasColumnName("hynogram");
+                .HasColumnName("hypnogram");
             entity.Property(e => e.SleepDate).HasColumnName("sleep_date");
             entity.Property(e => e.SleepEnd)
                 .HasColumnType("timestamp without time zone")
@@ -242,8 +345,4 @@ public partial class postgresContext : DbContext
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
-
-    public DbSet<WebApi.Models.DailyStreak> DailyStreak { get; set; } = default!;
-
-    public DbSet<WebApi.Models.SleepSetting> SleepSetting { get; set; } = default!;
 }

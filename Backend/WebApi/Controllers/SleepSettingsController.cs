@@ -22,24 +22,24 @@ namespace WebApi.Controllers
 
         // GET: api/SleepSettings
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<SleepSetting>>> GetSleepSetting()
+        public async Task<ActionResult<IEnumerable<SleepSetting>>> GetSleepSettings()
         {
-          if (_context.SleepSetting == null)
+          if (_context.SleepSettings == null)
           {
               return NotFound();
           }
-            return await _context.SleepSetting.ToListAsync();
+            return await _context.SleepSettings.ToListAsync();
         }
 
         // GET: api/SleepSettings/5
         [HttpGet("{id}")]
         public async Task<ActionResult<SleepSetting>> GetSleepSetting(int id)
         {
-          if (_context.SleepSetting == null)
+          if (_context.SleepSettings == null)
           {
               return NotFound();
           }
-            var sleepSetting = await _context.SleepSetting.FindAsync(id);
+            var sleepSetting = await _context.SleepSettings.FindAsync(id);
 
             if (sleepSetting == null)
             {
@@ -85,11 +85,11 @@ namespace WebApi.Controllers
         [HttpPost]
         public async Task<ActionResult<SleepSetting>> PostSleepSetting(SleepSetting sleepSetting)
         {
-          if (_context.SleepSetting == null)
+          if (_context.SleepSettings == null)
           {
-              return Problem("Entity set 'postgresContext.SleepSetting'  is null.");
+              return Problem("Entity set 'postgresContext.SleepSettings'  is null.");
           }
-            _context.SleepSetting.Add(sleepSetting);
+            _context.SleepSettings.Add(sleepSetting);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetSleepSetting", new { id = sleepSetting.Id }, sleepSetting);
@@ -99,17 +99,17 @@ namespace WebApi.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteSleepSetting(int id)
         {
-            if (_context.SleepSetting == null)
+            if (_context.SleepSettings == null)
             {
                 return NotFound();
             }
-            var sleepSetting = await _context.SleepSetting.FindAsync(id);
+            var sleepSetting = await _context.SleepSettings.FindAsync(id);
             if (sleepSetting == null)
             {
                 return NotFound();
             }
 
-            _context.SleepSetting.Remove(sleepSetting);
+            _context.SleepSettings.Remove(sleepSetting);
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -117,7 +117,7 @@ namespace WebApi.Controllers
 
         private bool SleepSettingExists(int id)
         {
-            return (_context.SleepSetting?.Any(e => e.Id == id)).GetValueOrDefault();
+            return (_context.SleepSettings?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace WebApi.Models;
 
@@ -11,7 +12,9 @@ public partial class ChallengeLog
 
     public int TransactionId { get; set; }
 
+    [JsonIgnore]
     public virtual Challenge Challenge { get; set; } = null!;
 
+    [JsonIgnore]
     public virtual Transaction Transaction { get; set; } = null!;
 }
