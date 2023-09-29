@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace WebApi.Models;
 
@@ -12,14 +13,4 @@ public partial class AppUser
     public DateTime? CreatedAt { get; set; }
 
     public int? Points { get; set; }
-
-    public virtual DailyStreak? DailyStreak { get; set; }
-
-    public virtual ICollection<Device> Devices { get; set; } = new List<Device>();
-
-    public virtual ICollection<SleepReview> SleepReviews { get; set; } = new List<SleepReview>();
-
-    public virtual SleepSetting? SleepSetting { get; set; }
-
-    public virtual ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
 }

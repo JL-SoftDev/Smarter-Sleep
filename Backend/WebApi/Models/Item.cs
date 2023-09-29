@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace WebApi.Models;
 
@@ -12,6 +13,4 @@ public partial class Item
     public string? Description { get; set; }
 
     public int Cost { get; set; }
-
-    public virtual ICollection<PurchaseLog> PurchaseLogs { get; set; } = new List<PurchaseLog>();
 }

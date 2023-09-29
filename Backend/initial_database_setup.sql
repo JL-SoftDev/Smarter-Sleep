@@ -6,6 +6,15 @@ CREATE TABLE app_user (
     points INT
 );
 
+DROP TABLE IF EXISTS custom_schedule CASCADE;
+CREATE TABLE custom_schedule (
+    user_id UUID,
+    day_of_week INT,
+    wake_time TIME,
+    FOREIGN KEY (user_id) REFERENCES app_user(user_id) ON DELETE CASCADE,
+    PRIMARY KEY (user_id, day_of_week)
+);
+
 DROP TABLE IF EXISTS device;
 CREATE TABLE device (
     id SERIAL PRIMARY KEY,
@@ -23,7 +32,7 @@ CREATE TABLE wearable_data (
     id SERIAL PRIMARY KEY,
     sleep_start TIMESTAMP,
     sleep_end TIMESTAMP,
-    hynogram VARCHAR,
+    hypnogram VARCHAR,
     sleep_score INT,
     sleep_date DATE NOT NULL
 );
@@ -31,6 +40,7 @@ CREATE TABLE wearable_data (
 DROP TABLE IF EXISTS survey CASCADE;
 CREATE TABLE survey (
     id SERIAL PRIMARY KEY,
+    created_at TIMESTAMP NOT NULL,
     sleep_quality INT,
     sleep_duration INT,
     survey_date DATE NOT NULL
@@ -42,6 +52,7 @@ CREATE TABLE sleep_review (
     user_id UUID NOT NULL,
     wearable_log_id INT,
     survey_id INT,
+    created_at TIMESTAMP NOT NULL,
     smarter_sleep_score INT,
     FOREIGN KEY (user_id) REFERENCES app_user(user_id) ON DELETE CASCADE,
     FOREIGN KEY (wearable_log_id) REFERENCES wearable_data(id),
@@ -61,8 +72,7 @@ CREATE TABLE sleep_settings (
 
 DROP TABLE IF EXISTS daily_streak;
 CREATE TABLE daily_streak (
-    id SERIAL PRIMARY KEY,
-    user_id UUID UNIQUE NOT NULL,
+    user_id UUID PRIMARY KEY,
     start_date DATE NOT NULL,
     last_date DATE NOT NULL,
     FOREIGN KEY (user_id) REFERENCES app_user(user_id) ON DELETE CASCADE
@@ -84,11 +94,24 @@ CREATE TABLE challenge (
     reward INT NOT NULL
 );
 
+DROP TABLE IF EXISTS user_challenge CASCADE;
+CREATE TABLE user_challenge (
+    id SERIAL PRIMARY KEY,
+    user_id UUID NOT NULL,
+    challenge_id INT NOT NULL,
+    completed BOOLEAN DEFAULT FALSE,
+    start_date TIMESTAMP,
+    expire_date TIMESTAMP,
+    user_selected BOOLEAN NOT NULL, 
+    FOREIGN KEY (user_id) REFERENCES app_user(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (challenge_id) REFERENCES challenge(id)
+);
+
 DROP TABLE IF EXISTS transaction CASCADE;
 CREATE TABLE transaction (
     id SERIAL PRIMARY KEY,
     user_id UUID NOT NULL,
-    timestamp TIMESTAMP,
+    created_at TIMESTAMP,
     point_amount INT NOT NULL,
     description VARCHAR,
     FOREIGN KEY (user_id) REFERENCES app_user(user_id) ON DELETE CASCADE

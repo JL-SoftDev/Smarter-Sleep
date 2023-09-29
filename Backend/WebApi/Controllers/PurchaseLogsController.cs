@@ -28,7 +28,9 @@ namespace WebApi.Controllers
           {
               return NotFound();
           }
-            return await _context.PurchaseLogs.ToListAsync();
+            return await _context.PurchaseLogs
+                .Include(pl => pl.Transaction)
+                .ToListAsync();
         }
 
         // GET: api/PurchaseLogs/5
@@ -39,7 +41,9 @@ namespace WebApi.Controllers
           {
               return NotFound();
           }
-            var purchaseLog = await _context.PurchaseLogs.FindAsync(id);
+            var purchaseLog = await _context.PurchaseLogs
+                .Include(pl => pl.Transaction)
+                .FirstOrDefaultAsync(pl => pl.Id == id);
 
             if (purchaseLog == null)
             {

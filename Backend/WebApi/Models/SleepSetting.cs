@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace WebApi.Models;
 
@@ -14,6 +15,4 @@ public partial class SleepSetting
     public DateTime ScheduledWake { get; set; }
 
     public string? ScheduledHypnogram { get; set; }
-
-    public virtual AppUser User { get; set; } = null!;
 }

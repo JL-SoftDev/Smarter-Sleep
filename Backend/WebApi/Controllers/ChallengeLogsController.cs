@@ -28,7 +28,9 @@ namespace WebApi.Controllers
           {
               return NotFound();
           }
-            return await _context.ChallengeLogs.ToListAsync();
+            return await _context.ChallengeLogs
+                .Include(cl => cl.Transaction)
+                .ToListAsync();
         }
 
         // GET: api/ChallengeLogs/5
@@ -39,7 +41,9 @@ namespace WebApi.Controllers
           {
               return NotFound();
           }
-            var challengeLog = await _context.ChallengeLogs.FindAsync(id);
+            var challengeLog = await _context.ChallengeLogs
+                .Include(cl => cl.Transaction)
+                .FirstOrDefaultAsync(cl => cl.Id == id);
 
             if (challengeLog == null)
             {

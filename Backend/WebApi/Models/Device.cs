@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace WebApi.Models;
 
@@ -18,6 +19,4 @@ public partial class Device
     public int? Port { get; set; }
 
     public string? Status { get; set; }
-
-    public virtual AppUser User { get; set; } = null!;
 }

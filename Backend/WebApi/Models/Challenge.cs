@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace WebApi.Models;
 
@@ -12,6 +13,4 @@ public partial class Challenge
     public string? Description { get; set; }
 
     public int Reward { get; set; }
-
-    public virtual ICollection<ChallengeLog> ChallengeLogs { get; set; } = new List<ChallengeLog>();
 }
