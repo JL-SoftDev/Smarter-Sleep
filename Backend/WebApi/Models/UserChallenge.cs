@@ -19,10 +19,4 @@ public partial class UserChallenge
     public DateTime? ExpireDate { get; set; }
 
     public bool UserSelected { get; set; }
-
-    [JsonIgnore]
-    public virtual Challenge Challenge { get; set; } = null!;
-
-    [JsonIgnore]
-    public virtual AppUser User { get; set; } = null!;
 }

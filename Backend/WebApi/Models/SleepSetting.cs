@@ -15,7 +15,4 @@ public partial class SleepSetting
     public DateTime ScheduledWake { get; set; }
 
     public string? ScheduledHypnogram { get; set; }
-
-    [JsonIgnore]
-    public virtual AppUser User { get; set; } = null!;
 }

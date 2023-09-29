@@ -1,6 +1,3 @@
-DROP TYPE IF EXISTS day_of_week CASCADE;
-CREATE TYPE day_of_week AS ENUM ('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday');
-
 DROP TABLE IF EXISTS app_user CASCADE;
 CREATE TABLE app_user (
     user_id UUID PRIMARY KEY,
@@ -12,7 +9,7 @@ CREATE TABLE app_user (
 DROP TABLE IF EXISTS custom_schedule CASCADE;
 CREATE TABLE custom_schedule (
     user_id UUID,
-    day_of_week day_of_week,
+    day_of_week INT,
     wake_time TIME,
     FOREIGN KEY (user_id) REFERENCES app_user(user_id) ON DELETE CASCADE,
     PRIMARY KEY (user_id, day_of_week)

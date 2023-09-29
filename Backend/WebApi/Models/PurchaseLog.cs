@@ -10,11 +10,8 @@ public partial class PurchaseLog
 
     public int ItemId { get; set; }
 
+    [JsonIgnore]
     public int TransactionId { get; set; }
 
-    [JsonIgnore]
-    public virtual Item Item { get; set; } = null!;
-
-    [JsonIgnore]
     public virtual Transaction Transaction { get; set; } = null!;
 }

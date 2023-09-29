@@ -21,7 +21,4 @@ public partial class Transaction
 
     [JsonIgnore]
     public virtual ICollection<PurchaseLog> PurchaseLogs { get; set; } = new List<PurchaseLog>();
-
-    [JsonIgnore]
-    public virtual AppUser User { get; set; } = null!;
 }

@@ -100,11 +100,6 @@ public partial class postgresContext : DbContext
             entity.Property(e => e.ChallengeId).HasColumnName("challenge_id");
             entity.Property(e => e.TransactionId).HasColumnName("transaction_id");
 
-            entity.HasOne(d => d.Challenge).WithMany(p => p.ChallengeLogs)
-                .HasForeignKey(d => d.ChallengeId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("challenge_log_challenge_id_fkey");
-
             entity.HasOne(d => d.Transaction).WithMany(p => p.ChallengeLogs)
                 .HasForeignKey(d => d.TransactionId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -133,10 +128,6 @@ public partial class postgresContext : DbContext
                 .HasColumnName("user_id");
             entity.Property(e => e.LastDate).HasColumnName("last_date");
             entity.Property(e => e.StartDate).HasColumnName("start_date");
-
-            entity.HasOne(d => d.User).WithOne(p => p.DailyStreak)
-                .HasForeignKey<DailyStreak>(d => d.UserId)
-                .HasConstraintName("daily_streak_user_id_fkey");
         });
 
         modelBuilder.Entity<Device>(entity =>
@@ -160,10 +151,6 @@ public partial class postgresContext : DbContext
                 .HasColumnType("character varying")
                 .HasColumnName("type");
             entity.Property(e => e.UserId).HasColumnName("user_id");
-
-            entity.HasOne(d => d.User).WithMany(p => p.Devices)
-                .HasForeignKey(d => d.UserId)
-                .HasConstraintName("device_user_id_fkey");
         });
 
         modelBuilder.Entity<Item>(entity =>
@@ -192,11 +179,6 @@ public partial class postgresContext : DbContext
             entity.Property(e => e.ItemId).HasColumnName("item_id");
             entity.Property(e => e.TransactionId).HasColumnName("transaction_id");
 
-            entity.HasOne(d => d.Item).WithMany(p => p.PurchaseLogs)
-                .HasForeignKey(d => d.ItemId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("purchase_log_item_id_fkey");
-
             entity.HasOne(d => d.Transaction).WithMany(p => p.PurchaseLogs)
                 .HasForeignKey(d => d.TransactionId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -222,10 +204,6 @@ public partial class postgresContext : DbContext
                 .HasForeignKey(d => d.SurveyId)
                 .HasConstraintName("sleep_review_survey_id_fkey");
 
-            entity.HasOne(d => d.User).WithMany(p => p.SleepReviews)
-                .HasForeignKey(d => d.UserId)
-                .HasConstraintName("sleep_review_user_id_fkey");
-
             entity.HasOne(d => d.WearableLog).WithMany(p => p.SleepReviews)
                 .HasForeignKey(d => d.WearableLogId)
                 .HasConstraintName("sleep_review_wearable_log_id_fkey");
@@ -250,10 +228,6 @@ public partial class postgresContext : DbContext
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("scheduled_wake");
             entity.Property(e => e.UserId).HasColumnName("user_id");
-
-            entity.HasOne(d => d.User).WithOne(p => p.SleepSetting)
-                .HasForeignKey<SleepSetting>(d => d.UserId)
-                .HasConstraintName("sleep_settings_user_id_fkey");
         });
 
         modelBuilder.Entity<Survey>(entity =>
@@ -286,10 +260,6 @@ public partial class postgresContext : DbContext
                 .HasColumnName("description");
             entity.Property(e => e.PointAmount).HasColumnName("point_amount");
             entity.Property(e => e.UserId).HasColumnName("user_id");
-
-            entity.HasOne(d => d.User).WithMany(p => p.Transactions)
-                .HasForeignKey(d => d.UserId)
-                .HasConstraintName("transaction_user_id_fkey");
         });
 
         modelBuilder.Entity<UserChallenge>(entity =>
@@ -311,15 +281,6 @@ public partial class postgresContext : DbContext
                 .HasColumnName("start_date");
             entity.Property(e => e.UserId).HasColumnName("user_id");
             entity.Property(e => e.UserSelected).HasColumnName("user_selected");
-
-            entity.HasOne(d => d.Challenge).WithMany(p => p.UserChallenges)
-                .HasForeignKey(d => d.ChallengeId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("user_challenge_challenge_id_fkey");
-
-            entity.HasOne(d => d.User).WithMany(p => p.UserChallenges)
-                .HasForeignKey(d => d.UserId)
-                .HasConstraintName("user_challenge_user_id_fkey");
         });
 
         modelBuilder.Entity<WearableData>(entity =>

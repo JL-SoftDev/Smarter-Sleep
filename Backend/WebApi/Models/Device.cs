@@ -19,7 +19,4 @@ public partial class Device
     public int? Port { get; set; }
 
     public string? Status { get; set; }
-
-    [JsonIgnore]
-    public virtual AppUser User { get; set; } = null!;
 }

@@ -28,7 +28,10 @@ namespace WebApi.Controllers
           {
               return NotFound();
           }
-            return await _context.SleepReviews.ToListAsync();
+            return await _context.SleepReviews
+                .Include(sr => sr.Survey)
+                .Include(sr => sr.WearableLog)
+                .ToListAsync();
         }
 
         // GET: api/SleepReviews/5
@@ -39,7 +42,10 @@ namespace WebApi.Controllers
           {
               return NotFound();
           }
-            var sleepReview = await _context.SleepReviews.FindAsync(id);
+            var sleepReview = await _context.SleepReviews
+                .Include(sr => sr.Survey)
+                .Include(sr => sr.WearableLog)
+                .FirstOrDefaultAsync(sr => sr.Id == id);
 
             if (sleepReview == null)
             {

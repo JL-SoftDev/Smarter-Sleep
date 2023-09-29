@@ -22,8 +22,5 @@ public partial class SleepReview
 
     public virtual Survey? Survey { get; set; }
 
-    [JsonIgnore]
-    public virtual AppUser User { get; set; } = null!;
-
     public virtual WearableData? WearableLog { get; set; }
 }

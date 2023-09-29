@@ -11,7 +11,4 @@ public partial class DailyStreak
     public DateOnly StartDate { get; set; }
 
     public DateOnly LastDate { get; set; }
-
-    [JsonIgnore]
-    public virtual AppUser User { get; set; } = null!;
 }

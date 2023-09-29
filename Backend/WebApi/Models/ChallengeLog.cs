@@ -10,11 +10,8 @@ public partial class ChallengeLog
 
     public int ChallengeId { get; set; }
 
+    [JsonIgnore]
     public int TransactionId { get; set; }
 
-    [JsonIgnore]
-    public virtual Challenge Challenge { get; set; } = null!;
-
-    [JsonIgnore]
     public virtual Transaction Transaction { get; set; } = null!;
 }
