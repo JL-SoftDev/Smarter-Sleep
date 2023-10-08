@@ -12,6 +12,12 @@ builder.Services.AddDbContext<postgresContext>(opt =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+//Enable outside network hosting access
+builder.WebHost.UseUrls(new string[] {
+		"http://*:5000",
+
+    });
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
