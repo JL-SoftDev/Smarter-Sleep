@@ -33,6 +33,8 @@ public partial class postgresContext : DbContext
 
     public virtual DbSet<Device> Devices { get; set; }
 
+    public DbSet<DeviceSetting> DeviceSetting { get; set; }
+
     public virtual DbSet<Item> Items { get; set; }
 
     public virtual DbSet<PurchaseLog> PurchaseLogs { get; set; }
@@ -151,6 +153,22 @@ public partial class postgresContext : DbContext
                 .HasColumnType("character varying")
                 .HasColumnName("type");
             entity.Property(e => e.UserId).HasColumnName("user_id");
+        });
+
+        modelBuilder.Entity<DeviceSetting>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("device_settings_pkey");
+
+            entity.ToTable("device_settings");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.DeviceId).HasColumnName("device_id");
+            entity.Property(e => e.ScheduledTime)
+                .HasColumnType("timestamp without time zone")
+                .HasColumnName("scheduled_time");
+            entity.Property(e => e.Settings)
+                .HasColumnType("jsonb")
+                .HasColumnName("settings");
         });
 
         modelBuilder.Entity<Item>(entity =>
