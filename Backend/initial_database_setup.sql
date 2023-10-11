@@ -27,6 +27,15 @@ CREATE TABLE device (
     FOREIGN KEY (user_id) REFERENCES app_user(user_id) ON DELETE CASCADE
 );
 
+DROP TABLE IF EXISTS device_settings;
+CREATE TABLE device_settings (
+    id SERIAL PRIMARY KEY,
+    device_id INT NOT NULL,
+    scheduled_time TIMESTAMP NOT NULL,
+    settings JSONB,
+    FOREIGN KEY (device_id) REFERENCES device(id)
+);
+
 DROP TABLE IF EXISTS wearable_data CASCADE;
 CREATE TABLE wearable_data (
     id SERIAL PRIMARY KEY,

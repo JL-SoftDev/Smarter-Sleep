@@ -12,11 +12,15 @@ builder.Services.AddDbContext<postgresContext>(opt =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-//Enable outside network hosting access
-builder.WebHost.UseUrls(new string[] {
-		"http://*:5000",
-
+//If URLs are not defined in env then use default.
+var aspNetCoreUrls = Environment.GetEnvironmentVariable("ASPNETCORE_URLS");
+if (string.IsNullOrEmpty(aspNetCoreUrls))
+{
+    builder.WebHost.UseUrls(new string[] {
+		"http://*:80",
+		//"https://*:443",
     });
+}
 
 var app = builder.Build();
 
