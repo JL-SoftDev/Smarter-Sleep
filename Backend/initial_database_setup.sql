@@ -15,27 +15,6 @@ CREATE TABLE custom_schedule (
     PRIMARY KEY (user_id, day_of_week)
 );
 
-DROP TABLE IF EXISTS device;
-CREATE TABLE device (
-    id SERIAL PRIMARY KEY,
-    user_id UUID NOT NULL,
-    name VARCHAR,
-    type VARCHAR,
-    ip VARCHAR,
-    port INT,
-    status VARCHAR,
-    FOREIGN KEY (user_id) REFERENCES app_user(user_id) ON DELETE CASCADE
-);
-
-DROP TABLE IF EXISTS device_settings;
-CREATE TABLE device_settings (
-    id SERIAL PRIMARY KEY,
-    device_id INT NOT NULL,
-    scheduled_time TIMESTAMP NOT NULL,
-    settings JSONB,
-    FOREIGN KEY (device_id) REFERENCES device(id)
-);
-
 DROP TABLE IF EXISTS wearable_data CASCADE;
 CREATE TABLE wearable_data (
     id SERIAL PRIMARY KEY,
@@ -68,16 +47,38 @@ CREATE TABLE sleep_review (
     FOREIGN KEY (survey_id) REFERENCES survey(id)
 );
 
-DROP TABLE IF EXISTS sleep_settings;
+DROP TABLE IF EXISTS sleep_settings CASCADE;
 CREATE TABLE sleep_settings (
     id SERIAL PRIMARY KEY,
-    user_id UUID UNIQUE NOT NULL,
+    user_id UUID NOT NULL,
     scheduled_sleep TIMESTAMP NOT NULL,
     scheduled_wake TIMESTAMP NOT NULL,
     scheduled_hypnogram VARCHAR,
     FOREIGN KEY (user_id) REFERENCES app_user(user_id) ON DELETE CASCADE
 );
 
+DROP TABLE IF EXISTS device CASCADE;
+CREATE TABLE device (
+    id SERIAL PRIMARY KEY,
+    user_id UUID NOT NULL,
+    name VARCHAR,
+    type VARCHAR,
+    ip VARCHAR,
+    port INT,
+    status VARCHAR,
+    FOREIGN KEY (user_id) REFERENCES app_user(user_id) ON DELETE CASCADE
+);
+
+DROP TABLE IF EXISTS device_settings;
+CREATE TABLE device_settings (
+    id SERIAL PRIMARY KEY,
+    device_id INT NOT NULL,
+    sleep_settings_id INT NOT NULL,
+    scheduled_time TIMESTAMP NOT NULL,
+    settings JSONB,
+    FOREIGN KEY (device_id) REFERENCES device(id) ON DELETE CASCADE,
+    FOREIGN KEY (sleep_settings_id) REFERENCES sleep_settings(id) ON DELETE CASCADE
+);
 
 DROP TABLE IF EXISTS daily_streak;
 CREATE TABLE daily_streak (

@@ -163,6 +163,7 @@ public partial class postgresContext : DbContext
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.DeviceId).HasColumnName("device_id");
+            entity.Property(e => e.SleepSettingId).HasColumnName("sleep_settings_id");
             entity.Property(e => e.ScheduledTime)
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("scheduled_time");
@@ -246,6 +247,10 @@ public partial class postgresContext : DbContext
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("scheduled_wake");
             entity.Property(e => e.UserId).HasColumnName("user_id");
+
+            entity.HasMany(s => s.DeviceSettings).WithOne(d => d.SleepSetting)
+                .HasForeignKey(d => d.SleepSettingId)
+                .HasConstraintName("sleep_settings_device_settings_id_fkey");
         });
 
         modelBuilder.Entity<Survey>(entity =>
