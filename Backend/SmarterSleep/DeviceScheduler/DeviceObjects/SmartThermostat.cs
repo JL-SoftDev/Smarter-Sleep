@@ -123,19 +123,19 @@ namespace DeviceScheduler.DeviceObjects
 
             switch(nightCoolSelector)
             {
-                case 0: //set full sleep temp to 8 hours before upbytime
+                case 0: //set sleep cool temp to 8 hours before upbytime
                     newTimes[0] = upByTime.AddHours(-8, out wrap);
                     setTemps[0] = scheduledWakeDate.AddDays(-Math.Abs(wrap)).ToDateTime(newTimes[0]);
                     break;
-                case 1: //set full sleep temp to same time as previous
+                case 1: //set sleep cool temp to same time as previous
                     newTimes[0] = previousTimes[0];
                     setTemps[0] = scheduledWakeDate.ToDateTime(newTimes[2]);
                     break;
-                case 2: //set full sleep temp to 5 minutes earlier than previous
+                case 2: //set sleep cool temp to 5 minutes earlier than previous
                     newTimes[0] = previousTimes[0].AddMinutes(-5, out wrap);
                     setTemps[0] = scheduledWakeDate.AddDays(-Math.Abs(wrap)).ToDateTime(newTimes[0]);
                     break;
-                case 3: //set full sleep temp to 5 minutes later than previous
+                case 3: //set sleep cool temp to 5 minutes later than previous
                     newTimes[0] = previousTimes[0].AddMinutes(5, out wrap);
                     setTemps[0] = scheduledWakeDate.AddDays(-Math.Abs(wrap)).ToDateTime(newTimes[0]);
                     break;
