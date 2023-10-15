@@ -24,12 +24,23 @@ if (string.IsNullOrEmpty(aspNetCoreUrls))
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+using (var scope = app.Services.CreateScope())
 {
+    var services = scope.ServiceProvider;
+    var dbContext = services.GetRequiredService<postgresContext>();
+
+    // Apply database migrations
+    dbContext.Database.Migrate();
+
+    // Seed the database
+    SeedData.Initialize(dbContext);
+}
+
+// Configure the HTTP request pipeline.
+//if (app.Environment.IsDevelopment()) {
     app.UseSwagger();
     app.UseSwaggerUI();
-}
+//}
 
 app.UseHttpsRedirection();
 
