@@ -10,7 +10,7 @@ public class SeedData
 
         // Declare guid1, set to either existing test user or new test user.
         Guid guid1;
-        var existingTestUser = context.AppUsers.First(u => u.Username == "initialUser1");
+        var existingTestUser = context.AppUsers.FirstOrDefault(u => u.Username == "initialUser1");
 
         //Add a test user
         if (existingTestUser == null)
