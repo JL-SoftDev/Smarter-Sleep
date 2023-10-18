@@ -8,9 +8,9 @@ namespace DeviceScheduler.DeviceObjects
 {
     public class SmartThermostat
     {
-        int deviceId;
-        DateTime scheduledTime;
-        string? settings;
+        public int deviceId { get; set; }
+        public DateTime scheduledTime { get; set; }
+        public string? settings { get; set; }
 
         private struct TemperatureSettings
         {
