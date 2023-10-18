@@ -11,8 +11,13 @@ public partial class DeviceSetting
 
     public int DeviceId { get; set; }
 
+    public int? SleepSettingId { get; set; }
+
     public DateTime ScheduledTime { get; set; }
 
     [Column(TypeName = "jsonb")]
     public string? Settings { get; set; }
+
+    [JsonIgnore]
+    public virtual SleepSetting? SleepSetting { get; set; }
 }

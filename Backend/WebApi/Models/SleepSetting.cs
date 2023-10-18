@@ -15,4 +15,6 @@ public partial class SleepSetting
     public DateTime ScheduledWake { get; set; }
 
     public string? ScheduledHypnogram { get; set; }
+
+    public virtual ICollection<DeviceSetting> DeviceSettings { get; set; } = new List<DeviceSetting>();
 }
