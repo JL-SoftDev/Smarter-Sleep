@@ -28,7 +28,9 @@ namespace WebApi.Controllers
           {
               return NotFound();
           }
-            return await _context.SleepSettings.ToListAsync();
+            return await _context.SleepSettings
+                .Include(s => s.DeviceSettings)
+                .ToListAsync();
         }
 
         // GET: api/SleepSettings/5
@@ -39,7 +41,9 @@ namespace WebApi.Controllers
           {
               return NotFound();
           }
-            var sleepSetting = await _context.SleepSettings.FindAsync(id);
+            var sleepSetting = await _context.SleepSettings
+                .Include(s => s.DeviceSettings)
+                .FirstOrDefaultAsync(s => s.Id == id);
 
             if (sleepSetting == null)
             {
