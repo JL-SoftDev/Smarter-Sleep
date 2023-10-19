@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:smarter_sleep/app/screens/deviceConnectionScreen.dart';
 
 import 'homeScreen.dart';
 import 'inventoryScreen.dart';
@@ -41,13 +42,17 @@ class _TestingScreenState extends State<TestingScreen> {
                   TextButton(
                       onPressed: _navigateToInventoryScreen,
                       child: Text("Inventory")),
-                  TextButton(
-                      onPressed: _navigateToShopScreen, child: Text("Shop")),
-                  TextButton(
-                      onPressed: _navigateToStatsScreen, child: Text("Stats")),
+                  //TextButton(
+                      //onPressed: _navigateToShopScreen, child: Text("Shop")),
+                  //TextButton(
+                      //onPressed: _navigateToStatsScreen, child: Text("Stats")),
                   TextButton(
                       onPressed: _navigateToSettingsScreen,
                       child: Text("Settings")),
+                  TextButton(
+                      onPressed: _navigateToDevicesScreen,
+                      child: Text("Connected Devices")),
+                  
                 ]))
       ]),
     );
@@ -82,5 +87,9 @@ class _TestingScreenState extends State<TestingScreen> {
   void _navigateToSettingsScreen() {
     Navigator.push(context,
         MaterialPageRoute(builder: (context) => const SettingsScreen()));
+  }
+  void _navigateToDevicesScreen() {
+    Navigator.push(context,
+        MaterialPageRoute(builder: (context) => const DeviceConnectionsScreen()));
   }
 }
