@@ -7,6 +7,7 @@ import 'inventoryScreen.dart';
 import 'settingsScreen.dart';
 import 'shopScreen.dart';
 import 'statsScreen.dart';
+import 'accountPage.dart';
 
 class TestingScreen extends StatefulWidget {
   const TestingScreen({super.key});
@@ -19,6 +20,15 @@ class _TestingScreenState extends State<TestingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text("Test Page"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.account_circle),
+            onPressed: _navigateToAccountPage,
+          ),
+        ],
+      ),
       body: Column(children: [
         //Just placeholder text
         Flexible(
@@ -84,5 +94,12 @@ class _TestingScreenState extends State<TestingScreen> {
         context,
         MaterialPageRoute(
             builder: (context) => const DeviceConnectionsScreen()));
+  }
+
+  void _navigateToAccountPage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const AccountPage()),
+    );
   }
 }

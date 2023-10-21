@@ -37,8 +37,8 @@ class _SmarterSleepState extends State<SmarterSleep> {
   @override
   Widget build(BuildContext context) {
     return Authenticator(
-      child:
-          MaterialApp(builder: Authenticator.builder(), home: TestingScreen()),
+      child: MaterialApp(
+          builder: Authenticator.builder(), home: const TestingScreen()),
     );
   }
 }
