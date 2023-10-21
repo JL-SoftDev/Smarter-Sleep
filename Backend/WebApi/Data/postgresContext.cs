@@ -263,8 +263,12 @@ public partial class postgresContext : DbContext
             entity.Property(e => e.CreatedAt)
                 .HasColumnType("timestamp without time zone")
                 .HasColumnName("created_at");
-            entity.Property(e => e.SleepDuration).HasColumnName("sleep_duration");
             entity.Property(e => e.SleepQuality).HasColumnName("sleep_quality");
+            entity.Property(e => e.WakePreference).HasColumnName("wake_preference");
+            entity.Property(e => e.TemperaturePreference).HasColumnName("temp_preference");
+            entity.Property(e => e.LightsDisturbance).HasColumnName("lights_disturbance");
+            entity.Property(e => e.SleepEarilier).HasColumnName("sleep_eariler");
+            entity.Property(e => e.SleepDuration).HasColumnName("sleep_duration");
             entity.Property(e => e.SurveyDate).HasColumnName("survey_date");
         });
 

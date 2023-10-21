@@ -52,7 +52,11 @@ public class SeedData
                 Survey = new Survey {
                     CreatedAt = DateTime.Now,
                     SleepQuality = 4, 
-                    SleepDuration = 7, 
+                    WakePreference = 1,
+                    TemperaturePreference = 0,
+                    LightsDisturbance = false,
+                    SleepEarilier = true,
+                    SleepDuration = 420, 
                     SurveyDate = DateOnly.FromDateTime(DateTime.Now)
                 },
                 WearableLog = new WearableData
@@ -74,7 +78,7 @@ public class SeedData
             {
                 UserId = guid1,
                 Name = "Example Light",
-                Type = "Smart Light",
+                Type = "Light",
                 Ip = "192.168.1.100",
                 Port = 8080,
                 Status = "On"
@@ -94,8 +98,14 @@ public class SeedData
                     new DeviceSetting
                     {
                         DeviceId = 1,
-                        ScheduledTime = DateTime.Parse("23:00:00"),
-                        Settings = JsonConvert.SerializeObject(new {OnOff = false})
+                        ScheduledTime = DateTime.Parse("21:30:00"),
+                        Settings = JsonConvert.SerializeObject(new {Brightness = 0})
+                    },
+                    new DeviceSetting
+                    {
+                        DeviceId = 1,
+                        ScheduledTime = DateTime.Parse("6:00:00"),
+                        Settings = JsonConvert.SerializeObject(new {Brightness = 100})
                     }
                 }
             });

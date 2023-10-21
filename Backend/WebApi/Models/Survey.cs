@@ -12,6 +12,14 @@ public partial class Survey
 
     public int? SleepQuality { get; set; }
 
+    public int? WakePreference { get; set;}
+
+    public int? TemperaturePreference{get; set;}
+
+    public bool? LightsDisturbance{get; set;}
+
+    public bool? SleepEarilier{get; set;}
+
     public int? SleepDuration { get; set; }
 
     public DateOnly SurveyDate { get; set; }
