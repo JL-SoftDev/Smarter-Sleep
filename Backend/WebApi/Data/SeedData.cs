@@ -55,7 +55,7 @@ public class SeedData
                     WakePreference = 1,
                     TemperaturePreference = 0,
                     LightsDisturbance = false,
-                    SleepEarilier = true,
+                    SleepEarlier = true,
                     SleepDuration = 420, 
                     SurveyDate = DateOnly.FromDateTime(DateTime.Now)
                 },

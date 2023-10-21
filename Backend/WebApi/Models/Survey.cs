@@ -18,7 +18,7 @@ public partial class Survey
 
     public bool? LightsDisturbance{get; set;}
 
-    public bool? SleepEarilier{get; set;}
+    public bool? SleepEarlier{get; set;}
 
     public int? SleepDuration { get; set; }
 

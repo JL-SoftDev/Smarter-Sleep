@@ -33,7 +33,7 @@ CREATE TABLE survey (
     wake_preference INT,
     temp_preference INT,
     lights_disturbance BOOLEAN,
-    sleep_eariler BOOLEAN,
+    sleep_earlier BOOLEAN,
     sleep_duration INT,
     survey_date DATE NOT NULL
 );
