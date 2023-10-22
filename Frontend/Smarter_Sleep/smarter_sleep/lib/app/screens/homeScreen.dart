@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../appFrame.dart';
 import 'deviceConnectionScreen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -41,10 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _devicesAndAlarmClicked() {
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => const DeviceConnectionsScreen()));
+    mainNavigatorKey.currentState!.pushNamed("/devices");
   }
 
   void _sleepButtonClicked() {}

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:smarter_sleep/app/widgets/loginInputWidget.dart';
 
+import '../appFrame.dart';
 import 'homeScreen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -106,7 +107,6 @@ class _LoginScreenState extends State<LoginScreen> {
     await Future.delayed(Duration(seconds: 2));
 
     //Navigate to our home screen
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => const HomeScreen()));
+    mainNavigatorKey.currentState!.pushNamed("/home");
   }
 }

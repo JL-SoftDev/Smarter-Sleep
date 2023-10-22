@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
+import '../appFrame.dart';
 import 'homeScreen.dart';
 import 'inventoryScreen.dart';
 import 'loginScreen.dart';
@@ -55,32 +56,26 @@ class _TestingScreenState extends State<TestingScreen> {
 
   //Basic functions to navigate screens
   void _navigateToLoginScreen() {
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => const LoginScreen()));
+    mainNavigatorKey.currentState!.pushNamed("/login");
   }
 
   void _navigateToHomeScreen() {
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => const HomeScreen()));
+    mainNavigatorKey.currentState!.pushNamed("/home");
   }
 
   void _navigateToInventoryScreen() {
-    Navigator.push(context,
-        MaterialPageRoute(builder: (context) => const InventoryScreen()));
+    mainNavigatorKey.currentState!.pushNamed("/inventory");
   }
 
   void _navigateToShopScreen() {
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => const ShopScreen()));
+    mainNavigatorKey.currentState!.pushNamed("/shop");
   }
 
   void _navigateToStatsScreen() {
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => const StatsScreen()));
+    mainNavigatorKey.currentState!.pushNamed("/stats");
   }
 
   void _navigateToSettingsScreen() {
-    Navigator.push(context,
-        MaterialPageRoute(builder: (context) => const SettingsScreen()));
+    mainNavigatorKey.currentState!.pushNamed("/settings");
   }
 }
