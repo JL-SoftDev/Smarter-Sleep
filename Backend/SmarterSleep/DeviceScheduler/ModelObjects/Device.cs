@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace DeviceScheduler.DeviceObjects
+namespace DeviceScheduler.ModelObjects
 {
     public class Device
     {
         public int id { get; set; }
-        public Guid userId { get; set; }
+        public Guid user_id { get; set; }
         public string? name { get; set; }
         public string? type { get; set; }
         public string? ip { get; set; }
