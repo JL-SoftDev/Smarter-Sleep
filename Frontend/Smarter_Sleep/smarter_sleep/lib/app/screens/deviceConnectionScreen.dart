@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'testDeviceConnection.dart';
+
 class DeviceConnectionsScreen extends StatefulWidget {
   const DeviceConnectionsScreen({super.key});
 
@@ -15,7 +17,7 @@ class _DeviceConnectionsScreenState extends State<DeviceConnectionsScreen> {
         body: Column(children: [
       Flexible(
           child: ListView.separated(
-              itemCount: 32,
+              itemCount: 10,
               separatorBuilder: (context, index) {
                 return SizedBox(height: 16);
               },
@@ -41,9 +43,14 @@ class _DeviceConnectionsScreenState extends State<DeviceConnectionsScreen> {
               })),
       //Bottom button
       TextButton(
-          onPressed: _connectADeviceClicked, child: Text("Connect a Device"))
+          onPressed: _navigateToDeviceConnectionScreen, child: Text("Connect a Device"))
     ]));
   }
 
   void _connectADeviceClicked() {}
+
+  void _navigateToDeviceConnectionScreen(){
+     Navigator.push(
+        context, MaterialPageRoute(builder: (context) => const TestDeviceConnection()));
+  }
 }
