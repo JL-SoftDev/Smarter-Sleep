@@ -30,9 +30,14 @@ CREATE TABLE survey (
     id SERIAL PRIMARY KEY,
     created_at TIMESTAMP NOT NULL,
     sleep_quality INT,
+    wake_preference INT,
+    temp_preference INT,
+    lights_disturbance BOOLEAN,
+    sleep_earlier BOOLEAN,
     sleep_duration INT,
     survey_date DATE NOT NULL
 );
+
 
 DROP TABLE IF EXISTS sleep_review;
 CREATE TABLE sleep_review (
