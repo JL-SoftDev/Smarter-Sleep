@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:smarter_sleep/app/screens/deviceConnectionScreen.dart';
 
 import 'homeScreen.dart';
 import 'inventoryScreen.dart';
-import 'loginScreen.dart';
 import 'settingsScreen.dart';
 import 'shopScreen.dart';
 import 'statsScreen.dart';
+import 'accountPage.dart';
 
 class TestingScreen extends StatefulWidget {
   const TestingScreen({super.key});
@@ -19,6 +20,15 @@ class _TestingScreenState extends State<TestingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text("Test Page"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.account_circle),
+            onPressed: _navigateToAccountPage,
+          ),
+        ],
+      ),
       body: Column(children: [
         //Just placeholder text
         Flexible(
@@ -33,32 +43,27 @@ class _TestingScreenState extends State<TestingScreen> {
                 scrollDirection: Axis.horizontal,
                 children: [
                   TextButton(
-                      onPressed: _navigateToLoginScreen,
-                      child: Text("Login Screen")),
-                  TextButton(
                       onPressed: _navigateToHomeScreen,
                       child: Text("Home Screen")),
                   TextButton(
                       onPressed: _navigateToInventoryScreen,
                       child: Text("Inventory")),
-                  TextButton(
-                      onPressed: _navigateToShopScreen, child: Text("Shop")),
-                  TextButton(
-                      onPressed: _navigateToStatsScreen, child: Text("Stats")),
+                  //TextButton(
+                  //onPressed: _navigateToShopScreen, child: Text("Shop")),
+                  //TextButton(
+                  //onPressed: _navigateToStatsScreen, child: Text("Stats")),
                   TextButton(
                       onPressed: _navigateToSettingsScreen,
                       child: Text("Settings")),
+                  TextButton(
+                      onPressed: _navigateToDevicesScreen,
+                      child: Text("Connected Devices")),
                 ]))
       ]),
     );
   }
 
   //Basic functions to navigate screens
-  void _navigateToLoginScreen() {
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => const LoginScreen()));
-  }
-
   void _navigateToHomeScreen() {
     Navigator.push(
         context, MaterialPageRoute(builder: (context) => const HomeScreen()));
@@ -82,5 +87,19 @@ class _TestingScreenState extends State<TestingScreen> {
   void _navigateToSettingsScreen() {
     Navigator.push(context,
         MaterialPageRoute(builder: (context) => const SettingsScreen()));
+  }
+
+  void _navigateToDevicesScreen() {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => const DeviceConnectionsScreen()));
+  }
+
+  void _navigateToAccountPage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const AccountPage()),
+    );
   }
 }
