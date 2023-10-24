@@ -18,7 +18,7 @@ class _StatsScreenState extends State<StatsScreen> {
         height: MediaQuery.of(context).size.height * 0.40,
         width: double.infinity,
         color: Colors.grey.shade700,
-        child: Column(
+        child: const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text("Avg Sleep Time: XX:XX"),
@@ -32,7 +32,7 @@ class _StatsScreenState extends State<StatsScreen> {
           child: Container(
         color: Colors.grey,
         width: double.infinity,
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        child: const Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text("Last REM: XX.XX"),
         ]),
       ))

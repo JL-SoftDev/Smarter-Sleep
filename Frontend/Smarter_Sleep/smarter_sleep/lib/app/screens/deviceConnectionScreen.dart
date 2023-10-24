@@ -19,31 +19,31 @@ class _DeviceConnectionsScreenState extends State<DeviceConnectionsScreen> {
           child: ListView.separated(
               itemCount: 10,
               separatorBuilder: (context, index) {
-                return SizedBox(height: 16);
+                return const SizedBox(height: 16);
               },
               itemBuilder: (context, index) {
                 return Container(
-                    padding: EdgeInsets.symmetric(horizontal: 16),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
                     height: 64,
                     child: Row(
                       children: [
                         //Icon
                         Container(
-                            padding: EdgeInsets.all(8),
+                            padding: const EdgeInsets.all(8),
                             height: 48,
                             width: 48,
                             color: Colors.grey.shade300,
-                            child: Icon(Icons.lightbulb)),
+                            child: const Icon(Icons.lightbulb)),
                         //Spacing
-                        SizedBox(width: 24),
+                        const SizedBox(width: 24),
                         //Name
-                        Text("Device Name", style: TextStyle(fontSize: 18))
+                        const Text("Device Name", style: TextStyle(fontSize: 18))
                       ],
                     ));
               })),
       //Bottom button
       TextButton(
-          onPressed: _navigateToDeviceConnectionScreen, child: Text("Connect a Device"))
+          onPressed: _navigateToDeviceConnectionScreen, child: const Text("Connect a Device"))
     ]));
   }
 

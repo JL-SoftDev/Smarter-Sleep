@@ -16,7 +16,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
       Container(
         height: MediaQuery.of(context).size.height * 0.3,
         width: double.infinity,
-        padding: EdgeInsets.symmetric(horizontal: 32),
+        padding: const EdgeInsets.symmetric(horizontal: 32),
         color: Colors.grey.shade700,
         child: Row(
           children: [
@@ -25,7 +25,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
               height: MediaQuery.of(context).size.height * 0.15,
               width: MediaQuery.of(context).size.height * 0.15,
             ),
-            Spacer(),
+            const Spacer(),
             Container(
               color: Colors.grey.shade300,
               height: MediaQuery.of(context).size.height * 0.15,
@@ -39,7 +39,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
           child: Container(
         color: Colors.grey,
         width: double.infinity,
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        child: const Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text("TODO - Add a grid"),
         ]),
       ))

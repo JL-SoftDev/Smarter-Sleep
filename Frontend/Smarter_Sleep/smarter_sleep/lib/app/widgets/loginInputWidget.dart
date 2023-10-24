@@ -27,7 +27,7 @@ class _LoginInputWidgetState extends State<LoginInputWidget> {
               controller: widget.controller,
               obscureText: widget.obscureText,
               decoration: InputDecoration(
-                  border: OutlineInputBorder(), hintText: widget.hintText)))
+                  border: const OutlineInputBorder(), hintText: widget.hintText)))
     ]));
   }
 }

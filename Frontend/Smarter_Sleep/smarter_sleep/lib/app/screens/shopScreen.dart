@@ -12,7 +12,7 @@ class _ShopScreenState extends State<ShopScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: Container(
-            child: Center(
+            child: const Center(
       child: Text("Shop"),
     )));
   }

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:smarter_sleep/app/screens/deviceConnectionScreen.dart';
 
 import 'homeScreen.dart';
@@ -31,12 +30,12 @@ class _TestingScreenState extends State<TestingScreen> {
       ),
       body: Column(children: [
         //Just placeholder text
-        Flexible(
+        const Flexible(
             child:
                 Center(child: Text("Smarter Sleep Android/iOS Application"))),
-        Spacer(),
+        const Spacer(),
         //TESTING Bottom Links to pages
-        Container(
+        SizedBox(
             height: 48,
             child: ListView(
                 //mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -44,20 +43,20 @@ class _TestingScreenState extends State<TestingScreen> {
                 children: [
                   TextButton(
                       onPressed: _navigateToHomeScreen,
-                      child: Text("Home Screen")),
+                      child: const Text("Home Screen")),
                   TextButton(
                       onPressed: _navigateToInventoryScreen,
-                      child: Text("Inventory")),
+                      child: const Text("Inventory")),
                   //TextButton(
                   //onPressed: _navigateToShopScreen, child: Text("Shop")),
                   //TextButton(
                   //onPressed: _navigateToStatsScreen, child: Text("Stats")),
                   TextButton(
                       onPressed: _navigateToSettingsScreen,
-                      child: Text("Settings")),
+                      child: const Text("Settings")),
                   TextButton(
                       onPressed: _navigateToDevicesScreen,
-                      child: Text("Connected Devices")),
+                      child: const Text("Connected Devices")),
                 ]))
       ]),
     );

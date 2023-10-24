@@ -20,22 +20,22 @@ class _HomeScreenState extends State<HomeScreen> {
           //Devices and Alarms Button
           TextButton(
               onPressed: _devicesAndAlarmClicked,
-              child: Text("Devices & Alarms")),
+              child: const Text("Devices & Alarms")),
           //Spacer
-          Spacer(),
+          const Spacer(),
           //Sleep Button
           TextButton(
-              onPressed: _sleepButtonClicked, child: Text("Sleep Button"))
+              onPressed: _sleepButtonClicked, child: const Text("Sleep Button"))
         ]),
         //Spacer
-        Spacer(),
+        const Spacer(),
         //Middle Content
         Align(
             alignment: Alignment.centerLeft,
             child: Container(
                 color: Colors.grey.shade300, height: 200, width: 150)),
         //Bottom Padding
-        SizedBox(height: 120)
+        const SizedBox(height: 120)
       ])),
     );
   }

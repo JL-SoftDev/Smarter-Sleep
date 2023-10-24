@@ -44,18 +44,18 @@ class testingDeviceConnectionState extends State<TestDeviceConnection>{
     return Scaffold(
       body:Column(
         children: [
-        Container(
+        SizedBox(
           height: sizeHeight,
           width: sizeWidth,
           child: ListView(
           scrollDirection: Axis.horizontal,
           children: [
-            SizedBox(width: 100),
-            IconButton(onPressed: _addLightDevice, icon:Icon(Icons.lightbulb), iconSize: 50,),
+            const SizedBox(width: 100),
+            IconButton(onPressed: _addLightDevice, icon:const Icon(Icons.lightbulb), iconSize: 50,),
             const SizedBox(width: 20),
-            IconButton(onPressed: _addTemperatureDevice, icon:Icon(Icons.thermostat), iconSize: 50),
+            IconButton(onPressed: _addTemperatureDevice, icon:const Icon(Icons.thermostat), iconSize: 50),
             const SizedBox(width: 20),
-            IconButton(onPressed: _addSoundDevice, icon:Icon(Icons.speaker), iconSize: 50),
+            IconButton(onPressed: _addSoundDevice, icon:const Icon(Icons.speaker), iconSize: 50),
             const SizedBox(width: 20),
           ],
           ),
