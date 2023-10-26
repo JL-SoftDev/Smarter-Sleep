@@ -59,38 +59,19 @@ namespace WebApi.Services
 		}
 		public async Task<WearableData?> PostWearableData(WearableData wearableData)
 		{
-			/*
-			if (_databaseContext.WearableData == null)
-			{
-				//return Problem("Entity set 'postgresContext.WearableData'  is null.");
-				return null;
-			}
-			*/
 			_databaseContext.WearableData.Add(wearableData);
 			await _databaseContext.SaveChangesAsync();
-
-			//return CreatedAtAction("GetWearableData", new { id = wearableData.Id }, wearableData);
 			return wearableData;
 		}
 		public async Task<int> DeleteWearableData(int id)
 		{
-			/*
-			if (_databaseContext.WearableData == null)
-			{
-				return NotFound();
-			}
-			*/
 			var wearableData = await _databaseContext.WearableData.FindAsync(id);
 			if (wearableData == null)
 			{
-				//return NotFound();
 				return 404;
 			}
-
 			_databaseContext.WearableData.Remove(wearableData);
 			await _databaseContext.SaveChangesAsync();
-
-			//return NoContent();
 			return 204;
 		}
 

@@ -14,16 +14,6 @@ namespace WebApi.Controllers
     [ApiController]
     public class WearableDatasController : ControllerBase
     {
-		/*
-        private readonly postgresContext _context;
-
-        public WearableDatasController(postgresContext context)
-        {
-            _context = context;
-        }
-        */
-		//private readonly postgresContext _context;
-
 		private readonly IWearableDataService _wearableDataService;
 
         public WearableDatasController(IWearableDataService wearableDataService)
