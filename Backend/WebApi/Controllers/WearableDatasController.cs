@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using WebApi.Interfaces;
 using WebApi.Models;
 
 namespace WebApi.Controllers
@@ -13,23 +14,31 @@ namespace WebApi.Controllers
     [ApiController]
     public class WearableDatasController : ControllerBase
     {
+		/*
         private readonly postgresContext _context;
 
         public WearableDatasController(postgresContext context)
         {
             _context = context;
         }
+        */
+		private readonly postgresContext _context;
+		private readonly IWearableDataService _wearableDataService;
+
+        public WearableDatasController(postgresContext context, IWearableDataService wearableDataService)
+        {
+			_context = context;
+			_wearableDataService = wearableDataService;
+        }
 
         // GET: api/WearableDatas
         [HttpGet]
         public async Task<ActionResult<IEnumerable<WearableData>>> GetWearableData()
         {
-          if (_context.WearableData == null)
-          {
-              return NotFound();
-          }
-            return await _context.WearableData.ToListAsync();
-        }
+            var wearableData = await _wearableDataService.GetAllWearableData();
+            return wearableData.ToList();
+
+		}
 
         // GET: api/WearableDatas/5
         [HttpGet("{id}")]
