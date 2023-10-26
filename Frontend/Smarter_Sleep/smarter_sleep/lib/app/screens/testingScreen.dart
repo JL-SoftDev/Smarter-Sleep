@@ -65,13 +65,10 @@ class _TestingScreenState extends State<TestingScreen> {
   }
 
   //Basic functions to navigate screens
-<<<<<<< HEAD
   void _navigateToLoginScreen() {
     mainNavigatorKey.currentState!.pushNamed("/login");
   }
 
-=======
->>>>>>> main
   void _navigateToHomeScreen() {
     mainNavigatorKey.currentState!.pushNamed("/home");
   }
