@@ -16,25 +16,25 @@ namespace WebApi.Interfaces
 		/// </summary>
 		/// <param name="id"></param>
 		/// <returns></returns>
-		Task<WearableData> GetWearableData(int id);
+		Task<WearableData?> GetWearableData(int id);
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="id"></param>
 		/// <param name="wearableData"></param>
 		/// <returns></returns>
-		Task<IActionResult> PutWearableData(int id, WearableData wearableData);
+		Task<int> PutWearableData(int id, WearableData wearableData);
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="wearableData"></param>
 		/// <returns></returns>
-		Task<ActionResult<WearableData>> PostWearableData(WearableData wearableData);
+		Task<WearableData?> PostWearableData(WearableData wearableData);
 		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="id"></param>
 		/// <returns></returns>
-		Task<IActionResult> DeleteWearableData(int id);
+		Task<int> DeleteWearableData(int id);
 	}
 }

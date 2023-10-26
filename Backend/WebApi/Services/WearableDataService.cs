@@ -25,22 +25,78 @@ namespace WebApi.Services
 			return await _databaseContext.WearableData.ToListAsync();
 		}
 
-		public async Task<WearableData> GetWearableData(int id)
+		public async Task<WearableData?> GetWearableData(int id)
 		{
-			throw new NotImplementedException();
-		}
-		public async Task<IActionResult> PutWearableData(int id, WearableData wearableData)
-		{
-			throw new NotImplementedException();
-		}
-		public async Task<ActionResult<WearableData>> PostWearableData(WearableData wearableData)
-		{
-			throw new NotImplementedException();
-		}
-		public async Task<IActionResult> DeleteWearableData(int id)
-		{
-			throw new NotImplementedException();
+			var wearableData = await _databaseContext.WearableData.FindAsync(id);
+			return wearableData;
 		}
 
+		public async Task<int> PutWearableData(int id, WearableData wearableData)
+		{
+			if (id != wearableData.Id)
+			{
+				return 400;
+			}
+
+			_databaseContext.Entry(wearableData).State = EntityState.Modified;
+
+			try
+			{
+				await _databaseContext.SaveChangesAsync();
+			}
+			catch (DbUpdateConcurrencyException)
+			{
+				if (!WearableDataExists(id))
+				{
+					return 404;
+				}
+				else
+				{
+					throw;
+				}
+			}
+			return 204;
+		}
+		public async Task<WearableData?> PostWearableData(WearableData wearableData)
+		{
+			/*
+			if (_databaseContext.WearableData == null)
+			{
+				//return Problem("Entity set 'postgresContext.WearableData'  is null.");
+				return null;
+			}
+			*/
+			_databaseContext.WearableData.Add(wearableData);
+			await _databaseContext.SaveChangesAsync();
+
+			//return CreatedAtAction("GetWearableData", new { id = wearableData.Id }, wearableData);
+			return wearableData;
+		}
+		public async Task<int> DeleteWearableData(int id)
+		{
+			/*
+			if (_databaseContext.WearableData == null)
+			{
+				return NotFound();
+			}
+			*/
+			var wearableData = await _databaseContext.WearableData.FindAsync(id);
+			if (wearableData == null)
+			{
+				//return NotFound();
+				return 404;
+			}
+
+			_databaseContext.WearableData.Remove(wearableData);
+			await _databaseContext.SaveChangesAsync();
+
+			//return NoContent();
+			return 204;
+		}
+
+		private bool WearableDataExists(int id)
+		{
+			return (_databaseContext.WearableData?.Any(e => e.Id == id)).GetValueOrDefault();
+		}
 	}
 }
