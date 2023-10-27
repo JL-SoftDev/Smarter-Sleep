@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using WebApi.Interfaces;
 using WebApi.Models;
 
 namespace WebApi.Controllers
@@ -13,40 +14,28 @@ namespace WebApi.Controllers
     [ApiController]
     public class CustomSchedulesController : ControllerBase
     {
-        private readonly postgresContext _context;
+        private readonly IUserDataService _userDataService;
 
-        public CustomSchedulesController(postgresContext context)
+        public CustomSchedulesController(IUserDataService userDataService)
         {
-            _context = context;
+            _userDataService = userDataService;
         }
 
         // GET: api/CustomSchedules
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CustomSchedule>>> GetCustomSchedules()
         {
-          if (_context.CustomSchedules == null)
-          {
-              return NotFound();
-          }
-            return await _context.CustomSchedules.ToListAsync();
+            var customSchedules = await _userDataService.GetAllCustomSchedules();
+            return customSchedules.ToList();
         }
 
         // GET: api/CustomSchedules/5
         [HttpGet("{id}")]
         public async Task<ActionResult<CustomSchedule>> GetCustomSchedule(Guid id)
         {
-          if (_context.CustomSchedules == null)
-          {
-              return NotFound();
-          }
-            var customSchedule = await _context.CustomSchedules.FindAsync(id);
-
-            if (customSchedule == null)
-            {
-                return NotFound();
-            }
-
-            return customSchedule;
+            var customSchedule = await _userDataService.GetCustomSchedule(id);
+            if (customSchedule == null) NotFound();
+            return customSchedule!;
         }
 
         // PUT: api/CustomSchedules/5
@@ -54,30 +43,18 @@ namespace WebApi.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutCustomSchedule(Guid id, CustomSchedule customSchedule)
         {
-            if (id != customSchedule.UserId)
+            var success = await _userDataService.PutCustomSchedule(id, customSchedule);
+            switch(success)
             {
-                return BadRequest();
-            }
-
-            _context.Entry(customSchedule).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!CustomScheduleExists(id))
-                {
+                case 204:
+                    return NoContent();
+                case 400:
+                    return BadRequest();
+                case 404:
                     return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                default:
+                    return BadRequest();
             }
-
-            return NoContent();
         }
 
         // POST: api/CustomSchedules
@@ -85,27 +62,8 @@ namespace WebApi.Controllers
         [HttpPost]
         public async Task<ActionResult<CustomSchedule>> PostCustomSchedule(CustomSchedule customSchedule)
         {
-          if (_context.CustomSchedules == null)
-          {
-              return Problem("Entity set 'postgresContext.CustomSchedules'  is null.");
-          }
-            _context.CustomSchedules.Add(customSchedule);
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (CustomScheduleExists(customSchedule.UserId))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
+            var newCustomSchedule = await _userDataService.PostCustomSchedule(customSchedule);
+            if(newCustomSchedule == null) return Problem("Entity set 'postgresContext.CustomSchedule' is null.");
             return CreatedAtAction("GetCustomSchedule", new { id = customSchedule.UserId }, customSchedule);
         }
 
@@ -113,25 +71,18 @@ namespace WebApi.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCustomSchedule(Guid id)
         {
-            if (_context.CustomSchedules == null)
+            var statusCode = await _userDataService.DeleteCustomSchedule(id);
+            switch(statusCode)
             {
-                return NotFound();
+                case 204:
+                    return NoContent();
+                case 400:
+                    return BadRequest();
+                case 404:
+                    return NotFound();
+                default:
+                    return BadRequest();
             }
-            var customSchedule = await _context.CustomSchedules.FindAsync(id);
-            if (customSchedule == null)
-            {
-                return NotFound();
-            }
-
-            _context.CustomSchedules.Remove(customSchedule);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool CustomScheduleExists(Guid id)
-        {
-            return (_context.CustomSchedules?.Any(e => e.UserId == id)).GetValueOrDefault();
         }
     }
 }

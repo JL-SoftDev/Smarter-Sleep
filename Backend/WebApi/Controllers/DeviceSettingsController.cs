@@ -63,7 +63,7 @@ namespace WebApi.Controllers
         public async Task<ActionResult<DeviceSetting>> PostDeviceSetting(DeviceSetting deviceSetting)
         {
             var newDeviceSetting = await _settingsService.PostDeviceSetting(deviceSetting);
-            if(newDeviceSetting == null) return Problem("Entity set 'postgresContext.WearableData' is null.");
+            if(newDeviceSetting == null) return Problem("Entity set 'postgresContext.DeviceSettings' is null.");
             return CreatedAtAction("GetDeviceSetting", new { id = newDeviceSetting!.Id }, newDeviceSetting!);
         }
 
