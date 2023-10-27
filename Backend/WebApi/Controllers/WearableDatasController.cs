@@ -14,18 +14,18 @@ namespace WebApi.Controllers
     [ApiController]
     public class WearableDatasController : ControllerBase
     {
-		private readonly IWearableDataService _wearableDataService;
+		private readonly ISleepDataService _sleepDataService;
 
-        public WearableDatasController(IWearableDataService wearableDataService)
+        public WearableDatasController(ISleepDataService wearableDataService)
         {
-			_wearableDataService = wearableDataService;
+			_sleepDataService = wearableDataService;
         }
 
         // GET: api/WearableDatas
         [HttpGet]
         public async Task<ActionResult<IEnumerable<WearableData>>> GetWearableData()
         {
-            var wearableData = await _wearableDataService.GetAllWearableData();
+            var wearableData = await _sleepDataService.GetAllWearableData();
             return wearableData.ToList();
 
 		}
@@ -34,7 +34,7 @@ namespace WebApi.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<WearableData>> GetWearableData(int id)
         {
-            var wearableData = await _wearableDataService.GetWearableData(id);
+            var wearableData = await _sleepDataService.GetWearableData(id);
             if (wearableData == null) NotFound();
             return wearableData!;
 		}
@@ -44,7 +44,7 @@ namespace WebApi.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutWearableData(int id, WearableData wearableData)
         {
-            var success = await _wearableDataService.PutWearableData(id, wearableData);
+            var success = await _sleepDataService.PutWearableData(id, wearableData);
             switch(success)
             {
 				//Successful:
@@ -66,7 +66,7 @@ namespace WebApi.Controllers
         [HttpPost]
         public async Task<ActionResult<WearableData>> PostWearableData(WearableData wearableData)
         {
-            var newWearableData = await _wearableDataService.PostWearableData(wearableData);
+            var newWearableData = await _sleepDataService.PostWearableData(wearableData);
             if(newWearableData == null) return Problem("Entity set 'postgresContext.WearableData'  is null.");
 			return CreatedAtAction("GetWearableData", new { id = newWearableData!.Id }, newWearableData!);
 		}
@@ -75,7 +75,7 @@ namespace WebApi.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteWearableData(int id)
         {
-            var statusCode = await _wearableDataService.DeleteWearableData(id);
+            var statusCode = await _sleepDataService.DeleteWearableData(id);
             switch (statusCode)
             {
                 //Successful:
