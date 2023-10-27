@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using WebApi.Interfaces;
 using WebApi.Models;
 
 namespace WebApi.Controllers
@@ -13,44 +14,28 @@ namespace WebApi.Controllers
     [ApiController]
     public class SleepSettingsController : ControllerBase
     {
-        private readonly postgresContext _context;
+        private readonly ISettingsService _settingsService;
 
-        public SleepSettingsController(postgresContext context)
+        public SleepSettingsController(ISettingsService settingsService)
         {
-            _context = context;
+            _settingsService = settingsService;
         }
 
         // GET: api/SleepSettings
         [HttpGet]
         public async Task<ActionResult<IEnumerable<SleepSetting>>> GetSleepSettings()
         {
-          if (_context.SleepSettings == null)
-          {
-              return NotFound();
-          }
-            return await _context.SleepSettings
-                .Include(s => s.DeviceSettings)
-                .ToListAsync();
+            var sleepSettings = await _settingsService.GetAllSleepSettings();
+            return sleepSettings.ToList();
         }
 
         // GET: api/SleepSettings/5
         [HttpGet("{id}")]
         public async Task<ActionResult<SleepSetting>> GetSleepSetting(int id)
         {
-          if (_context.SleepSettings == null)
-          {
-              return NotFound();
-          }
-            var sleepSetting = await _context.SleepSettings
-                .Include(s => s.DeviceSettings)
-                .FirstOrDefaultAsync(s => s.Id == id);
-
-            if (sleepSetting == null)
-            {
-                return NotFound();
-            }
-
-            return sleepSetting;
+            var sleepSetting = await _settingsService.GetSleepSetting(id);
+            if (sleepSetting == null) NotFound();
+            return sleepSetting!;
         }
 
         // PUT: api/SleepSettings/5
@@ -58,30 +43,18 @@ namespace WebApi.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutSleepSetting(int id, SleepSetting sleepSetting)
         {
-            if (id != sleepSetting.Id)
+            var success = await _settingsService.PutSleepSetting(id, sleepSetting);
+            switch(success)
             {
-                return BadRequest();
-            }
-
-            _context.Entry(sleepSetting).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!SleepSettingExists(id))
-                {
+                case 204:
+                    return NoContent();
+                case 400:
+                    return BadRequest();
+                case 404:
                     return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                default:
+                    return BadRequest();
             }
-
-            return NoContent();
         }
 
         // POST: api/SleepSettings
@@ -89,39 +62,27 @@ namespace WebApi.Controllers
         [HttpPost]
         public async Task<ActionResult<SleepSetting>> PostSleepSetting(SleepSetting sleepSetting)
         {
-          if (_context.SleepSettings == null)
-          {
-              return Problem("Entity set 'postgresContext.SleepSettings'  is null.");
-          }
-            _context.SleepSettings.Add(sleepSetting);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetSleepSetting", new { id = sleepSetting.Id }, sleepSetting);
+            var newSleepSetting = await _settingsService.PostSleepSetting(sleepSetting);
+            if(newSleepSetting == null) return Problem("Entity set 'postgresContext.WearableData' is null.");
+            return CreatedAtAction("GetSleepSetting", new { id = newSleepSetting!.Id }, newSleepSetting!);
         }
 
         // DELETE: api/SleepSettings/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteSleepSetting(int id)
         {
-            if (_context.SleepSettings == null)
+            var statusCode = await _settingsService.DeleteSleepSetting(id);
+            switch (statusCode)
             {
-                return NotFound();
+                case 204:
+                    return NoContent();
+                case 400:
+                    return BadRequest();
+                case 404:
+                    return NotFound();
+                default:
+                    return BadRequest();
             }
-            var sleepSetting = await _context.SleepSettings.FindAsync(id);
-            if (sleepSetting == null)
-            {
-                return NotFound();
-            }
-
-            _context.SleepSettings.Remove(sleepSetting);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool SleepSettingExists(int id)
-        {
-            return (_context.SleepSettings?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }
