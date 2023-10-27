@@ -18,6 +18,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<ISettingsService, SettingsService>();
 builder.Services.AddScoped<ISleepDataService, SleepDataService>();
 builder.Services.AddScoped<IUserDataService, UserDataService>();
+builder.Services.AddScoped<IDeviceService, DeviceService>();
 
 //If URLs are not defined in env then use default.
 var aspNetCoreUrls = Environment.GetEnvironmentVariable("ASPNETCORE_URLS");
