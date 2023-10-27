@@ -5,79 +5,57 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using WebApi.Interfaces;
 using WebApi.Models;
 
 namespace WebApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class DevicesController : ControllerBase
+    public class DeviceController : ControllerBase
     {
-        private readonly postgresContext _context;
+		private readonly IDeviceService _deviceService;
 
-        public DevicesController(postgresContext context)
+        public DeviceController(IDeviceService deviceService)
         {
-            _context = context;
+			_deviceService = deviceService;
         }
 
         // GET: api/Devices
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Device>>> GetDevices()
         {
-          if (_context.Devices == null)
-          {
-              return NotFound();
-          }
-            return await _context.Devices.ToListAsync();
-        }
+            var devices = await _deviceService.GetAllDevices();
+            return devices.ToList();
+
+		}
 
         // GET: api/Devices/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Device>> GetDevice(int id)
         {
-          if (_context.Devices == null)
-          {
-              return NotFound();
-          }
-            var device = await _context.Devices.FindAsync(id);
-
-            if (device == null)
-            {
-                return NotFound();
-            }
-
-            return device;
-        }
+            var device = await _deviceService.GetDevice(id);
+            if (device == null) NotFound();
+            return device!;
+		}
 
         // PUT: api/Devices/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutDevice(int id, Device device)
         {
-            if (id != device.Id)
+            var success = await _deviceService.PutDevice(id, device);
+            switch(success)
             {
-                return BadRequest();
-            }
-
-            _context.Entry(device).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!DeviceExists(id))
-                {
+				case 204:
+                    return NoContent();
+                case 400:
+                    return BadRequest();
+                case 404:
                     return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                default:
+                    return BadRequest();
             }
-
-            return NoContent();
         }
 
         // POST: api/Devices
@@ -85,39 +63,27 @@ namespace WebApi.Controllers
         [HttpPost]
         public async Task<ActionResult<Device>> PostDevice(Device device)
         {
-          if (_context.Devices == null)
-          {
-              return Problem("Entity set 'postgresContext.Devices'  is null.");
-          }
-            _context.Devices.Add(device);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetDevice", new { id = device.Id }, device);
-        }
+            var deviceData = await _deviceService.PostDevice(device);
+            if(deviceData == null) return Problem("Entity set 'postgresContext.Devices'  is null.");
+			return CreatedAtAction("GetDevice", new { id = deviceData!.Id }, deviceData!);
+		}
 
         // DELETE: api/Devices/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteDevice(int id)
         {
-            if (_context.Devices == null)
+            var statusCode = await _deviceService.DeleteDevice(id);
+            switch (statusCode)
             {
-                return NotFound();
+                case 204:
+                    return NoContent();
+                case 400:
+					return BadRequest();
+				case 404:
+                    return NotFound();
+                default:
+                    return BadRequest();
             }
-            var device = await _context.Devices.FindAsync(id);
-            if (device == null)
-            {
-                return NotFound();
-            }
-
-            _context.Devices.Remove(device);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool DeviceExists(int id)
-        {
-            return (_context.Devices?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }
