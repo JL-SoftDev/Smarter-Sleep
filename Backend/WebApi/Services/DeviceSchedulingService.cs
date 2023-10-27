@@ -261,11 +261,11 @@ namespace WebApi.Services
                         case "alarm":
                             if (lastWeekSettings.Count > 0)
                             {
-                                listDeviceSettings.Add(SetAlarm(combinedWeight[2], lastWeekSettings[0], i, newSettings));
+                                listDeviceSettings.Add(SetAlarm(combinedWeight[2], lastWeekSettings[0], userDevices[i].Id, newSettings, lastWeekTomorrowSettings));
                             }
                             else
                             {
-                                listDeviceSettings.Add(SetAlarm(i, newSettings));
+                                listDeviceSettings.Add(SetAlarm(userDevices[i].Id, newSettings));
                             }
                             break;
                         case "lights":
@@ -273,14 +273,14 @@ namespace WebApi.Services
                             {
                                 for (int l = 0; l < lastWeekSettings.Count; l++)
                                 {
-                                    listDeviceSettings.Add(SetLights(combinedWeight[0], lastWeekSettings[l], i, newSettings));
+                                    listDeviceSettings.Add(SetLights(combinedWeight[0], lastWeekSettings[l], userDevices[i].Id, newSettings, lastWeekTomorrowSettings));
                                 }
                             }
                             else
                             {
                                 for (int l = 0; l < 4; l++)
                                 {
-                                    listDeviceSettings.Add(SetLights(l, i, newSettings));
+                                    listDeviceSettings.Add(SetLights(l, userDevices[i].Id, newSettings));
                                 }
                             }
                             break;
@@ -289,14 +289,14 @@ namespace WebApi.Services
                             {
                                 for (int l = 0; l < lastWeekSettings.Count; l++)
                                 {
-                                    listDeviceSettings.Add(SetThermostat(combinedWeight[1], lastWeekSettings[l], i, newSettings));
+                                    listDeviceSettings.Add(SetThermostat(combinedWeight[1], lastWeekSettings[l], userDevices[i].Id, newSettings, lastWeekTomorrowSettings));
                                 }
                             }
                             else
                             {
                                 for (int l = 0; l < 4; l++)
                                 {
-                                    listDeviceSettings.Add(SetThermostat(l, i, newSettings));
+                                    listDeviceSettings.Add(SetThermostat(l, userDevices[i].Id, newSettings));
                                 }
                             }
                             break;
@@ -310,18 +310,18 @@ namespace WebApi.Services
                     switch (userDevices[i].Type)
                     {
                         case "alarm":
-                            listDeviceSettings.Add(SetAlarm(i, newSettings));
+                            listDeviceSettings.Add(SetAlarm(userDevices[i].Id, newSettings));
                             break;
                         case "lights":
                             for (int l = 0; l < 4; l++)
                             {
-                                listDeviceSettings.Add(SetLights(l, i, newSettings));
+                                listDeviceSettings.Add(SetLights(l, userDevices[i].Id, newSettings));
                             }
                             break;
                         case "thermostat":
                             for (int l = 0; l < 4; l++)
                             {
-                                listDeviceSettings.Add(SetThermostat(l, i, newSettings));
+                                listDeviceSettings.Add(SetThermostat(l, userDevices[i].Id, newSettings));
                             }
                             break;
                     }
@@ -359,7 +359,7 @@ namespace WebApi.Services
             return combinedWeight;
         }
 
-        private DeviceSetting SetAlarm(int alarmOption, DeviceSetting previousAlarmSettings, int deviceId, SleepSetting inSettings)
+        private DeviceSetting SetAlarm(int alarmOption, DeviceSetting previousAlarmSettings, int deviceId, SleepSetting inSettings, SleepSetting oldSettings)
         {
             DeviceSetting newDeviceSettings = new DeviceSetting();
             newDeviceSettings.DeviceId = deviceId;
@@ -369,21 +369,22 @@ namespace WebApi.Services
             return newDeviceSettings;
         }
 
-        private DeviceSetting SetLights(int lightOption, DeviceSetting previousLightSettings, int deviceId, SleepSetting inSettings)
+        private DeviceSetting SetLights(int lightOption, DeviceSetting previousLightSettings, int deviceId, SleepSetting inSettings, SleepSetting oldSettings)
         {
             DeviceSetting newDeviceSettings = new DeviceSetting();
             newDeviceSettings.DeviceId = deviceId;
             newDeviceSettings.SleepSettingId = inSettings.Id;
+            TimeSpan spanPreviousToPreviousWake = previousLightSettings.ScheduledTime.Subtract(oldSettings.ScheduledWake);
             switch (lightOption)
             {
                 case 0: //same
-                    newDeviceSettings.ScheduledTime = previousLightSettings.ScheduledTime.AddDays(7);
+                    newDeviceSettings.ScheduledTime = inSettings.ScheduledWake.Add(spanPreviousToPreviousWake);
                     break;
                 case 1: //earlier
-                    newDeviceSettings.ScheduledTime = previousLightSettings.ScheduledTime.AddDays(7).AddMinutes(-5);
+                    newDeviceSettings.ScheduledTime = inSettings.ScheduledWake.Add(spanPreviousToPreviousWake).AddMinutes(-5);
                     break;
                 case 2: //later no later than wake time
-                    newDeviceSettings.ScheduledTime = previousLightSettings.ScheduledTime.AddDays(7).AddMinutes(5);
+                    newDeviceSettings.ScheduledTime = inSettings.ScheduledWake.Add(spanPreviousToPreviousWake).AddMinutes(5);
                     if (newDeviceSettings.ScheduledTime > inSettings.ScheduledWake)
                     {
                         newDeviceSettings.ScheduledTime = inSettings.ScheduledWake;
@@ -394,21 +395,22 @@ namespace WebApi.Services
             return newDeviceSettings;
         }
 
-        private DeviceSetting SetThermostat(int tempOption, DeviceSetting previousTempSettings, int deviceId, SleepSetting inSettings)
+        private DeviceSetting SetThermostat(int tempOption, DeviceSetting previousTempSettings, int deviceId, SleepSetting inSettings, SleepSetting oldSettings)
         {
             DeviceSetting newDeviceSettings = new DeviceSetting();
             newDeviceSettings.DeviceId = deviceId;
             newDeviceSettings.SleepSettingId = inSettings.Id;
+            TimeSpan spanPreviousToPreviousWake = previousTempSettings.ScheduledTime.Subtract(oldSettings.ScheduledWake);
             switch (tempOption)
             {
                 case 0: //same
-                    newDeviceSettings.ScheduledTime = previousTempSettings.ScheduledTime.AddDays(7);
+                    newDeviceSettings.ScheduledTime = inSettings.ScheduledWake.Add(spanPreviousToPreviousWake);
                     break;
                 case 1: //earlier
-                    newDeviceSettings.ScheduledTime = previousTempSettings.ScheduledTime.AddDays(7).AddMinutes(-5);
+                    newDeviceSettings.ScheduledTime = inSettings.ScheduledWake.Add(spanPreviousToPreviousWake).AddMinutes(-5);
                     break;
                 case 2: //later
-                    newDeviceSettings.ScheduledTime = previousTempSettings.ScheduledTime.AddDays(7).AddMinutes(5);
+                    newDeviceSettings.ScheduledTime = inSettings.ScheduledWake.Add(spanPreviousToPreviousWake).AddMinutes(5);
                     break;
             }
             newDeviceSettings.Settings = previousTempSettings.Settings;
@@ -421,7 +423,7 @@ namespace WebApi.Services
             newDeviceSettings.DeviceId = deviceId;
             newDeviceSettings.SleepSettingId = inSettings.Id;
             newDeviceSettings.ScheduledTime = inSettings.ScheduledWake;
-            newDeviceSettings.Settings = "{\\\"alarm\\\": set}";
+            newDeviceSettings.Settings = "{\"alarm\": \"set\"}";
             return newDeviceSettings;
         }
 
@@ -434,19 +436,19 @@ namespace WebApi.Services
             {
                 case 0: //set dim for sleep
                     newDeviceSettings.ScheduledTime = inSettings.ScheduledSleep.AddMinutes(-30);
-                    newDeviceSettings.Settings = "{\\\"lights\\\": 40}";
+                    newDeviceSettings.Settings = "{\"lights\": 40}";
                     break;
                 case 1: //set off for sleep
                     newDeviceSettings.ScheduledTime = inSettings.ScheduledSleep;
-                    newDeviceSettings.Settings = "{\\\"lights\\\": 0}";
+                    newDeviceSettings.Settings = "{\"lights\": 0}";
                     break;
                 case 2: //set dim for wake
-                    newDeviceSettings.ScheduledTime = inSettings.ScheduledSleep.AddMinutes(-5);
-                    newDeviceSettings.Settings = "{\\\"lights\\\": 20}";
+                    newDeviceSettings.ScheduledTime = inSettings.ScheduledWake.AddMinutes(-5);
+                    newDeviceSettings.Settings = "{\"lights\": 20}";
                     break;
                 case 3: //set on for wake
-                    newDeviceSettings.ScheduledTime = inSettings.ScheduledSleep;
-                    newDeviceSettings.Settings = "{\\\"lights\\\": 100}";
+                    newDeviceSettings.ScheduledTime = inSettings.ScheduledWake;
+                    newDeviceSettings.Settings = "{\"lights\": 100}";
                     break;
             }
             return newDeviceSettings;
@@ -461,19 +463,19 @@ namespace WebApi.Services
             {
                 case 0: //set cool for sleep
                     newDeviceSettings.ScheduledTime = inSettings.ScheduledSleep.AddMinutes(-30);
-                    newDeviceSettings.Settings = "{\\\"temperature\\\": 68}";
+                    newDeviceSettings.Settings = "{\"temperature\": 68}";
                     break;
                 case 1: //set sleep temp
                     newDeviceSettings.ScheduledTime = inSettings.ScheduledSleep;
-                    newDeviceSettings.Settings = "{\\\"temperature\\\": 65}";
+                    newDeviceSettings.Settings = "{\"temperature\": 65}";
                     break;
                 case 2: //set warm for wake
-                    newDeviceSettings.ScheduledTime = inSettings.ScheduledSleep.AddMinutes(-30);
-                    newDeviceSettings.Settings = "{\\\"temperature\\\": 68}";
+                    newDeviceSettings.ScheduledTime = inSettings.ScheduledWake.AddMinutes(-30);
+                    newDeviceSettings.Settings = "{\"temperature\": 68}";
                     break;
                 case 3: //set wake temp
-                    newDeviceSettings.ScheduledTime = inSettings.ScheduledSleep;
-                    newDeviceSettings.Settings = "{\\\"temperature\\\": 72}";
+                    newDeviceSettings.ScheduledTime = inSettings.ScheduledWake;
+                    newDeviceSettings.Settings = "{\"temperature\": 72}";
                     break;
             }
             return newDeviceSettings;
