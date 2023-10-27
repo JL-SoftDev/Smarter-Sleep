@@ -15,8 +15,9 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 //Dependency injection for our services
-builder.Services.AddScoped<IWearableDataService, WearableDataService>();
+builder.Services.AddScoped<ISettingsService, SettingsService>();
 builder.Services.AddScoped<ISleepDataService, SleepDataService>();
+builder.Services.AddScoped<IUserDataService, UserDataService>();
 
 //If URLs are not defined in env then use default.
 var aspNetCoreUrls = Environment.GetEnvironmentVariable("ASPNETCORE_URLS");

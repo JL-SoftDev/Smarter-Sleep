@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using WebApi.Interfaces;
 using WebApi.Models;
 
 namespace WebApi.Controllers
@@ -13,71 +14,48 @@ namespace WebApi.Controllers
     [ApiController]
     public class AppUsersController : ControllerBase
     {
-        private readonly postgresContext _context;
+		private readonly IUserDataService _userDataService;
 
-        public AppUsersController(postgresContext context)
+        public AppUsersController(IUserDataService appUserService)
         {
-            _context = context;
+			_userDataService = appUserService;
         }
 
         // GET: api/AppUsers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<AppUser>>> GetAppUsers()
         {
-          if (_context.AppUsers == null)
-          {
-              return NotFound();
-          }
-            return await _context.AppUsers.ToListAsync();
-        }
+            var appUsers = await _userDataService.GetAllUsers();
+            return appUsers.ToList();
+
+		}
 
         // GET: api/AppUsers/5
         [HttpGet("{id}")]
         public async Task<ActionResult<AppUser>> GetAppUser(Guid id)
         {
-          if (_context.AppUsers == null)
-          {
-              return NotFound();
-          }
-            var appUser = await _context.AppUsers.FindAsync(id);
-
-            if (appUser == null)
-            {
-                return NotFound();
-            }
-
-            return appUser;
-        }
+            var appUser = await _userDataService.GetUser(id);
+            if (appUser == null) NotFound();
+            return appUser!;
+		}
 
         // PUT: api/AppUsers/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutAppUser(Guid id, AppUser appUser)
         {
-            if (id != appUser.UserId)
+            var success = await _userDataService.PutUser(id, appUser);
+            switch(success)
             {
-                return BadRequest();
-            }
-
-            _context.Entry(appUser).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!AppUserExists(id))
-                {
+				case 204:
+                    return NoContent();
+                case 400:
+                    return BadRequest();
+                case 404:
                     return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                default:
+                    return BadRequest();
             }
-
-            return NoContent();
         }
 
         // POST: api/AppUsers
@@ -85,53 +63,27 @@ namespace WebApi.Controllers
         [HttpPost]
         public async Task<ActionResult<AppUser>> PostAppUser(AppUser appUser)
         {
-          if (_context.AppUsers == null)
-          {
-              return Problem("Entity set 'postgresContext.AppUsers'  is null.");
-          }
-            _context.AppUsers.Add(appUser);
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (AppUserExists(appUser.UserId))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return CreatedAtAction("GetAppUser", new { id = appUser.UserId }, appUser);
-        }
+            var userData = await _userDataService.PostUser(appUser);
+            if(userData == null) return Problem("Entity set 'postgresContext.WearableData'  is null.");
+			return CreatedAtAction("GetUser", new { id = userData!.UserId }, userData!);
+		}
 
         // DELETE: api/AppUsers/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAppUser(Guid id)
         {
-            if (_context.AppUsers == null)
+            var statusCode = await _userDataService.DeleteUser(id);
+            switch (statusCode)
             {
-                return NotFound();
+                case 204:
+                    return NoContent();
+                case 400:
+					return BadRequest();
+				case 404:
+                    return NotFound();
+                default:
+                    return BadRequest();
             }
-            var appUser = await _context.AppUsers.FindAsync(id);
-            if (appUser == null)
-            {
-                return NotFound();
-            }
-
-            _context.AppUsers.Remove(appUser);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool AppUserExists(Guid id)
-        {
-            return (_context.AppUsers?.Any(e => e.UserId == id)).GetValueOrDefault();
         }
     }
 }
