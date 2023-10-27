@@ -43,5 +43,40 @@ namespace WebApi.Interfaces
         /// <param name="id"></param>
         /// <returns></returns>
         Task<int> DeleteUser(Guid id);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        Task<IEnumerable<CustomSchedule>> GetAllCustomSchedules();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        Task<CustomSchedule?> GetCustomSchedule(Guid id);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="customSchedule"></param>
+        /// <returns></returns>
+        Task<int> PutCustomSchedule(Guid id, CustomSchedule customSchedule);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="customSchedule"></param>
+        /// <returns></returns>
+        Task<CustomSchedule?> PostCustomSchedule(CustomSchedule customSchedule);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        Task<int> DeleteCustomSchedule(Guid id);
     }
 }

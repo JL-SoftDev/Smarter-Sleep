@@ -63,7 +63,7 @@ namespace WebApi.Controllers
         public async Task<ActionResult<SleepSetting>> PostSleepSetting(SleepSetting sleepSetting)
         {
             var newSleepSetting = await _settingsService.PostSleepSetting(sleepSetting);
-            if(newSleepSetting == null) return Problem("Entity set 'postgresContext.WearableData' is null.");
+            if(newSleepSetting == null) return Problem("Entity set 'postgresContext.SleepSettings' is null.");
             return CreatedAtAction("GetSleepSetting", new { id = newSleepSetting!.Id }, newSleepSetting!);
         }
 
