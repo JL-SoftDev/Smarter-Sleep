@@ -15,7 +15,6 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 //Dependency injection for our services
-builder.Services.AddScoped<IWearableDataService, WearableDataService>();
 builder.Services.AddScoped<ISleepDataService, SleepDataService>();
 
 //If URLs are not defined in env then use default.
