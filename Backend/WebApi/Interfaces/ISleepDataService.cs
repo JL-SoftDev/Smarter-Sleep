@@ -17,7 +17,7 @@ namespace WebApi.Interfaces
 		/// </summary>
 		/// <param name="id"></param>
 		/// <returns></returns>
-		public Task<SleepReview> GetSleepReview(int id);
+		public Task<SleepReview?> GetSleepReview(int id);
 		/// <summary>
 		/// 
 		/// </summary>
@@ -30,7 +30,7 @@ namespace WebApi.Interfaces
 		/// </summary>
 		/// <param name="sleepReview"></param>
 		/// <returns></returns>
-		public Task<SleepReview> PostSleepReview(SleepReview sleepReview);
+		public Task<SleepReview?> PostSleepReview(SleepReview sleepReview);
 		/// <summary>
 		/// 
 		/// </summary>
@@ -84,7 +84,7 @@ namespace WebApi.Interfaces
 		/// </summary>
 		/// <param name="id"></param>
 		/// <returns></returns>
-		public Task<Survey> GetSurvey(int id);
+		public Task<Survey?> GetSurvey(int id);
 		/// <summary>
 		/// 
 		/// </summary>
@@ -97,7 +97,7 @@ namespace WebApi.Interfaces
 		/// </summary>
 		/// <param name="survey"></param>
 		/// <returns></returns>
-		public Task<Survey> PostSurvey(Survey survey);
+		public Task<Survey?> PostSurvey(Survey survey);
 		/// <summary>
 		/// 
 		/// </summary>

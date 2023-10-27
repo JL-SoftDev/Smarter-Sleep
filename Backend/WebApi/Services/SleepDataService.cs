@@ -19,29 +19,68 @@ namespace WebApi.Services
 		//Sleep Review Data Functions
 		#region Sleep Review Data
 
-		public Task<IEnumerable<SleepReview>> GetSleepReviews()
+		public async Task<IEnumerable<SleepReview>> GetSleepReviews()
 		{
-			throw new NotImplementedException();
+			return await _databaseContext.SleepReviews
+				.Include(sr => sr.Survey)
+				.Include(sr => sr.WearableLog)
+				.ToListAsync();
 		}
 
-		public Task<SleepReview> GetSleepReview(int id)
+		public async Task<SleepReview?> GetSleepReview(int id)
 		{
-			throw new NotImplementedException();
+			var sleepReview = await _databaseContext.SleepReviews
+				.Include(sr => sr.Survey)
+				.Include(sr => sr.WearableLog)
+				.FirstOrDefaultAsync(sr => sr.Id == id);
+			return sleepReview;
 		}
 
-		public Task<int> PutSleepReview(int id, SleepReview sleepReview)
+		public async Task<int> PutSleepReview(int id, SleepReview sleepReview)
 		{
-			throw new NotImplementedException();
+			if (id != sleepReview.Id)
+			{
+				return 400;
+			}
+
+			_databaseContext.Entry(sleepReview).State = EntityState.Modified;
+
+			try
+			{
+				await _databaseContext.SaveChangesAsync();
+			}
+			catch (DbUpdateConcurrencyException)
+			{
+				if (!SleepReviewExists(id))
+				{
+					return 404;
+				}
+				else
+				{
+					throw;
+				}
+			}
+
+			return 204;
 		}
 
-		public Task<SleepReview> PostSleepReview(SleepReview sleepReview)
+		public async Task<SleepReview?> PostSleepReview(SleepReview sleepReview)
 		{
-			throw new NotImplementedException();
+			_databaseContext.SleepReviews.Add(sleepReview);
+			await _databaseContext.SaveChangesAsync();
+			return sleepReview;
 		}
 
-		public Task<int> DeleteSleepReview(int id)
+		public async Task<int> DeleteSleepReview(int id)
 		{
-			throw new NotImplementedException();
+			var sleepReview = await _databaseContext.SleepReviews.FindAsync(id);
+			if (sleepReview == null)
+			{
+				return 404;
+			}
+			_databaseContext.SleepReviews.Remove(sleepReview);
+			await _databaseContext.SaveChangesAsync();
+			return 204;
 		}
 
 		private bool SleepReviewExists(int id)
@@ -121,29 +160,56 @@ namespace WebApi.Services
 
 		//Survey Data Functions
 		#region Survey Data
-		public Task<IEnumerable<Survey>> GetSurveys()
+		public async Task<IEnumerable<Survey>> GetSurveys()
 		{
-			throw new NotImplementedException();
+			return await _databaseContext.Surveys.ToListAsync();
 		}
 
-		public Task<Survey> GetSurvey(int id)
+		public async Task<Survey?> GetSurvey(int id)
 		{
-			throw new NotImplementedException();
+			var survey = await _databaseContext.Surveys.FindAsync(id);
+			return survey;
 		}
 
-		public Task<int> PutSurvey(int id, Survey survey)
+		public async Task<int> PutSurvey(int id, Survey survey)
 		{
-			throw new NotImplementedException();
+			_databaseContext.Entry(survey).State = EntityState.Modified;
+			try
+			{
+				await _databaseContext.SaveChangesAsync();
+			}
+			catch (DbUpdateConcurrencyException)
+			{
+				if (!SurveyExists(id))
+				{
+					return 404;
+				}
+				else
+				{
+					throw;
+				}
+			}
+
+			return 204;
 		}
 
-		public Task<Survey> PostSurvey(Survey survey)
+		public async Task<Survey?> PostSurvey(Survey survey)
 		{
-			throw new NotImplementedException();
+			_databaseContext.Surveys.Add(survey);
+			await _databaseContext.SaveChangesAsync();
+			return survey;
 		}
 
-		public Task<int> DeleteSurvey(int id)
+		public async Task<int> DeleteSurvey(int id)
 		{
-			throw new NotImplementedException();
+			var survey = await _databaseContext.Surveys.FindAsync(id);
+			if (survey == null)
+			{
+				return 404;
+			}
+			_databaseContext.Surveys.Remove(survey);
+			await _databaseContext.SaveChangesAsync();
+			return 204;
 		}
 		private bool SurveyExists(int id)
 		{
