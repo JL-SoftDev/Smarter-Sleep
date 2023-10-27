@@ -10,8 +10,6 @@ namespace WebApi.Interfaces
 		#endregion
 
 		#region Sleep Settings Data
-		#endregion
-
-		
+		#endregion		
 	}
 }
