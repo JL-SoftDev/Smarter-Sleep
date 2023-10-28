@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../appFrame.dart';
-import 'deviceConnectionScreen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
