@@ -3,11 +3,6 @@ import 'package:flutter/rendering.dart';
 import 'package:smarter_sleep/app/screens/deviceConnectionScreen.dart';
 
 import '../appFrame.dart';
-import 'homeScreen.dart';
-import 'inventoryScreen.dart';
-import 'settingsScreen.dart';
-import 'shopScreen.dart';
-import 'statsScreen.dart';
 import 'accountPage.dart';
 
 class TestingScreen extends StatefulWidget {
@@ -22,11 +17,13 @@ class _TestingScreenState extends State<TestingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Test Page"),
+        title: const Text("Debug"),
         actions: [
           IconButton(
             icon: const Icon(Icons.account_circle),
-            onPressed: _navigateToAccountPage,
+            onPressed: () {
+              mainNavigatorKey.currentState!.pushNamed("/account");
+            },
           ),
         ],
       ),
@@ -65,10 +62,6 @@ class _TestingScreenState extends State<TestingScreen> {
   }
 
   //Basic functions to navigate screens
-  void _navigateToLoginScreen() {
-    mainNavigatorKey.currentState!.pushNamed("/login");
-  }
-
   void _navigateToHomeScreen() {
     mainNavigatorKey.currentState!.pushNamed("/home");
   }
@@ -94,12 +87,5 @@ class _TestingScreenState extends State<TestingScreen> {
         context,
         MaterialPageRoute(
             builder: (context) => const DeviceConnectionsScreen()));
-  }
-
-  void _navigateToAccountPage() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const AccountPage()),
-    );
   }
 }

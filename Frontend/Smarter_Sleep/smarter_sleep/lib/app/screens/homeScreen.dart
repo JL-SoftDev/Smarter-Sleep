@@ -14,6 +14,17 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text("Home"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.account_circle),
+            onPressed: () {
+              mainNavigatorKey.currentState!.pushNamed("/account");
+            },
+          ),
+        ],
+      ),
       body: SafeArea(
           child: Column(children: [
         //Top Buttons

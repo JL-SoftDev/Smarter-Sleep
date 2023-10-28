@@ -8,12 +8,7 @@ import 'package:amplify_authenticator/amplify_authenticator.dart';
 import 'amplifyconfiguration.dart';
 
 void main() {
-  runApp(MaterialApp(
-    title: "Smarter Sleep",
-    home: AppFrame(),
-  ));
-//}
-  //runApp(const SmarterSleep());
+  runApp(const SmarterSleep());
 }
 
 class SmarterSleep extends StatefulWidget {
@@ -43,8 +38,8 @@ class _SmarterSleepState extends State<SmarterSleep> {
   @override
   Widget build(BuildContext context) {
     return Authenticator(
-      child: MaterialApp(
-          builder: Authenticator.builder(), home: const TestingScreen()),
+      child:
+          MaterialApp(builder: Authenticator.builder(), home: const AppFrame()),
     );
   }
 }

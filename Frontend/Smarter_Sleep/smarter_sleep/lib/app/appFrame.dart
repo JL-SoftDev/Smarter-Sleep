@@ -21,12 +21,7 @@ class _AppFrameState extends State<AppFrame> {
 
   @override
   void initState() {
-    //Determine if the user is logged in
-    bool isLoggedIn = false;
-    if (!isLoggedIn)
-      initialRoute = "/login";
-    else
-      initialRoute = "/home";
+    initialRoute = "/home";
     super.initState();
   }
 
