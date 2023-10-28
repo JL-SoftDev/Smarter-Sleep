@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import 'testDeviceConnection.dart';
+import 'deviceScheduleScreen.dart';
 import '../appFrame.dart';
 
 class Device {
@@ -127,23 +128,5 @@ class _DeviceConnectionsScreenState extends State<DeviceConnectionsScreen> {
       return Text('Temperature: ${device.status}°F');
     }
     return Text('Status: ${device.status}');
-  }
-}
-
-class DeviceSchedulePage extends StatelessWidget {
-  final Device device;
-
-  DeviceSchedulePage({required this.device});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Device Schedule for ${device.name}'),
-      ),
-      body: Center(
-        child: Text('TODO: Add schedules'),
-      ),
-    );
   }
 }
