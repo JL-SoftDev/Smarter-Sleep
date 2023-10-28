@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
-
+import 'package:smarter_sleep/app/screens/ScheduleFormScreen.dart';
 import 'package:smarter_sleep/app/screens/deviceConnectionScreen.dart';
+import 'dart:convert';
 
 class DeviceSchedulePage extends StatefulWidget {
   final Device device;
@@ -30,29 +30,37 @@ class _DeviceSchedulePageState extends State<DeviceSchedulePage> {
   @override
   void initState() {
     super.initState();
-    // Fetch and display the schedule for the specific device
     fetchDeviceSchedules(widget.device.id);
   }
 
   Future<void> fetchDeviceSchedules(int deviceId) async {
-    print('Device ID: $deviceId');
     final response = await http.get(Uri.parse(
         'http://ec2-54-87-139-255.compute-1.amazonaws.com/api/DeviceSettings'));
 
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
+      final now = DateTime.now();
+
+      List<DeviceSchedule> deviceSchedules = data
+          .where((scheduleData) =>
+              scheduleData['deviceId'] == deviceId &&
+              DateTime.parse(scheduleData['scheduledTime']).isAfter(now))
+          .map((scheduleData) {
+        return DeviceSchedule(
+          scheduleData['id'],
+          scheduleData['deviceId'],
+          scheduleData['sleepSettingId'],
+          DateTime.parse(scheduleData['scheduledTime']),
+          json.decode(scheduleData['settings']),
+        );
+      }).toList();
+
+      // Sort settings by scheduledTime ascending(soonest schedules first)
+      deviceSchedules
+          .sort((a, b) => a.scheduledTime.compareTo(b.scheduledTime));
+
       setState(() {
-        schedules = data
-            .where((scheduleData) => scheduleData['deviceId'] == deviceId)
-            .map((scheduleData) {
-          return DeviceSchedule(
-            scheduleData['id'],
-            scheduleData['deviceId'],
-            scheduleData['sleepSettingId'],
-            DateTime.parse(scheduleData['scheduledTime']),
-            json.decode(scheduleData['settings']),
-          );
-        }).toList();
+        schedules = deviceSchedules;
       });
     }
   }
@@ -80,7 +88,7 @@ class _DeviceSchedulePageState extends State<DeviceSchedulePage> {
                       IconButton(
                         icon: const Icon(Icons.edit),
                         onPressed: () {
-                          _editSchedule(schedule);
+                          _navigateToEditSchedule(context, schedule);
                         },
                       ),
                       IconButton(
@@ -94,6 +102,12 @@ class _DeviceSchedulePageState extends State<DeviceSchedulePage> {
                 );
               },
             ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          _navigateToAddSchedule(context);
+        },
+        child: const Icon(Icons.add),
+      ),
     );
   }
 
@@ -125,8 +139,7 @@ class _DeviceSchedulePageState extends State<DeviceSchedulePage> {
             TextButton(
               child: const Text('Delete'),
               onPressed: () {
-                // Implement the deletion logic here
-                _deleteSchedule(schedule);
+                _deleteSchedule(schedule.id);
                 Navigator.of(context).pop();
               },
             ),
@@ -136,11 +149,61 @@ class _DeviceSchedulePageState extends State<DeviceSchedulePage> {
     );
   }
 
-  void _deleteSchedule(DeviceSchedule schedule) {
-    //TODO: Delete the schedule
+  void _navigateToAddSchedule(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ScheduleForm(device: widget.device),
+      ),
+    ).then((result) {
+      if (result != null) {
+        //TODO: Post the setting to the database and refresh the page
+        //Requires the setting to include a sleepSettingId, which is not currently implemented.
+      }
+    });
   }
 
-  void _editSchedule(DeviceSchedule schedule) {
-    //TODO: Create page to modify the schedule
+  void _deleteSchedule(int id) {
+    http
+        .delete(Uri.parse(
+            'http://ec2-54-87-139-255.compute-1.amazonaws.com/api/DeviceSettings/${id}'))
+        .then((response) {
+      if (response.statusCode == 204) {
+        fetchDeviceSchedules(widget.device.id);
+      } else {
+        print('Error: ${response.statusCode}');
+      }
+    }).catchError(print);
+  }
+
+  void _navigateToEditSchedule(
+      BuildContext context, DeviceSchedule initialData) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ScheduleForm(
+          device: widget.device,
+          initialData: initialData,
+        ),
+      ),
+    ).then((schedule) {
+      if (schedule != null) {
+        schedule['id'] = initialData.id;
+        schedule['sleepSettingId'] = initialData.sleepSettingId;
+        http
+            .put(
+                Uri.parse(
+                    'http://ec2-54-87-139-255.compute-1.amazonaws.com/api/DeviceSettings/${initialData.id}'),
+                headers: {'Content-Type': 'application/json'},
+                body: jsonEncode(schedule))
+            .then((response) {
+          if (response.statusCode == 204) {
+            fetchDeviceSchedules(widget.device.id);
+          } else {
+            print('Error: ${response.statusCode}');
+          }
+        }).catchError(print);
+      }
+    });
   }
 }
