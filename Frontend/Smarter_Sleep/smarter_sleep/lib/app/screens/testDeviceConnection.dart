@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
+import '../appFrame.dart';
+
 class TestDeviceConnection extends StatefulWidget{
   const TestDeviceConnection({super.key});
   
@@ -39,28 +41,22 @@ class testingDeviceConnectionState extends State<TestDeviceConnection>{
 
   @override
   Widget build(BuildContext context) {
-    double sizeHeight = MediaQuery.of(context).size.height;
-    double sizeWidth = MediaQuery.of(context).size.width;
     return Scaffold(
-      body:Column(
-        children: [
-        Container(
-          height: sizeHeight,
-          width: sizeWidth,
-          child: ListView(
-          scrollDirection: Axis.horizontal,
-          children: [
-            SizedBox(width: 100),
-            IconButton(onPressed: _addLightDevice, icon:Icon(Icons.lightbulb), iconSize: 50,),
-            const SizedBox(width: 20),
-            IconButton(onPressed: _addTemperatureDevice, icon:Icon(Icons.thermostat), iconSize: 50),
-            const SizedBox(width: 20),
-            IconButton(onPressed: _addSoundDevice, icon:Icon(Icons.speaker), iconSize: 50),
-            const SizedBox(width: 20),
-          ],
+      appBar: AppBar(
+        title: const Text("Connect Device"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.account_circle),
+            onPressed: () {
+              mainNavigatorKey.currentState!.pushNamed("/account");
+            },
           ),
-        )
-      ],)
+        ],
+      ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(16.0),
+        
+        ),
     );
 
     throw UnimplementedError();

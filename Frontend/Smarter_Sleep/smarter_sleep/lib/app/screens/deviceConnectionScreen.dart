@@ -37,6 +37,16 @@ class _DeviceConnectionsScreenState extends State<DeviceConnectionsScreen> {
         'http://ec2-54-87-139-255.compute-1.amazonaws.com/api/Devices'));
 
     if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+      List<Device> storedDevices = data
+      .map((storedDevices){
+        return Device(
+          storedDevices['id'],
+          storedDevices['name'],
+          storedDevices['type'],
+          storedDevices['status']
+        );
+      }).toList();
       //TODO: Filter and map the devices from the API Server.
       setState(() {
         devices = [
