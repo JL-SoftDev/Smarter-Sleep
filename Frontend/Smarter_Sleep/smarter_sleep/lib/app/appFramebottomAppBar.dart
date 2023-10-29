@@ -13,9 +13,25 @@ class _AppFrameBottomAppBarState extends State<AppFrameBottomAppBar> {
   int _currentIndex = 0;
 
   void _onItemTapped(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
+    if (_currentIndex != index) {
+      setState(() {
+        _currentIndex = index;
+      });
+      final navigator = mainNavigatorKey.currentState!;
+      switch (index) {
+        case 0:
+          navigator.pushNamed("/home");
+          break;
+        case 1:
+          navigator.pushNamed("/devices");
+          break;
+        case 2:
+          navigator.pushNamed("/review");
+          break;
+        default:
+          navigator.pushNamed("/home");
+      }
+    }
   }
 
   @override
@@ -35,7 +51,6 @@ class _AppFrameBottomAppBarState extends State<AppFrameBottomAppBar> {
                       : const Color(0xFFA8DADC)),
               onPressed: () {
                 _onItemTapped(0);
-                mainNavigatorKey.currentState!.pushNamed("/home");
               },
             ),
             IconButton(
@@ -45,7 +60,6 @@ class _AppFrameBottomAppBarState extends State<AppFrameBottomAppBar> {
                       : const Color(0xFFA8DADC)),
               onPressed: () {
                 _onItemTapped(1);
-                mainNavigatorKey.currentState!.pushNamed("/devices");
               },
             ),
             IconButton(
@@ -55,7 +69,6 @@ class _AppFrameBottomAppBarState extends State<AppFrameBottomAppBar> {
                       : const Color(0xFFA8DADC)),
               onPressed: () {
                 _onItemTapped(2);
-                mainNavigatorKey.currentState!.pushNamed("/review");
               },
             ),
           ],
