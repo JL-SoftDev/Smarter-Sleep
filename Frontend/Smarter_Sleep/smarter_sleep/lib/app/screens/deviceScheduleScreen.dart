@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'dart:convert';
+
 import 'package:smarter_sleep/app/screens/ScheduleFormScreen.dart';
 import 'package:smarter_sleep/app/screens/deviceConnectionScreen.dart';
-import 'dart:convert';
+import 'package:smarter_sleep/app/models/device_schedule.dart';
 
 class DeviceSchedulePage extends StatefulWidget {
   final Device device;
@@ -11,17 +13,6 @@ class DeviceSchedulePage extends StatefulWidget {
 
   @override
   _DeviceSchedulePageState createState() => _DeviceSchedulePageState();
-}
-
-class DeviceSchedule {
-  final int id;
-  final int deviceId;
-  final int sleepSettingId;
-  final DateTime scheduledTime;
-  final Map<String, dynamic> settings;
-
-  DeviceSchedule(this.id, this.deviceId, this.sleepSettingId,
-      this.scheduledTime, this.settings);
 }
 
 class _DeviceSchedulePageState extends State<DeviceSchedulePage> {
@@ -40,19 +31,13 @@ class _DeviceSchedulePageState extends State<DeviceSchedulePage> {
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
       final now = DateTime.now();
-
+      print(data);
+      print("DeviceId: $deviceId");
       List<DeviceSchedule> deviceSchedules = data
-          .where((scheduleData) =>
-              scheduleData['deviceId'] == deviceId &&
-              DateTime.parse(scheduleData['scheduledTime']).isAfter(now))
+          .where((scheduleData) => scheduleData['deviceId'] == deviceId) // &&
+          //DateTime.parse(scheduleData['scheduledTime']).isAfter(now))
           .map((scheduleData) {
-        return DeviceSchedule(
-          scheduleData['id'],
-          scheduleData['deviceId'],
-          scheduleData['sleepSettingId'],
-          DateTime.parse(scheduleData['scheduledTime']),
-          json.decode(scheduleData['settings']),
-        );
+        return DeviceSchedule.fromJson(scheduleData);
       }).toList();
 
       // Sort settings by scheduledTime ascending(soonest schedules first)

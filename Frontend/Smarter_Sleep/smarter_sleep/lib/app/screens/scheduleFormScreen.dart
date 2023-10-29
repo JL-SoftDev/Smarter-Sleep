@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:smarter_sleep/app/screens/deviceConnectionScreen.dart';
-import 'package:smarter_sleep/app/screens/deviceScheduleScreen.dart';
+import 'package:smarter_sleep/app/models/device_schedule.dart';
 
 class ScheduleForm extends StatefulWidget {
   final Device device;
