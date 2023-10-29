@@ -8,6 +8,7 @@ import 'package:smarter_sleep/app/screens/settingsScreen.dart';
 import 'package:smarter_sleep/app/screens/shopScreen.dart';
 import 'package:smarter_sleep/app/screens/statsScreen.dart';
 import 'package:smarter_sleep/app/screens/accountPage.dart';
+import 'package:smarter_sleep/app/screens/reviewScreen.dart';
 
 import 'screens/testingScreen.dart';
 
@@ -26,6 +27,9 @@ class PageRouter {
         break;
       case '/devices':
         builder = (BuildContext _) => const DeviceConnectionsScreen();
+        break;
+      case '/review':
+        builder = (BuildContext _) => SleepReviewScreen();
         break;
       case '/inventory':
         builder = (BuildContext _) => const InventoryScreen();
