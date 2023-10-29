@@ -13,24 +13,23 @@ class _AppFrameBottomAppBarState extends State<AppFrameBottomAppBar> {
   int _currentIndex = 0;
 
   void _onItemTapped(int index) {
+    final navigator = mainNavigatorKey.currentState!;
+
+    final routes = [
+      "/home",
+      "/devices",
+      "/review",
+    ];
+
     if (_currentIndex != index) {
       setState(() {
         _currentIndex = index;
       });
-      final navigator = mainNavigatorKey.currentState!;
-      switch (index) {
-        case 0:
-          navigator.pushNamed("/home");
-          break;
-        case 1:
-          navigator.pushNamed("/devices");
-          break;
-        case 2:
-          navigator.pushNamed("/review");
-          break;
-        default:
-          navigator.pushNamed("/home");
-      }
+
+      navigator.pushNamedAndRemoveUntil(
+        routes[index],
+        (route) => false,
+      );
     }
   }
 
