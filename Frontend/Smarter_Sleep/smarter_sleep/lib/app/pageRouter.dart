@@ -4,10 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:smarter_sleep/app/screens/deviceConnectionScreen.dart';
 import 'package:smarter_sleep/app/screens/homeScreen.dart';
 import 'package:smarter_sleep/app/screens/inventoryScreen.dart';
-import 'package:smarter_sleep/app/screens/loginScreen.dart';
 import 'package:smarter_sleep/app/screens/settingsScreen.dart';
 import 'package:smarter_sleep/app/screens/shopScreen.dart';
 import 'package:smarter_sleep/app/screens/statsScreen.dart';
+import 'package:smarter_sleep/app/screens/accountPage.dart';
+import 'package:smarter_sleep/app/screens/reviewScreen.dart';
 
 import 'screens/testingScreen.dart';
 
@@ -27,6 +28,9 @@ class PageRouter {
       case '/devices':
         builder = (BuildContext _) => const DeviceConnectionsScreen();
         break;
+      case '/review':
+        builder = (BuildContext _) => SleepReviewScreen();
+        break;
       case '/inventory':
         builder = (BuildContext _) => const InventoryScreen();
         break;
@@ -39,10 +43,8 @@ class PageRouter {
       case '/settings':
         builder = (BuildContext _) => const SettingsScreen();
         break;
-
-      //Login Screens
-      case '/login':
-        builder = (BuildContext _) => const LoginScreen();
+      case '/account':
+        builder = (BuildContext _) => const AccountPage();
         break;
       //DEBUG SCREENS
 
