@@ -49,7 +49,6 @@ class _DeviceConnectionsScreenState extends State<DeviceConnectionsScreen> {
           storedDevices['status']
         );
       }).toList();
-      //TODO: Filter and map the devices from the API Server.
       setState(() {
         devices = storedDevices;
       });
@@ -135,5 +134,46 @@ class _DeviceConnectionsScreenState extends State<DeviceConnectionsScreen> {
       return Text('Temperature: ${device.status}°F');
     }
     return Text('Status: ${device.status}');
+  }
+
+  void _navigateToAddDevice(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DeviceForm(),
+      ),
+    ).then((result) {
+      if (result != null) {
+        //TODO: Post the device to the api
+      }
+    });
+  }
+
+  void _navigateToEditDevice(BuildContext context, Device initialData) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DeviceForm(
+          initialData: initialData,
+        ),
+      ),
+    ).then((device) {
+      if (device != null) {
+        //set any other needed device fields
+        http
+            .put(
+                Uri.parse(
+                    'http://ec2-54-87-139-255.compute-1.amazonaws.com/api/Devices/${initialData.id}'),
+                headers: {'Content-Type': 'application/json'},
+                body: jsonEncode(device))
+            .then((response) {
+          if (response.statusCode == 204) {
+            fetchDevices();
+          } else {
+            print('Error: ${response.statusCode}');
+          }
+        }).catchError(print);
+      }
+    });
   }
 }
