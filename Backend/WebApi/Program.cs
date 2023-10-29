@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using WebApi.Interfaces;
 using WebApi.Models;
+using WebApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +13,14 @@ builder.Services.AddDbContext<postgresContext>(opt =>
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+//Dependency injection for our services
+
+builder.Services.AddScoped<ISettingsService, SettingsService>();
+builder.Services.AddScoped<ISleepDataService, SleepDataService>();
+builder.Services.AddScoped<IUserDataService, UserDataService>();
+builder.Services.AddScoped<IDeviceService, DeviceService>();
+builder.Services.AddScoped<IDeviceSchedulingService, DeviceSchedulingService>();
 
 //If URLs are not defined in env then use default.
 var aspNetCoreUrls = Environment.GetEnvironmentVariable("ASPNETCORE_URLS");
