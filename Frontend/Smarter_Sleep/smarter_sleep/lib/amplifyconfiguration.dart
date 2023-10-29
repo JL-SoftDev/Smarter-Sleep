@@ -11,9 +11,9 @@ const amplifyconfig = '''{
                 },
                 "CognitoUserPool": {
                     "Default": {
-                        "PoolId": "us-east-2_idupwwlCV",
-                        "AppClientId": "7n2v0t1hgiq4ac5pf90h7k5e8m",
-                        "Region": "us-east-2"
+                        "PoolId": "us-east-1_FjfbLXhQ1",
+                        "AppClientId": "52e06v02u1oedhunbn9ipp0pm5",
+                        "Region": "us-east-1"
                     }
                 },
                 "Auth": {
@@ -23,9 +23,7 @@ const amplifyconfig = '''{
                         "usernameAttributes": [],
                         "signupAttributes": [
                             "NAME",
-                            "EMAIL",
-                            "GENDER",
-                            "BIRTHDATE"
+                            "EMAIL"
                         ],
                         "passwordProtectionSettings": {
                             "passwordPolicyMinLength": 8,
