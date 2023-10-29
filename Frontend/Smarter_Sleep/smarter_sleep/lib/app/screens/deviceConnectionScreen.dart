@@ -38,7 +38,9 @@ class _DeviceConnectionsScreenState extends State<DeviceConnectionsScreen> {
 
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
+      print(data);
       List<Device> storedDevices = data
+      .where((storedDevices) => storedDevices['userId'],)
       .map((storedDevices){
         return Device(
           storedDevices['id'],
@@ -49,12 +51,7 @@ class _DeviceConnectionsScreenState extends State<DeviceConnectionsScreen> {
       }).toList();
       //TODO: Filter and map the devices from the API Server.
       setState(() {
-        devices = [
-          Device(1, 'Bedroom Light', 'light', '50'),
-          Device(2, 'Living Room Light', 'light', '0'),
-          Device(3, 'Alarm clock', 'alarm', '2023-11-01 08:00:00'),
-          Device(4, 'Bedroom Thermostat', 'thermostat', '72'),
-        ];
+        devices = storedDevices;
       });
     }
   }
