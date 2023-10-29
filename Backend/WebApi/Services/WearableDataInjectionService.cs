@@ -18,7 +18,7 @@ namespace WebApi.Services
             _settingsService = settingsService;
             _userDataService = userDataService;
         }
-        public async Task<WearableData?> AddGoodWerableData(Guid userId, DateTime? inDay = null)
+        public async Task<WearableData?> AddGoodWearableData(Guid userId, DateTime? inDay = null)
         {
             DateTime today = DateTime.Today;
             if (inDay != null)
@@ -133,7 +133,7 @@ namespace WebApi.Services
             }
             return postedWearableData;
         }
-        public async Task<WearableData?> AddBadWerableData(Guid userId, DateTime? inDay = null)
+        public async Task<WearableData?> AddBadWearableData(Guid userId, DateTime? inDay = null)
         {
             DateTime today = DateTime.Today;
             if (inDay != null)
