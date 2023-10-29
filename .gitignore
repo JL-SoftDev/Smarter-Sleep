@@ -8,3 +8,4 @@ Frontend/Smarter_Sleep/smarter_sleep/linux/flutter/ephemeral/.plugin_symlinks/de
 Frontend/Smarter_Sleep/smarter_sleep/linux/flutter/ephemeral/.plugin_symlinks/amplify_db_common
 Frontend/Smarter_Sleep/smarter_sleep/linux/flutter/ephemeral/.plugin_symlinks/url_launcher_linux
 Frontend/Smarter_Sleep/smarter_sleep/linux/flutter/ephemeral/.plugin_symlinks/path_provider_linux
+*.lock
