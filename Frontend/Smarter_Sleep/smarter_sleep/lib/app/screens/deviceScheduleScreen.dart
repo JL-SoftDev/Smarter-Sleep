@@ -31,11 +31,10 @@ class _DeviceSchedulePageState extends State<DeviceSchedulePage> {
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
       final now = DateTime.now();
-      print(data);
-      print("DeviceId: $deviceId");
       List<DeviceSchedule> deviceSchedules = data
-          .where((scheduleData) => scheduleData['deviceId'] == deviceId) // &&
-          //DateTime.parse(scheduleData['scheduledTime']).isAfter(now))
+          .where((scheduleData) =>
+              scheduleData['deviceId'] == deviceId &&
+              DateTime.parse(scheduleData['scheduledTime']).isAfter(now))
           .map((scheduleData) {
         return DeviceSchedule.fromJson(scheduleData);
       }).toList();
@@ -140,10 +139,25 @@ class _DeviceSchedulePageState extends State<DeviceSchedulePage> {
       MaterialPageRoute(
         builder: (context) => ScheduleForm(device: widget.device),
       ),
-    ).then((result) {
-      if (result != null) {
-        //TODO: Post the setting to the database and refresh the page
-        //Requires the setting to include a sleepSettingId, which is not currently implemented.
+    ).then((schedule) {
+      if (schedule != null) {
+        //TODO: Get the exact sleep setting for that day otherwise create one.
+        schedule['sleepSettingId'] =
+            schedules.isNotEmpty ? schedules[0].sleepSettingId : 1;
+
+        http
+            .post(
+                Uri.parse(
+                    'http://ec2-54-87-139-255.compute-1.amazonaws.com/api/DeviceSettings'),
+                headers: {'Content-Type': 'application/json'},
+                body: jsonEncode(schedule))
+            .then((response) {
+          if (response.statusCode == 201) {
+            fetchDeviceSchedules(widget.device.id);
+          } else {
+            print('Error: ${response.statusCode}');
+          }
+        }).catchError(print);
       }
     });
   }
