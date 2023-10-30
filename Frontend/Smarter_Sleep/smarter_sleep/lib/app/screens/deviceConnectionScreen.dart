@@ -8,9 +8,9 @@ import '../appFrame.dart';
 
 class Device {
   final int id;
-  final String name;
-  final String type;
-  final String status;
+  final String? name;
+  final String? type;
+  final String? status;
 
   Device(this.id, this.name, this.type, this.status);
 }
@@ -38,14 +38,9 @@ class _DeviceConnectionsScreenState extends State<DeviceConnectionsScreen> {
 
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
-      List<Device> storedDevices = data
-      .map((storedDevices){
-        return Device(
-          storedDevices['id'],
-          storedDevices['name'],
-          storedDevices['type'],
-          storedDevices['status']
-        );
+      List<Device> storedDevices = data.map((storedDevices) {
+        return Device(storedDevices['id'], storedDevices['name'],
+            storedDevices['type'], storedDevices['status']);
       }).toList();
       //TODO: Filter and map the devices from the API Server.
       setState(() {
@@ -78,9 +73,9 @@ class _DeviceConnectionsScreenState extends State<DeviceConnectionsScreen> {
         itemBuilder: (context, index) {
           final device = devices[index];
           return ListTile(
-            title: Text(device.name),
+            title: Text(device.name == null ? "" : device.name!),
             subtitle: Text('Type: ${device.type}'),
-            leading: _buildIconForType(device.type),
+            leading: _buildIconForType(device.type == null ? "" : device.type!),
             trailing: _buildStatusWidget(device),
             onTap: () {
               Navigator.push(

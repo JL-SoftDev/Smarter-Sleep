@@ -19,9 +19,11 @@ class DeviceRoutes {
     }
   }
   */
+  final String baseRoute =
+      "http://ec2-54-87-139-255.compute-1.amazonaws.com/api/devices";
 
   Future<Device> getDevice(int id) async {
-    final response = await http.get(Uri.parse(''));
+    final response = await http.get(Uri.parse("$baseRoute/$id"));
 
     if (response.statusCode == 200) {
       // If the server did return a 200 OK response,
@@ -37,8 +39,10 @@ class DeviceRoutes {
   Future addDevice(Device device) async {
     //Convert our device to JSON format
     var httpContent = device.toJson();
-    final response =
-        await http.post(Uri.parse(''), body: jsonEncode(httpContent));
+    Map<String, String> headers = {};
+    headers["Content-Type"] = "application/json";
+    final response = await http.post(Uri.parse("$baseRoute"),
+        body: jsonEncode(httpContent), headers: headers);
 
     if (response.statusCode != 200) {
       // If the server did not return a 200 OK response,
@@ -51,7 +55,7 @@ class DeviceRoutes {
     //Convert our device to JSON format
     var httpContent = device.toJson();
     final response =
-        await http.put(Uri.parse(''), body: jsonEncode(httpContent));
+        await http.put(Uri.parse('$baseRoute'), body: jsonEncode(httpContent));
 
     if (response.statusCode != 200) {
       // If the server did not return a 200 OK response,
@@ -61,7 +65,7 @@ class DeviceRoutes {
   }
 
   Future deleteDevice(int id) async {
-    final response = await http.delete(Uri.parse(''));
+    final response = await http.delete(Uri.parse("$baseRoute/$id"));
 
     if (response.statusCode != 200) {
       // If the server did not return a 200 OK response,

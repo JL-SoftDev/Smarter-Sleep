@@ -4,11 +4,12 @@ part 'device.g.dart';
 @JsonSerializable()
 class Device {
   int id = 0;
+  String userId = "";
   String name = "";
   String type = "";
-  String ip = "";
+  String? ip = "";
   int port = 0;
-  String status = "";
+  String? status = "";
 
   Device();
 
