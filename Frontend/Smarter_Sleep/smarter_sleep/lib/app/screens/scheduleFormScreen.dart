@@ -29,6 +29,10 @@ class _ScheduleFormState extends State<ScheduleForm> {
         selectedTime =
             TimeOfDay.fromDateTime(widget.initialData!.scheduledTime);
 
+        if (selectedDate.isBefore(DateTime.now())) {
+          selectedDate = DateTime.now();
+        }
+
         final settings = widget.initialData!.settings;
 
         if (widget.device.type == 'light') {
