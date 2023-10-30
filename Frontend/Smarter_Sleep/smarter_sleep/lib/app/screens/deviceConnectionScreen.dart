@@ -1,3 +1,4 @@
+import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -8,8 +9,8 @@ import '../appFrame.dart';
 
 class Device {
   final int id;
-  final String? name;
-  final String? type;
+  final String name;
+  final String type;
   final String? status;
 
   Device(this.id, this.name, this.type, this.status);
@@ -37,19 +38,18 @@ class _DeviceConnectionsScreenState extends State<DeviceConnectionsScreen> {
         'http://ec2-54-87-139-255.compute-1.amazonaws.com/api/Devices'));
 
     if (response.statusCode == 200) {
+      final user = await Amplify.Auth.getCurrentUser();
+      final userId = user.userId;
+
       final List<dynamic> data = json.decode(response.body);
-      List<Device> storedDevices = data.map((storedDevices) {
-        return Device(storedDevices['id'], storedDevices['name'],
-            storedDevices['type'], storedDevices['status']);
+      List<Device> fetchedDevices = data
+          .where((deviceData) => deviceData['userId'] == userId)
+          .map((deviceData) {
+        return Device(deviceData['id'], deviceData['name'], deviceData['type'],
+            deviceData['status']);
       }).toList();
-      //TODO: Filter and map the devices from the API Server.
       setState(() {
-        devices = [
-          Device(1, 'Bedroom Light', 'light', '50'),
-          Device(2, 'Living Room Light', 'light', '0'),
-          Device(3, 'Alarm clock', 'alarm', '2023-11-01 08:00:00'),
-          Device(4, 'Bedroom Thermostat', 'thermostat', '72'),
-        ];
+        devices = fetchedDevices;
       });
     }
   }
@@ -68,35 +68,47 @@ class _DeviceConnectionsScreenState extends State<DeviceConnectionsScreen> {
           ),
         ],
       ),
-      body: ListView.builder(
-        itemCount: devices.length,
-        itemBuilder: (context, index) {
-          final device = devices[index];
-          return ListTile(
-            title: Text(device.name == null ? "" : device.name!),
-            subtitle: Text('Type: ${device.type}'),
-            leading: _buildIconForType(device.type == null ? "" : device.type!),
-            trailing: _buildStatusWidget(device),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => DeviceSchedulePage(device: device),
-                ),
-              );
-            },
-          );
-        },
-      ),
+      body: devices.isEmpty
+          ? const Center(
+              child: Text('No devices connected, connect one below.'),
+            )
+          : ListView.builder(
+              itemCount: devices.length,
+              itemBuilder: (context, index) {
+                final device = devices[index];
+                return ListTile(
+                  title: Text(device.name),
+                  subtitle: Text('Type: ${device.type}'),
+                  leading: _buildIconForType(device.type),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _buildStatusWidget(device),
+                      IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () {
+                          _navigateToEditDevice(context, device);
+                        },
+                      ),
+                    ],
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            DeviceSchedulePage(device: device),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ElevatedButton(
           onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => const TestDeviceConnection()),
-            );
+            _navigateToAddDevice(context);
           },
           child: const Text('Connect Devices'),
         ),
@@ -125,8 +137,24 @@ class _DeviceConnectionsScreenState extends State<DeviceConnectionsScreen> {
   }
 
   Widget _buildStatusWidget(Device device) {
+    if (device.status == null) {
+      return const Text('No Status');
+    }
     if (device.type == 'alarm') {
-      return Text('Next Alarm: ${device.status}');
+      final nextAlarm = DateTime.tryParse(device.status!);
+      if (nextAlarm != null) {
+        final now = DateTime.now();
+        final timeDifference = nextAlarm.difference(now);
+
+        if (timeDifference.inDays > 1) {
+          final days = timeDifference.inDays;
+          return Text('Next Alarm: in $days days');
+        } else {
+          final formattedTime = "${nextAlarm.hour}:${nextAlarm.minute}";
+          return Text('Next Alarm: $formattedTime');
+        }
+      }
+      return Text('Next Alarm\n ${device.status}');
     } else if (device.type == 'light') {
       return Text('Light: ${device.status}%');
     } else if (device.type == 'thermostat') {
@@ -134,4 +162,61 @@ class _DeviceConnectionsScreenState extends State<DeviceConnectionsScreen> {
     }
     return Text('Status: ${device.status}');
   }
+
+  void _navigateToAddDevice(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DeviceForm(),
+      ),
+    ).then((result) {
+      if (result != null) {
+        //TODO: Change to use the api/devicesRoutes instead of directly calling it.
+        http
+            .post(
+                Uri.parse(
+                    'http://ec2-54-87-139-255.compute-1.amazonaws.com/api/Devices'),
+                headers: {'Content-Type': 'application/json'},
+                body: jsonEncode(result))
+            .then((response) {
+          if (response.statusCode == 201) {
+            fetchDevices();
+          } else {
+            print('Error: ${response.statusCode}');
+          }
+        }).catchError(print);
+      }
+    });
+  }
+
+  void _navigateToEditDevice(BuildContext context, Device initialData) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DeviceForm(
+          initialData: initialData,
+        ),
+      ),
+    ).then((device) {
+      if (device != null) {
+        //TODO: Change to use the api/devicesRoutes instead of directly calling it.
+        http
+            .put(
+                Uri.parse(
+                    'http://ec2-54-87-139-255.compute-1.amazonaws.com/api/Devices/${initialData.id}'),
+                headers: {'Content-Type': 'application/json'},
+                body: jsonEncode(device))
+            .then((response) {
+          if (response.statusCode == 204) {
+            fetchDevices();
+          } else {
+            print('Error: ${response.statusCode}');
+          }
+        }).catchError(print);
+      }
+    });
+  }
 }
+
+//temporarily here, remove once implemented
+DeviceForm({Device? initialData}) {}
