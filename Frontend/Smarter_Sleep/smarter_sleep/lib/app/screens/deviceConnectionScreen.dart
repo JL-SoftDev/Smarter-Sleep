@@ -1,15 +1,15 @@
 import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:smarter_sleep/app/screens/deviceScheduleScreen.dart';
 import 'dart:convert';
 
-import 'testDeviceConnection.dart';
-import 'deviceScheduleScreen.dart';
+import 'deviceFormScreen.dart';
 import '../appFrame.dart';
 
 class Device {
   final int id;
-  final String name;
+  String name;
   final String type;
   final String? status;
 
@@ -40,7 +40,6 @@ class _DeviceConnectionsScreenState extends State<DeviceConnectionsScreen> {
     if (response.statusCode == 200) {
       final user = await Amplify.Auth.getCurrentUser();
       final userId = user.userId;
-
       final List<dynamic> data = json.decode(response.body);
       List<Device> fetchedDevices = data
           .where((deviceData) => deviceData['userId'] == userId)
@@ -150,13 +149,13 @@ class _DeviceConnectionsScreenState extends State<DeviceConnectionsScreen> {
           final days = timeDifference.inDays;
           return Text('Next Alarm: in $days days');
         } else {
-          final formattedTime = "${nextAlarm.hour}:${nextAlarm.minute}";
+          final formattedTime = "${nextAlarm.hour}h ${nextAlarm.minute}m";
           return Text('Next Alarm: $formattedTime');
         }
       }
       return Text('Next Alarm\n ${device.status}');
     } else if (device.type == 'light') {
-      return Text('Light: ${device.status}%');
+      return Text('Brightness: ${device.status}%');
     } else if (device.type == 'thermostat') {
       return Text('Temperature: ${device.status}°F');
     }
@@ -167,11 +166,14 @@ class _DeviceConnectionsScreenState extends State<DeviceConnectionsScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => const TestDeviceConnection(), //TODO: Change name
+        builder: (context) => DeviceForm(),
       ),
-    ).then((result) {
+    ).then((result) async {
       if (result != null) {
+        final user = await Amplify.Auth.getCurrentUser();
+        final userId = user.userId;
         //TODO: Change to use the api/devicesRoutes instead of directly calling it.
+        result['userId'] = userId;
         http
             .post(
                 Uri.parse(
@@ -182,6 +184,7 @@ class _DeviceConnectionsScreenState extends State<DeviceConnectionsScreen> {
           if (response.statusCode == 201) {
             fetchDevices();
           } else {
+            print(response.body);
             print('Error: ${response.statusCode}');
           }
         }).catchError(print);
@@ -197,8 +200,14 @@ class _DeviceConnectionsScreenState extends State<DeviceConnectionsScreen> {
           initialData: initialData,
         ),
       ),
-    ).then((device) {
+    ).then((device) async {
       if (device != null) {
+        final user = await Amplify.Auth.getCurrentUser();
+        final userId = user.userId;
+        device['userId'] = userId;
+        device['id'] = initialData.id;
+
+        print(jsonEncode(device));
         //TODO: Change to use the api/devicesRoutes instead of directly calling it.
         http
             .put(
@@ -217,6 +226,3 @@ class _DeviceConnectionsScreenState extends State<DeviceConnectionsScreen> {
     });
   }
 }
-
-//temporarily here, remove once implemented
-DeviceForm({Device? initialData}) {}
