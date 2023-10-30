@@ -175,7 +175,20 @@ class _DeviceConnectionsScreenState extends State<DeviceConnectionsScreen> {
       ),
     ).then((result) {
       if (result != null) {
-        //TODO: Post the device to the api
+        //TODO: Change to use the api/devicesRoutes instead of directly calling it.
+        http
+            .post(
+                Uri.parse(
+                    'http://ec2-54-87-139-255.compute-1.amazonaws.com/api/Devices'),
+                headers: {'Content-Type': 'application/json'},
+                body: jsonEncode(result))
+            .then((response) {
+          if (response.statusCode == 201) {
+            fetchDevices();
+          } else {
+            print('Error: ${response.statusCode}');
+          }
+        }).catchError(print);
       }
     });
   }
@@ -190,7 +203,7 @@ class _DeviceConnectionsScreenState extends State<DeviceConnectionsScreen> {
       ),
     ).then((device) {
       if (device != null) {
-        //set any other needed device fields
+        //TODO: Change to use the api/devicesRoutes instead of directly calling it.
         http
             .put(
                 Uri.parse(
