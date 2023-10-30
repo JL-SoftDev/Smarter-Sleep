@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using WebApi.Interfaces;
 using WebApi.Models;
 
 namespace WebApi.Controllers
@@ -13,45 +14,28 @@ namespace WebApi.Controllers
     [ApiController]
     public class SleepReviewsController : ControllerBase
     {
-        private readonly postgresContext _context;
+        private readonly ISleepDataService _sleepDataService;
 
-        public SleepReviewsController(postgresContext context)
+        public SleepReviewsController(ISleepDataService sleepDataService)
         {
-            _context = context;
-        }
+            _sleepDataService = sleepDataService;
+		}
 
         // GET: api/SleepReviews
         [HttpGet]
         public async Task<ActionResult<IEnumerable<SleepReview>>> GetSleepReviews()
         {
-          if (_context.SleepReviews == null)
-          {
-              return NotFound();
-          }
-            return await _context.SleepReviews
-                .Include(sr => sr.Survey)
-                .Include(sr => sr.WearableLog)
-                .ToListAsync();
+            var sleepReviews = await _sleepDataService.GetSleepReviews();
+            if (sleepReviews == null) return NotFound();
+            return sleepReviews.ToList();
         }
 
         // GET: api/SleepReviews/5
         [HttpGet("{id}")]
         public async Task<ActionResult<SleepReview>> GetSleepReview(int id)
         {
-          if (_context.SleepReviews == null)
-          {
-              return NotFound();
-          }
-            var sleepReview = await _context.SleepReviews
-                .Include(sr => sr.Survey)
-                .Include(sr => sr.WearableLog)
-                .FirstOrDefaultAsync(sr => sr.Id == id);
-
-            if (sleepReview == null)
-            {
-                return NotFound();
-            }
-
+            var sleepReview = await _sleepDataService.GetSleepReview(id);
+            if (sleepReview == null) return NotFound();
             return sleepReview;
         }
 
@@ -60,70 +44,51 @@ namespace WebApi.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutSleepReview(int id, SleepReview sleepReview)
         {
-            if (id != sleepReview.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(sleepReview).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!SleepReviewExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
+			var success = await _sleepDataService.PutSleepReview(id, sleepReview);
+			switch (success)
+			{
+				//Successful:
+				case 204:
+					return NoContent();
+				//Bad Request
+				case 400:
+					return BadRequest();
+				//Not Found
+				case 404:
+					return NotFound();
+				default:
+					return BadRequest();
+			}
+		}
 
         // POST: api/SleepReviews
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<SleepReview>> PostSleepReview(SleepReview sleepReview)
         {
-          if (_context.SleepReviews == null)
-          {
-              return Problem("Entity set 'postgresContext.SleepReviews'  is null.");
-          }
-            _context.SleepReviews.Add(sleepReview);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetSleepReview", new { id = sleepReview.Id }, sleepReview);
-        }
+            var newSleepReview = await _sleepDataService.PostSleepReview(sleepReview);
+			if (newSleepReview == null) return Problem("Entity set 'postgresContext.SleepReviews'  is null.");
+			return CreatedAtAction("GetSleepReview", new { id = newSleepReview.Id }, newSleepReview);
+		}
 
         // DELETE: api/SleepReviews/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteSleepReview(int id)
         {
-            if (_context.SleepReviews == null)
-            {
-                return NotFound();
-            }
-            var sleepReview = await _context.SleepReviews.FindAsync(id);
-            if (sleepReview == null)
-            {
-                return NotFound();
-            }
-
-            _context.SleepReviews.Remove(sleepReview);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool SleepReviewExists(int id)
-        {
-            return (_context.SleepReviews?.Any(e => e.Id == id)).GetValueOrDefault();
-        }
+			var statusCode = await _sleepDataService.DeleteSleepReview(id);
+			switch (statusCode)
+			{
+				//Successful:
+				case 204:
+					return NoContent();
+				//Bad Request
+				case 400:
+					return BadRequest();
+				case 404:
+					return NotFound();
+				default:
+					return BadRequest();
+			}
+		}
     }
 }

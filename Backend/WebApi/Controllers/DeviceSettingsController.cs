@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using WebApi.Interfaces;
 using WebApi.Models;
 
 namespace WebApi.Controllers
@@ -13,40 +14,28 @@ namespace WebApi.Controllers
     [ApiController]
     public class DeviceSettingsController : ControllerBase
     {
-        private readonly postgresContext _context;
+        private readonly ISettingsService _settingsService;
 
-        public DeviceSettingsController(postgresContext context)
+        public DeviceSettingsController(ISettingsService settingsService)
         {
-            _context = context;
+            _settingsService = settingsService;
         }
 
         // GET: api/DeviceSettings
         [HttpGet]
         public async Task<ActionResult<IEnumerable<DeviceSetting>>> GetDeviceSetting()
         {
-          if (_context.DeviceSetting == null)
-          {
-              return NotFound();
-          }
-            return await _context.DeviceSetting.ToListAsync();
+            var deviceSettings = await _settingsService.GetAllDeviceSettings();
+            return deviceSettings.ToList();
         }
 
         // GET: api/DeviceSettings/5
         [HttpGet("{id}")]
         public async Task<ActionResult<DeviceSetting>> GetDeviceSetting(int id)
         {
-          if (_context.DeviceSetting == null)
-          {
-              return NotFound();
-          }
-            var deviceSetting = await _context.DeviceSetting.FindAsync(id);
-
-            if (deviceSetting == null)
-            {
-                return NotFound();
-            }
-
-            return deviceSetting;
+            var deviceSetting = await _settingsService.GetDeviceSetting(id);
+            if(deviceSetting == null) NotFound();
+            return deviceSetting!;
         }
 
         // PUT: api/DeviceSettings/5
@@ -54,30 +43,18 @@ namespace WebApi.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutDeviceSetting(int id, DeviceSetting deviceSetting)
         {
-            if (id != deviceSetting.Id)
+            var success = await _settingsService.PutDeviceSetting(id, deviceSetting);
+            switch(success)
             {
-                return BadRequest();
-            }
-
-            _context.Entry(deviceSetting).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!DeviceSettingExists(id))
-                {
+                case 204:
+                    return NoContent();
+                case 400:
+                    return BadRequest();
+                case 404:
                     return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                default:
+                    return BadRequest();
             }
-
-            return NoContent();
         }
 
         // POST: api/DeviceSettings
@@ -85,39 +62,27 @@ namespace WebApi.Controllers
         [HttpPost]
         public async Task<ActionResult<DeviceSetting>> PostDeviceSetting(DeviceSetting deviceSetting)
         {
-          if (_context.DeviceSetting == null)
-          {
-              return Problem("Entity set 'postgresContext.DeviceSetting'  is null.");
-          }
-            _context.DeviceSetting.Add(deviceSetting);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetDeviceSetting", new { id = deviceSetting.Id }, deviceSetting);
+            var newDeviceSetting = await _settingsService.PostDeviceSetting(deviceSetting);
+            if(newDeviceSetting == null) return Problem("Entity set 'postgresContext.DeviceSettings' is null.");
+            return CreatedAtAction("GetDeviceSetting", new { id = newDeviceSetting!.Id }, newDeviceSetting!);
         }
 
         // DELETE: api/DeviceSettings/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteDeviceSetting(int id)
         {
-            if (_context.DeviceSetting == null)
+            var statusCode = await _settingsService.DeleteDeviceSetting(id);
+            switch(statusCode)
             {
-                return NotFound();
+                case 204:
+                    return NoContent();
+                case 400:
+                    return BadRequest();
+                case 404:
+                    return NotFound();
+                default:
+                    return BadRequest();
             }
-            var deviceSetting = await _context.DeviceSetting.FindAsync(id);
-            if (deviceSetting == null)
-            {
-                return NotFound();
-            }
-
-            _context.DeviceSetting.Remove(deviceSetting);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool DeviceSettingExists(int id)
-        {
-            return (_context.DeviceSetting?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

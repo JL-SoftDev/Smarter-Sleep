@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using WebApi.Interfaces;
 using WebApi.Models;
 
 namespace WebApi.Controllers
@@ -14,110 +15,82 @@ namespace WebApi.Controllers
     public class SurveysController : ControllerBase
     {
         private readonly postgresContext _context;
+        private readonly ISleepDataService _sleepDataService;
 
-        public SurveysController(postgresContext context)
+        public SurveysController(postgresContext context, ISleepDataService sleepDataService)
         {
             _context = context;
+            _sleepDataService = sleepDataService;
         }
 
         // GET: api/Surveys
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Survey>>> GetSurveys()
         {
-          if (_context.Surveys == null)
-          {
-              return NotFound();
-          }
-            return await _context.Surveys.ToListAsync();
+            var surveys = await _sleepDataService.GetSurveys();
+            if (surveys == null) return NotFound();
+            return surveys.ToList();
         }
 
         // GET: api/Surveys/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Survey>> GetSurvey(int id)
         {
-          if (_context.Surveys == null)
-          {
-              return NotFound();
-          }
-            var survey = await _context.Surveys.FindAsync(id);
-
-            if (survey == null)
-            {
-                return NotFound();
-            }
-
-            return survey;
-        }
+			var survey = await _sleepDataService.GetSurvey(id);
+			if (survey == null) return NotFound();
+			return survey;
+		}
 
         // PUT: api/Surveys/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutSurvey(int id, Survey survey)
         {
-            if (id != survey.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(survey).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!SurveyExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
+			var success = await _sleepDataService.PutSurvey(id, survey);
+			switch (success)
+			{
+				//Successful:
+				case 204:
+					return NoContent();
+				//Bad Request
+				case 400:
+					return BadRequest();
+				//Not Found
+				case 404:
+					return NotFound();
+				default:
+					return BadRequest();
+			}
+		}
 
         // POST: api/Surveys
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<Survey>> PostSurvey(Survey survey)
         {
-          if (_context.Surveys == null)
-          {
-              return Problem("Entity set 'postgresContext.Surveys'  is null.");
-          }
-            _context.Surveys.Add(survey);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetSurvey", new { id = survey.Id }, survey);
+			var newSurvey = await _sleepDataService.PostSurvey(survey);
+			if (newSurvey == null) return Problem("Entity set 'postgresContext.Surveys'  is null.");
+			return CreatedAtAction("GetSurvey", new { id = survey.Id }, survey);
         }
 
         // DELETE: api/Surveys/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteSurvey(int id)
         {
-            if (_context.Surveys == null)
-            {
-                return NotFound();
-            }
-            var survey = await _context.Surveys.FindAsync(id);
-            if (survey == null)
-            {
-                return NotFound();
-            }
-
-            _context.Surveys.Remove(survey);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool SurveyExists(int id)
-        {
-            return (_context.Surveys?.Any(e => e.Id == id)).GetValueOrDefault();
-        }
+			var statusCode = await _sleepDataService.DeleteSurvey(id);
+			switch (statusCode)
+			{
+				//Successful:
+				case 204:
+					return NoContent();
+				//Bad Request
+				case 400:
+					return BadRequest();
+				case 404:
+					return NotFound();
+				default:
+					return BadRequest();
+			}
+		}
     }
 }

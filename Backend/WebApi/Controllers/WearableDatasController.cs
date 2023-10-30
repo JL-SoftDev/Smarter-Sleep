@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using WebApi.Interfaces;
 using WebApi.Models;
 
 namespace WebApi.Controllers
@@ -13,71 +14,51 @@ namespace WebApi.Controllers
     [ApiController]
     public class WearableDatasController : ControllerBase
     {
-        private readonly postgresContext _context;
+		private readonly ISleepDataService _sleepDataService;
 
-        public WearableDatasController(postgresContext context)
+        public WearableDatasController(ISleepDataService wearableDataService)
         {
-            _context = context;
+			_sleepDataService = wearableDataService;
         }
 
         // GET: api/WearableDatas
         [HttpGet]
         public async Task<ActionResult<IEnumerable<WearableData>>> GetWearableData()
         {
-          if (_context.WearableData == null)
-          {
-              return NotFound();
-          }
-            return await _context.WearableData.ToListAsync();
-        }
+            var wearableData = await _sleepDataService.GetAllWearableData();
+            return wearableData.ToList();
+
+		}
 
         // GET: api/WearableDatas/5
         [HttpGet("{id}")]
         public async Task<ActionResult<WearableData>> GetWearableData(int id)
         {
-          if (_context.WearableData == null)
-          {
-              return NotFound();
-          }
-            var wearableData = await _context.WearableData.FindAsync(id);
-
-            if (wearableData == null)
-            {
-                return NotFound();
-            }
-
-            return wearableData;
-        }
+            var wearableData = await _sleepDataService.GetWearableData(id);
+            if (wearableData == null) NotFound();
+            return wearableData!;
+		}
 
         // PUT: api/WearableDatas/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutWearableData(int id, WearableData wearableData)
         {
-            if (id != wearableData.Id)
+            var success = await _sleepDataService.PutWearableData(id, wearableData);
+            switch(success)
             {
-                return BadRequest();
-            }
-
-            _context.Entry(wearableData).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!WearableDataExists(id))
-                {
+				//Successful:
+				case 204:
+                    return NoContent();
+                //Bad Request
+                case 400:
+                    return BadRequest();
+                //Not Found
+                case 404:
                     return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                default:
+                    return BadRequest();
             }
-
-            return NoContent();
         }
 
         // POST: api/WearableDatas
@@ -85,39 +66,31 @@ namespace WebApi.Controllers
         [HttpPost]
         public async Task<ActionResult<WearableData>> PostWearableData(WearableData wearableData)
         {
-          if (_context.WearableData == null)
-          {
-              return Problem("Entity set 'postgresContext.WearableData'  is null.");
-          }
-            _context.WearableData.Add(wearableData);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetWearableData", new { id = wearableData.Id }, wearableData);
-        }
+            var newWearableData = await _sleepDataService.PostWearableData(wearableData);
+            if(newWearableData == null) return Problem("Entity set 'postgresContext.WearableData'  is null.");
+			return CreatedAtAction("GetWearableData", new { id = newWearableData!.Id }, newWearableData!);
+		}
 
         // DELETE: api/WearableDatas/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteWearableData(int id)
         {
-            if (_context.WearableData == null)
+            var statusCode = await _sleepDataService.DeleteWearableData(id);
+            switch (statusCode)
             {
-                return NotFound();
+                //Successful:
+                case 204:
+                    return NoContent();
+                //Bad Request
+                case 400:
+					return BadRequest();
+				case 404:
+                    return NotFound();
+                default:
+                    return BadRequest();
             }
-            var wearableData = await _context.WearableData.FindAsync(id);
-            if (wearableData == null)
-            {
-                return NotFound();
-            }
-
-            _context.WearableData.Remove(wearableData);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
         }
 
-        private bool WearableDataExists(int id)
-        {
-            return (_context.WearableData?.Any(e => e.Id == id)).GetValueOrDefault();
-        }
+
     }
 }

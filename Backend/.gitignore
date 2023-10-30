@@ -3,6 +3,10 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
 
+# Added config files
+safile.json
+appsettings.development.json
+
 # User-specific files
 *.rsuser
 *.suo
@@ -287,6 +291,7 @@ FakesAssemblies/
 # Node.js Tools for Visual Studio
 .ntvs_analysis.dat
 node_modules/
+package-lock.json
 
 # Visual Studio 6 build log
 *.plg
