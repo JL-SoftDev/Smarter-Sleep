@@ -1,3 +1,4 @@
+import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -10,7 +11,7 @@ class Device {
   final int id;
   final String name;
   final String type;
-  final String status;
+  final String? status;
 
   Device(this.id, this.name, this.type, this.status);
 }
@@ -37,20 +38,18 @@ class _DeviceConnectionsScreenState extends State<DeviceConnectionsScreen> {
         'http://ec2-54-87-139-255.compute-1.amazonaws.com/api/Devices'));
 
     if (response.statusCode == 200) {
+      final user = await Amplify.Auth.getCurrentUser();
+      final userId = user.userId;
+
       final List<dynamic> data = json.decode(response.body);
-      print(data);
-      List<Device> storedDevices = data
-      .where((storedDevices) => storedDevices['userId'],)
-      .map((storedDevices){
-        return Device(
-          storedDevices['id'],
-          storedDevices['name'],
-          storedDevices['type'],
-          storedDevices['status']
-        );
+      List<Device> fetchedDevices = data
+          .where((deviceData) => deviceData['userId'] == userId)
+          .map((deviceData) {
+        return Device(deviceData['id'], deviceData['name'], deviceData['type'],
+            deviceData['status']);
       }).toList();
       setState(() {
-        devices = storedDevices;
+        devices = fetchedDevices;
       });
     }
   }
@@ -77,7 +76,18 @@ class _DeviceConnectionsScreenState extends State<DeviceConnectionsScreen> {
             title: Text(device.name),
             subtitle: Text('Type: ${device.type}'),
             leading: _buildIconForType(device.type),
-            trailing: _buildStatusWidget(device),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildStatusWidget(device),
+                IconButton(
+                  icon: const Icon(Icons.edit),
+                  onPressed: () {
+                    _navigateToEditDevice(context, device);
+                  },
+                ),
+              ],
+            ),
             onTap: () {
               Navigator.push(
                 context,
@@ -126,8 +136,24 @@ class _DeviceConnectionsScreenState extends State<DeviceConnectionsScreen> {
   }
 
   Widget _buildStatusWidget(Device device) {
+    if (device.status == null) {
+      return const Text('No Status');
+    }
     if (device.type == 'alarm') {
-      return Text('Next Alarm: ${device.status}');
+      final nextAlarm = DateTime.tryParse(device.status!);
+      if (nextAlarm != null) {
+        final now = DateTime.now();
+        final timeDifference = nextAlarm.difference(now);
+
+        if (timeDifference.inDays > 1) {
+          final days = timeDifference.inDays;
+          return Text('Next Alarm: in $days days');
+        } else {
+          final formattedTime = "${nextAlarm.hour}:${nextAlarm.minute}";
+          return Text('Next Alarm: $formattedTime');
+        }
+      }
+      return Text('Next Alarm\n ${device.status}');
     } else if (device.type == 'light') {
       return Text('Light: ${device.status}%');
     } else if (device.type == 'thermostat') {
@@ -177,3 +203,6 @@ class _DeviceConnectionsScreenState extends State<DeviceConnectionsScreen> {
     });
   }
 }
+
+//temporarily here, remove once implemented
+DeviceForm({Device? initialData}) {}
