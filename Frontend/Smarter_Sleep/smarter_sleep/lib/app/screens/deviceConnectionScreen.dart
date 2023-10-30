@@ -108,11 +108,7 @@ class _DeviceConnectionsScreenState extends State<DeviceConnectionsScreen> {
         padding: const EdgeInsets.all(16.0),
         child: ElevatedButton(
           onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => const TestDeviceConnection()),
-            );
+            _navigateToAddDevice(context);
           },
           child: const Text('Connect Devices'),
         ),
