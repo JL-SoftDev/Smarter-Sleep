@@ -68,37 +68,42 @@ class _DeviceConnectionsScreenState extends State<DeviceConnectionsScreen> {
           ),
         ],
       ),
-      body: ListView.builder(
-        itemCount: devices.length,
-        itemBuilder: (context, index) {
-          final device = devices[index];
-          return ListTile(
-            title: Text(device.name),
-            subtitle: Text('Type: ${device.type}'),
-            leading: _buildIconForType(device.type),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _buildStatusWidget(device),
-                IconButton(
-                  icon: const Icon(Icons.edit),
-                  onPressed: () {
-                    _navigateToEditDevice(context, device);
+      body: devices.isEmpty
+          ? const Center(
+              child: Text('No devices connected, connect one below.'),
+            )
+          : ListView.builder(
+              itemCount: devices.length,
+              itemBuilder: (context, index) {
+                final device = devices[index];
+                return ListTile(
+                  title: Text(device.name),
+                  subtitle: Text('Type: ${device.type}'),
+                  leading: _buildIconForType(device.type),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _buildStatusWidget(device),
+                      IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () {
+                          _navigateToEditDevice(context, device);
+                        },
+                      ),
+                    ],
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            DeviceSchedulePage(device: device),
+                      ),
+                    );
                   },
-                ),
-              ],
+                );
+              },
             ),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => DeviceSchedulePage(device: device),
-                ),
-              );
-            },
-          );
-        },
-      ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ElevatedButton(
