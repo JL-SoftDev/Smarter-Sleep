@@ -167,7 +167,7 @@ class _DeviceConnectionsScreenState extends State<DeviceConnectionsScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => DeviceForm(),
+        builder: (context) => const TestDeviceConnection(), //TODO: Change name
       ),
     ).then((result) {
       if (result != null) {
