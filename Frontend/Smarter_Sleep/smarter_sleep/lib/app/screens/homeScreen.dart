@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'deviceConnectionScreen.dart';
+import '../appFrame.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -13,6 +13,17 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text("Home"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.account_circle),
+            onPressed: () {
+              mainNavigatorKey.currentState!.pushNamed("/account");
+            },
+          ),
+        ],
+      ),
       body: SafeArea(
           child: Column(children: [
         //Top Buttons
@@ -41,10 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _devicesAndAlarmClicked() {
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => const DeviceConnectionsScreen()));
+    mainNavigatorKey.currentState!.pushNamed("/devices");
   }
 
   void _sleepButtonClicked() {}

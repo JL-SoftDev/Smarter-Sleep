@@ -2,11 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:smarter_sleep/app/screens/deviceConnectionScreen.dart';
 
-import 'homeScreen.dart';
-import 'inventoryScreen.dart';
-import 'settingsScreen.dart';
-import 'shopScreen.dart';
-import 'statsScreen.dart';
+import '../appFrame.dart';
 import 'accountPage.dart';
 
 class TestingScreen extends StatefulWidget {
@@ -21,11 +17,13 @@ class _TestingScreenState extends State<TestingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Test Page"),
+        title: const Text("Debug"),
         actions: [
           IconButton(
             icon: const Icon(Icons.account_circle),
-            onPressed: _navigateToAccountPage,
+            onPressed: () {
+              mainNavigatorKey.currentState!.pushNamed("/account");
+            },
           ),
         ],
       ),
@@ -65,28 +63,23 @@ class _TestingScreenState extends State<TestingScreen> {
 
   //Basic functions to navigate screens
   void _navigateToHomeScreen() {
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => const HomeScreen()));
+    mainNavigatorKey.currentState!.pushNamed("/home");
   }
 
   void _navigateToInventoryScreen() {
-    Navigator.push(context,
-        MaterialPageRoute(builder: (context) => const InventoryScreen()));
+    mainNavigatorKey.currentState!.pushNamed("/inventory");
   }
 
   void _navigateToShopScreen() {
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => const ShopScreen()));
+    mainNavigatorKey.currentState!.pushNamed("/shop");
   }
 
   void _navigateToStatsScreen() {
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => const StatsScreen()));
+    mainNavigatorKey.currentState!.pushNamed("/stats");
   }
 
   void _navigateToSettingsScreen() {
-    Navigator.push(context,
-        MaterialPageRoute(builder: (context) => const SettingsScreen()));
+    mainNavigatorKey.currentState!.pushNamed("/settings");
   }
 
   void _navigateToDevicesScreen() {
@@ -94,12 +87,5 @@ class _TestingScreenState extends State<TestingScreen> {
         context,
         MaterialPageRoute(
             builder: (context) => const DeviceConnectionsScreen()));
-  }
-
-  void _navigateToAccountPage() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const AccountPage()),
-    );
   }
 }

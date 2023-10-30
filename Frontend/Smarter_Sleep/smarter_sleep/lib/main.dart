@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smarter_sleep/app/appFrame.dart';
 import 'app/screens/testingScreen.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
@@ -37,8 +38,8 @@ class _SmarterSleepState extends State<SmarterSleep> {
   @override
   Widget build(BuildContext context) {
     return Authenticator(
-      child: MaterialApp(
-          builder: Authenticator.builder(), home: const TestingScreen()),
+      child:
+          MaterialApp(builder: Authenticator.builder(), home: const AppFrame()),
     );
   }
 }
