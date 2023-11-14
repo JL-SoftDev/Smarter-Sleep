@@ -1,24 +1,39 @@
+import 'dart:async';
+import 'dart:convert';
 import 'dart:math';
+import 'package:amplify_flutter/amplify_flutter.dart';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
-import 'package:smarter_sleep/app/appFrame.dart';
+
+import 'surveyFormScreen.dart';
+import '../appFrame.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
   List<UserChallenge> userChallenges = [];
+  bool isSleeping = false;
+  late Stopwatch sleepTime;
+  late Timer updateTime;
 
   @override
   void initState() {
     super.initState();
     fetchUserChallenges();
+
+    sleepTime = Stopwatch();
+    updateTime = Timer.periodic(const Duration(minutes: 1), (timer) {
+      setState(() {});
+    });
   }
 
   Future<void> fetchUserChallenges() async {
+    //TODO: Fetch challenges from API(challenges must first be generated within the review generation algorithm)
     setState(() {
       userChallenges = [
         UserChallenge(
@@ -46,6 +61,45 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  Future<void> toggleSleep() async {
+    setState(() {
+      isSleeping = !isSleeping;
+      if (isSleeping) {
+        sleepTime.start();
+      } else {
+        sleepTime.stop();
+        sleepTime.reset();
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => SurveyForm(),
+          ),
+        ).then((result) async {
+          if (result != null) {
+            final user = await Amplify.Auth.getCurrentUser();
+            final userId = user.userId;
+            //TODO: Change to use the api/devicesRoutes instead of directly calling it.
+            result['userId'] = userId;
+            http
+                .post(
+                    Uri.parse(
+                        'http://ec2-54-87-139-255.compute-1.amazonaws.com/api/Survey'),
+                    headers: {'Content-Type': 'application/json'},
+                    body: jsonEncode(result))
+                .then((response) {
+              if (response.statusCode == 201) {
+                //TODO: Create popup window with data?
+              } else {
+                print(response.body);
+                print('Error: ${response.statusCode}');
+              }
+            }).catchError(print);
+          }
+        });
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -67,35 +121,40 @@ class _HomeScreenState extends State<HomeScreen> {
               widthFactor: 1.0,
               child: Container(
                 height: MediaQuery.of(context).size.height * 0.28,
-                color: Colors.blue[800],
+                color: isSleeping ? Colors.purple[900] : Colors.blue[800],
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    const Text(
-                      "Smarter Sleep Score",
-                      style: TextStyle(
+                    Text(
+                      isSleeping ? "Sleeping" : "Smarter Sleep Score",
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(height: 40),
-                    Stack(
-                      alignment: Alignment.center,
-                      children: <Widget>[
-                        Transform.scale(
-                          scale: 2.5,
-                          child: const CircularProgressIndicator(
-                            value: 93 / 100,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.white),
+                    isSleeping
+                        ? Text(
+                            '${sleepTime.elapsed.inHours.toString().padLeft(2, "0")}H:${(sleepTime.elapsed.inMinutes % 60).toString().padLeft(2, "0")}M',
+                            style: const TextStyle(
+                                fontSize: 40, color: Colors.white))
+                        : Stack(
+                            alignment: Alignment.center,
+                            children: <Widget>[
+                              Transform.scale(
+                                scale: 2.5,
+                                child: const CircularProgressIndicator(
+                                  value: 93 / 100,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white),
+                                ),
+                              ),
+                              const Text('93',
+                                  style: TextStyle(
+                                      fontSize: 40, color: Colors.white)),
+                            ],
                           ),
-                        ),
-                        const Text('93',
-                            style:
-                                TextStyle(fontSize: 40, color: Colors.white)),
-                      ],
-                    ),
                   ],
                 ),
               ),
@@ -119,12 +178,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     width: 290,
                     height: 50,
                     child: FilledButton(
-                        onPressed: () => {},
+                        onPressed: () => toggleSleep,
                         style: FilledButton.styleFrom(
                             backgroundColor: const Color(0xff6750a4)),
-                        child: const Text(
-                          "Start Sleeping",
-                          style: TextStyle(
+                        child: Text(
+                          isSleeping ? "End Sleep" : "Start Sleeping",
+                          style: const TextStyle(
                             fontSize: 30,
                           ),
                         )),
@@ -148,7 +207,7 @@ class ChallengeList extends StatelessWidget {
 
   int colorIndex = 0;
 
-  ChallengeList({required this.userChallenges});
+  ChallengeList({super.key, required this.userChallenges});
 
   @override
   Widget build(BuildContext context) {
