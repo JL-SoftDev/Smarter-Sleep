@@ -178,7 +178,7 @@ class _HomeScreenState extends State<HomeScreen> {
             http
                 .post(
                     Uri.parse(
-                        'http://ec2-54-87-139-255.compute-1.amazonaws.com/api/Survey'),
+                        'http://ec2-54-87-139-255.compute-1.amazonaws.com/api/Surveys'),
                     headers: {'Content-Type': 'application/json'},
                     body: jsonEncode(result))
                 .then((response) {
