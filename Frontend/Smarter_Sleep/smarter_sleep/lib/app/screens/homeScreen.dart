@@ -61,45 +61,6 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  Future<void> toggleSleep() async {
-    setState(() {
-      isSleeping = !isSleeping;
-      if (isSleeping) {
-        sleepTime.start();
-      } else {
-        sleepTime.stop();
-        sleepTime.reset();
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => SurveyForm(),
-          ),
-        ).then((result) async {
-          if (result != null) {
-            final user = await Amplify.Auth.getCurrentUser();
-            final userId = user.userId;
-            //TODO: Change to use the api/devicesRoutes instead of directly calling it.
-            result['userId'] = userId;
-            http
-                .post(
-                    Uri.parse(
-                        'http://ec2-54-87-139-255.compute-1.amazonaws.com/api/Survey'),
-                    headers: {'Content-Type': 'application/json'},
-                    body: jsonEncode(result))
-                .then((response) {
-              if (response.statusCode == 201) {
-                //TODO: Create popup window with data?
-              } else {
-                print(response.body);
-                print('Error: ${response.statusCode}');
-              }
-            }).catchError(print);
-          }
-        });
-      }
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -178,7 +139,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     width: 290,
                     height: 50,
                     child: FilledButton(
-                        onPressed: () => toggleSleep,
+                        onPressed: () => toggleSleep(),
                         style: FilledButton.styleFrom(
                             backgroundColor: const Color(0xff6750a4)),
                         child: Text(
@@ -193,6 +154,45 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+  }
+
+  void toggleSleep() {
+    setState(() {
+      isSleeping = !isSleeping;
+      if (isSleeping) {
+        sleepTime.start();
+      } else {
+        sleepTime.stop();
+        sleepTime.reset();
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => SurveyForm(),
+          ),
+        ).then((result) async {
+          if (result != null) {
+            final user = await Amplify.Auth.getCurrentUser();
+            final userId = user.userId;
+            //TODO: Change to use the api/devicesRoutes instead of directly calling it.
+            result['userId'] = userId;
+            http
+                .post(
+                    Uri.parse(
+                        'http://ec2-54-87-139-255.compute-1.amazonaws.com/api/Survey'),
+                    headers: {'Content-Type': 'application/json'},
+                    body: jsonEncode(result))
+                .then((response) {
+              if (response.statusCode == 201) {
+                //TODO: Create popup window with data?
+              } else {
+                print(response.body);
+                print('Error: ${response.statusCode}');
+              }
+            }).catchError(print);
+          }
+        });
+      }
+    });
   }
 }
 
