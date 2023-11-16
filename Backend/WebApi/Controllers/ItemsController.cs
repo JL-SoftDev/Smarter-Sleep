@@ -10,7 +10,8 @@ using WebApi.Models;
 namespace WebApi.Controllers
 {
     [Route("api/[controller]")]
-    [ApiController]
+    //Controller disabled for prototype
+    //[ApiController]
     public class ItemsController : ControllerBase
     {
         private readonly postgresContext _context;
