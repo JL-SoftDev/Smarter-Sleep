@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import 'surveyFormScreen.dart';
 import '../appFrame.dart';
@@ -59,6 +60,26 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ];
     });
+  }
+
+  //TODO: Convert to WearableLog?
+  Future<Map<String, dynamic>> fetchWearableData(bool goodData) async {
+    //TODO: Fetch the generated wearable data from the Web API using the goodData var
+    DateTime now = DateTime.now();
+
+    DateTime lastNight =
+        now.subtract(const Duration(days: 1)).add(const Duration(hours: 21));
+    DateTime wakeTime = lastNight.add(const Duration(hours: 8));
+    Map<String, dynamic> data = {
+      "sleepStart": lastNight.toIso8601String(),
+      "sleepEnd": wakeTime.toIso8601String(),
+      "hypnogram":
+          "443432222211222333321112222222222111133333322221111223333333333223222233222111223333333333332224",
+      "sleepScore": 100,
+      "sleepDate": DateFormat('yyyy-MM-dd').format(lastNight)
+    };
+
+    return data;
   }
 
   @override
@@ -156,6 +177,32 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Future<void> submitSleepData(survey, wearableData) async {
+    final user = await Amplify.Auth.getCurrentUser();
+    final userId = user.userId;
+    if (survey != null && wearableData != null) {
+      Map<String, dynamic> payload = {
+        "survey": survey,
+        "wearableData": wearableData
+      };
+      //TODO: Change to use the api/devicesRoutes instead of directly calling it.
+      http
+          .post(
+              Uri.parse(
+                  'http://ec2-54-87-139-255.compute-1.amazonaws.com/api/GenerateReview/$userId'),
+              headers: {'Content-Type': 'application/json'},
+              body: jsonEncode(payload))
+          .then((response) {
+        if (response.statusCode == 201) {
+          //TODO: Create popup window with data?
+        } else {
+          print(response.body);
+          print('Error: ${response.statusCode}');
+        }
+      }).catchError(print);
+    }
+  }
+
   void toggleSleep() {
     setState(() {
       isSleeping = !isSleeping;
@@ -167,29 +214,11 @@ class _HomeScreenState extends State<HomeScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => SurveyForm(),
+            builder: (context) => const SurveyForm(),
           ),
-        ).then((result) async {
-          if (result != null) {
-            final user = await Amplify.Auth.getCurrentUser();
-            final userId = user.userId;
-            //TODO: Change to use the api/devicesRoutes instead of directly calling it.
-            result['userId'] = userId;
-            http
-                .post(
-                    Uri.parse(
-                        'http://ec2-54-87-139-255.compute-1.amazonaws.com/api/Surveys'),
-                    headers: {'Content-Type': 'application/json'},
-                    body: jsonEncode(result))
-                .then((response) {
-              if (response.statusCode == 201) {
-                //TODO: Create popup window with data?
-              } else {
-                print(response.body);
-                print('Error: ${response.statusCode}');
-              }
-            }).catchError(print);
-          }
+        ).then((survey) async {
+          var wearableData = await fetchWearableData(false);
+          submitSleepData(survey, wearableData);
         });
       }
     });
