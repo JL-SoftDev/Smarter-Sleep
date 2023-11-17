@@ -39,6 +39,12 @@ class _HomeScreenState extends State<HomeScreen> {
     _initializeUser();
   }
 
+  @override
+  void dispose() {
+    updateTime.cancel();
+    super.dispose();
+  }
+
   Future<void> _initializeUser() async {
     final user = await Amplify.Auth.getCurrentUser();
 
