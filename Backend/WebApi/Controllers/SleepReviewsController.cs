@@ -90,5 +90,27 @@ namespace WebApi.Controllers
 					return BadRequest();
 			}
 		}
+
+        public class ReviewPayload
+        {
+            public Survey Survey { get; set; }
+            public WearableData WearableData { get; set; }
+        }
+
+        [HttpPost("GenerateReview/{userId}")]
+        public async Task<ActionResult<SleepReview>> GenerateReview(Guid userId, [FromBody] ReviewPayload payload)
+        {
+            if (userId == Guid.Empty || payload == null || payload.Survey == null || payload.WearableData == null)
+            {
+                return BadRequest("Invalid payload or missing data.");
+            }
+            try {
+                SleepReview generatedReview = await _sleepDataService.GenerateReview(userId, payload.Survey, payload.WearableData);
+			    
+                return CreatedAtAction("GetSleepReview", new { id = generatedReview.Id }, generatedReview);
+            } catch(Exception e) {
+                return StatusCode(500, "Internal server error");
+            }
+		}
     }
 }
