@@ -81,6 +81,7 @@ CREATE TABLE device_settings (
     sleep_settings_id INT NOT NULL,
     scheduled_time TIMESTAMP NOT NULL,
     settings JSONB,
+    user_modified BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (device_id) REFERENCES device(id) ON DELETE CASCADE,
     FOREIGN KEY (sleep_settings_id) REFERENCES sleep_settings(id) ON DELETE CASCADE
 );
