@@ -78,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
       List<dynamic> body = json.decode(response.body);
       List<SleepReview> reviews = body
           .map((json) => SleepReview.fromJson(json))
-          .where((review) => review.userId == userId)
+          .where((review) => review.userId == user.userId)
           .toList();
       if (reviews.isNotEmpty) {
         SleepReview lastReview =

@@ -1,5 +1,4 @@
 class Survey {
-  final int id;
   final DateTime createdAt;
   final int sleepQuality;
   final int wakePreference;
@@ -10,7 +9,6 @@ class Survey {
   final String surveyDate;
 
   Survey({
-    required this.id,
     required this.createdAt,
     required this.sleepQuality,
     required this.wakePreference,
@@ -23,14 +21,13 @@ class Survey {
 
   factory Survey.fromJson(Map<String, dynamic> json) {
     return Survey(
-      id: json['id'],
       createdAt: DateTime.parse(json['createdAt']),
       sleepQuality: json['sleepQuality'],
       wakePreference: json['wakePreference'],
       temperaturePreference: json['temperaturePreference'],
       lightsDisturbance: json['lightsDisturbance'],
       sleepEarlier: json['sleepEarlier'],
-      sleepDuration: json['sleepDuration'],
+      sleepDuration: json['sleepDuration'] ?? 0,
       surveyDate: json['surveyDate'],
     );
   }
