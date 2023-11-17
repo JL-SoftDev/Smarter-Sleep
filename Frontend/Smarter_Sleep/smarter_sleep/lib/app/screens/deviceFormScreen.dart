@@ -4,14 +4,14 @@ import 'package:smarter_sleep/app/screens/deviceConnectionScreen.dart';
 class DeviceForm extends StatefulWidget {
   final Device? initialData;
 
-  DeviceForm({Key? key, this.initialData}) : super(key: key);
+  const DeviceForm({super.key, this.initialData});
 
   @override
-  _DeviceFormState createState() => _DeviceFormState();
+  State<DeviceForm> createState() => _DeviceFormState();
 }
 
 class _DeviceFormState extends State<DeviceForm> {
-  String name = "Device 1";
+  final name = TextEditingController();
   String selectedType = 'light';
   DateTime selectedDate = DateTime.now();
   TimeOfDay selectedTime = TimeOfDay.now();
@@ -24,7 +24,7 @@ class _DeviceFormState extends State<DeviceForm> {
     if (widget.initialData != null) {
       final device = widget.initialData!;
       selectedType = device.type;
-      name = device.name;
+      name.text = device.name;
       if (selectedType == 'alarm') {
         selectedDate = DateTime.parse(device.status!);
         selectedTime = TimeOfDay.fromDateTime(DateTime.parse(device.status!));
@@ -36,10 +36,17 @@ class _DeviceFormState extends State<DeviceForm> {
     }
   }
 
+  @override
+  void dispose() {
+    name.dispose();
+    super.dispose();
+  }
+
   Future<void> _showDatePicker() async {
     final DateTime? pickedDate = await showDatePicker(
       context: context,
-      initialDate: selectedDate,
+      initialDate:
+          selectedDate.isBefore(DateTime.now()) ? DateTime.now() : selectedDate,
       firstDate: DateTime.now(),
       lastDate: DateTime(2101),
     );
@@ -75,14 +82,8 @@ class _DeviceFormState extends State<DeviceForm> {
         child: Column(
           children: <Widget>[
             TextFormField(
-              // Name field
               decoration: const InputDecoration(labelText: 'Device Name'),
-              controller: TextEditingController(text: name),
-              onChanged: (value) {
-                setState(() {
-                  name = value;
-                });
-              },
+              controller: name,
             ),
             const SizedBox(height: 16),
             DropdownButton<String>(
@@ -199,7 +200,7 @@ class _DeviceFormState extends State<DeviceForm> {
     }
 
     return {
-      'name': name,
+      'name': name.text,
       'type': selectedType,
       'status': settings,
     };
