@@ -16,13 +16,13 @@ class _SurveyFormState extends State<SurveyForm> {
   final List<bool> _selectedTemperature = <bool>[false, true, false];
   bool _lights = false;
   bool _sleepTime = false;
-  //int sleepDuration = 0;
+  //int _sleepDuration = 0;
 
   /* Can be used if wished to pass sleep duration to be editable.
   @override
   void initState() {
     if (widget.trackedTime != null) {
-      sleepDuration = widget.trackedTime!;
+      _sleepDuration = widget.trackedTime!;
     }
     super.initState();
   }*/
@@ -91,7 +91,7 @@ class _SurveyFormState extends State<SurveyForm> {
             ),
             const SizedBox(height: 16),
             const Text(
-              'Were you too hot, too cold, or just right?',
+              'Were you too hot, too cold, or niether?',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
@@ -168,6 +168,15 @@ class _SurveyFormState extends State<SurveyForm> {
   }
 
   Map<String, dynamic> _saveSurvey() {
-    return {};
+    return {
+      "createdAt": "2023-11-17T02:44:16.554Z",
+      "sleepQuality": _restedRating,
+      "wakePreference": _selectedWakePreference.indexOf(true),
+      "temperaturePreference": _selectedTemperature.indexOf(true),
+      "lightsDisturbance": _lights,
+      "sleepEarlier": _sleepTime,
+      //"sleepDuration": _sleepDuration,
+      "surveyDate": "2023-11-17"
+    };
   }
 }
