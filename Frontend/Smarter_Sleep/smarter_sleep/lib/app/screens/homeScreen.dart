@@ -189,7 +189,7 @@ class _HomeScreenState extends State<HomeScreen> {
       http
           .post(
               Uri.parse(
-                  'http://ec2-54-87-139-255.compute-1.amazonaws.com/api/GenerateReview/$userId'),
+                  'http://ec2-54-87-139-255.compute-1.amazonaws.com/api/SleepReviews/GenerateReview/$userId'),
               headers: {'Content-Type': 'application/json'},
               body: jsonEncode(payload))
           .then((response) {
@@ -210,6 +210,7 @@ class _HomeScreenState extends State<HomeScreen> {
         sleepTime.start();
       } else {
         sleepTime.stop();
+        var minutesSlept = sleepTime.elapsed.inMinutes;
         sleepTime.reset();
         Navigator.push(
           context,
@@ -217,6 +218,7 @@ class _HomeScreenState extends State<HomeScreen> {
             builder: (context) => const SurveyForm(),
           ),
         ).then((survey) async {
+          survey['sleepDuration'] = minutesSlept;
           var wearableData = await fetchWearableData(false);
           submitSleepData(survey, wearableData);
         });
