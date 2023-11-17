@@ -6,6 +6,9 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import 'package:smarter_sleep/app/models/user_challenge.dart';
+import 'package:smarter_sleep/app/models/sleep_review.dart';
+
 import 'surveyFormScreen.dart';
 import '../appFrame.dart';
 
@@ -21,44 +24,67 @@ class _HomeScreenState extends State<HomeScreen> {
   bool isSleeping = false;
   late Stopwatch sleepTime;
   late Timer updateTime;
+  int? _sleepScore;
+  late String userId;
 
   @override
   void initState() {
     super.initState();
-    fetchUserChallenges();
 
     sleepTime = Stopwatch();
     updateTime = Timer.periodic(const Duration(minutes: 1), (timer) {
       setState(() {});
     });
+
+    _initializeUser();
   }
 
-  Future<void> fetchUserChallenges() async {
-    //TODO: Fetch challenges from API(challenges must first be generated within the review generation algorithm)
+  Future<void> _initializeUser() async {
+    final user = await Amplify.Auth.getCurrentUser();
+
+    //TODO: Fetch challenges from API(likely need to define a new api to return challenge progress)
+    List<UserChallenge> fetchedChallenges = [
+      UserChallenge(
+        challengeName: "Sleep On Schedule",
+        startDate: DateTime.now(),
+        expireDate: DateTime.now().add(const Duration(days: 4)),
+        userSelected: true,
+      ),
+      UserChallenge(
+        challengeName: "No Lights 1 Hour",
+        startDate: DateTime.now(),
+        expireDate: DateTime.now().add(const Duration(days: 14)),
+        userSelected: true,
+      ),
+      UserChallenge(
+        challengeName: "No Eating Before Bed",
+        startDate: DateTime.now(),
+        expireDate: DateTime.now().add(const Duration(days: 2)),
+        userSelected: true,
+      ),
+    ];
+
+    final response = await http.get(Uri.parse(
+        'http://ec2-54-87-139-255.compute-1.amazonaws.com/api/SleepReviews'));
+
+    int fetchedSleepScore = 0;
+    if (response.statusCode == 200) {
+      List<dynamic> body = json.decode(response.body);
+      List<SleepReview> reviews = body
+          .map((json) => SleepReview.fromJson(json))
+          .where((review) => review.userId == userId)
+          .toList();
+      if (reviews.isNotEmpty) {
+        SleepReview lastReview =
+            reviews.reduce((a, b) => a.createdAt.isAfter(b.createdAt) ? a : b);
+        fetchedSleepScore = lastReview.smarterSleepScore;
+      }
+    }
+
     setState(() {
-      userChallenges = [
-        UserChallenge(
-          id: 1,
-          challengeName: "Sleep On Schedule",
-          startDate: DateTime.now(),
-          expireDate: DateTime.now().add(const Duration(days: 4)),
-          userSelected: true,
-        ),
-        UserChallenge(
-          id: 2,
-          challengeName: "No Lights 1 Hour",
-          startDate: DateTime.now(),
-          expireDate: DateTime.now().add(const Duration(days: 14)),
-          userSelected: true,
-        ),
-        UserChallenge(
-          id: 3,
-          challengeName: "No Eating Before Bed",
-          startDate: DateTime.now(),
-          expireDate: DateTime.now().add(const Duration(days: 2)),
-          userSelected: true,
-        ),
-      ];
+      userId = user.userId;
+      userChallenges = fetchedChallenges;
+      _sleepScore = fetchedSleepScore;
     });
   }
 
@@ -126,14 +152,15 @@ class _HomeScreenState extends State<HomeScreen> {
                             children: <Widget>[
                               Transform.scale(
                                 scale: 2.5,
-                                child: const CircularProgressIndicator(
-                                  value: 93 / 100,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.white),
+                                child: CircularProgressIndicator(
+                                  value: (_sleepScore ?? 100) / 100,
+                                  valueColor:
+                                      const AlwaysStoppedAnimation<Color>(
+                                          Colors.white),
                                 ),
                               ),
-                              const Text('93',
-                                  style: TextStyle(
+                              Text(_sleepScore?.toString() ?? '--',
+                                  style: const TextStyle(
                                       fontSize: 40, color: Colors.white)),
                             ],
                           ),
@@ -178,8 +205,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> submitSleepData(survey, wearableData) async {
-    final user = await Amplify.Auth.getCurrentUser();
-    final userId = user.userId;
     if (survey != null && wearableData != null) {
       Map<String, dynamic> payload = {
         "survey": survey,
@@ -308,20 +333,4 @@ class ChallengeList extends StatelessWidget {
       }).toList(),
     );
   }
-}
-
-class UserChallenge {
-  final int id;
-  final String challengeName;
-  final DateTime startDate;
-  final DateTime expireDate;
-  final bool userSelected;
-
-  UserChallenge({
-    required this.id,
-    required this.challengeName,
-    required this.startDate,
-    required this.expireDate,
-    required this.userSelected,
-  });
 }
