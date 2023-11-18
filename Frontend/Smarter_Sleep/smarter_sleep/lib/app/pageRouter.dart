@@ -9,6 +9,7 @@ import 'package:smarter_sleep/app/screens/shopScreen.dart';
 import 'package:smarter_sleep/app/screens/statsScreen.dart';
 import 'package:smarter_sleep/app/screens/accountPage.dart';
 import 'package:smarter_sleep/app/screens/reviewScreen.dart';
+import 'package:smarter_sleep/app/screens/userScheduleScreen.dart';
 
 import 'screens/testingScreen.dart';
 
@@ -45,6 +46,9 @@ class PageRouter {
         break;
       case '/account':
         builder = (BuildContext _) => const AccountPage();
+        break;
+      case '/schedule':
+        builder = (BuildContext _) => const UserScheduleScreen();
         break;
       //DEBUG SCREENS
 

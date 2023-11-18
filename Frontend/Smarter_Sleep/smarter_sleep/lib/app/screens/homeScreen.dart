@@ -53,6 +53,12 @@ class _HomeScreenState extends State<HomeScreen> {
         title: const Text("Smarter Sleep Home"),
         actions: [
           IconButton(
+            icon: const Icon(Icons.schedule),
+            onPressed: () {
+              mainNavigatorKey.currentState!.pushNamed("/schedule");
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.account_circle),
             onPressed: () {
               mainNavigatorKey.currentState!.pushNamed("/account");
