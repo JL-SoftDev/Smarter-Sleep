@@ -1,13 +1,14 @@
 //Page Router class serves as a to simple return a builder object when provided
 //  a route name
 import 'package:flutter/material.dart';
+import 'package:smarter_sleep/app/screens/debugScreen.dart';
 import 'package:smarter_sleep/app/screens/deviceConnectionScreen.dart';
 import 'package:smarter_sleep/app/screens/homeScreen.dart';
 import 'package:smarter_sleep/app/screens/inventoryScreen.dart';
 import 'package:smarter_sleep/app/screens/settingsScreen.dart';
 import 'package:smarter_sleep/app/screens/shopScreen.dart';
 import 'package:smarter_sleep/app/screens/statsScreen.dart';
-import 'package:smarter_sleep/app/screens/accountPage.dart';
+import 'package:smarter_sleep/app/screens/accountScreen.dart';
 import 'package:smarter_sleep/app/screens/reviewScreen.dart';
 
 import 'screens/testingScreen.dart';
@@ -44,9 +45,13 @@ class PageRouter {
         builder = (BuildContext _) => const SettingsScreen();
         break;
       case '/account':
-        builder = (BuildContext _) => const AccountPage();
+        builder = (BuildContext _) => const AccountScreen();
         break;
+
       //DEBUG SCREENS
+      case '/debug':
+        builder = (BuildContext _) => const DebugScreen();
+        break;
 
       default:
         throw Exception('Invalid route: ${settings.name}');
