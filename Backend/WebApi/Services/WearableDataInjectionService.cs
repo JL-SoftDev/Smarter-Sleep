@@ -127,7 +127,7 @@ namespace WebApi.Services
                     {
                         index = 1;
                     }
-                    if(index < 4)
+                    if(index < dataSet.hypnograms.Count)
                     {
                         index ++;
                     } 
@@ -137,8 +137,9 @@ namespace WebApi.Services
             }
             else
             {
-                newWearableData.Hypnogram = dataSet.hypnograms[2];
-                newWearableData.SleepScore = dataSet.scores[2];
+                int index = dataSet.hypnograms.Count/2;
+                newWearableData.Hypnogram = dataSet.hypnograms[index];
+                newWearableData.SleepScore = dataSet.scores[index];
             }
             return newWearableData;
         }
@@ -261,8 +262,9 @@ namespace WebApi.Services
             }
             else
             {
-                newWearableData.Hypnogram = dataSet.hypnograms[2];
-                newWearableData.SleepScore = dataSet.scores[2];
+                int index = dataSet.hypnograms.Count/2;
+                newWearableData.Hypnogram = dataSet.hypnograms[index];
+                newWearableData.SleepScore = dataSet.scores[index];
             }
             return newWearableData;
         }
