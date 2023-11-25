@@ -170,6 +170,7 @@ public partial class postgresContext : DbContext
             entity.Property(e => e.Settings)
                 .HasColumnType("jsonb")
                 .HasColumnName("settings");
+            entity.Property(e => e.UserModified).HasColumnName("user_modified");
         });
 
         modelBuilder.Entity<Item>(entity =>

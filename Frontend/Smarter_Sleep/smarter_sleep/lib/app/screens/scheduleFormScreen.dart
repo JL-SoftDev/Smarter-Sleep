@@ -179,7 +179,8 @@ class _ScheduleFormState extends State<ScheduleForm> {
         selectedTime.hour,
         selectedTime.minute,
       ).toIso8601String(),
-      'settings': jsonEncode(settings)
+      'settings': jsonEncode(settings),
+      'userModified': true
     };
   }
 }
