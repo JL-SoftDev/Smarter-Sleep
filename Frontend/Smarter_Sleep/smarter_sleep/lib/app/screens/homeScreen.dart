@@ -129,8 +129,8 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 Text('Created At: ${review.createdAt.toString()}'),
                 Text('Smarter Sleep Score: ${review.smarterSleepScore}'),
-                SizedBox(height: 10),
-                Text('Survey Details:'),
+                const SizedBox(height: 10),
+                const Text('Survey Details:'),
                 Text('  Sleep Quality: ${review.survey.sleepQuality}'),
                 Text('  Wake Preference: ${review.survey.wakePreference}'),
                 Text(
@@ -141,8 +141,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 Text('  Ate Late: ${review.survey.ateLate}'),
                 Text('  Sleep Duration: ${review.survey.sleepDuration}'),
                 Text('  Survey Date: ${review.survey.surveyDate}'),
-                SizedBox(height: 10),
-                Text('Wearable Log Details:'),
+                const SizedBox(height: 10),
+                const Text('Wearable Details:'),
                 Text(
                     '  Sleep Start: ${review.wearableLog.sleepStart.toString()}'),
                 Text('  Sleep End: ${review.wearableLog.sleepEnd.toString()}'),
