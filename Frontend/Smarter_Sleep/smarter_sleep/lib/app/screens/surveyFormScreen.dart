@@ -17,6 +17,8 @@ class _SurveyFormState extends State<SurveyForm> {
   bool _sleepTime = false;
   bool _ateLate = false;
   int _sleepDuration = 0;
+  bool _overrideDuration = false;
+  final _newDurationController = TextEditingController();
 
   @override
   void initState() {
@@ -27,6 +29,12 @@ class _SurveyFormState extends State<SurveyForm> {
   }
 
   @override
+  void dispose() {
+    _newDurationController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -34,8 +42,7 @@ class _SurveyFormState extends State<SurveyForm> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: ListView(
           children: [
             const Text(
               'How rested did you feel this morning?',
@@ -119,7 +126,7 @@ class _SurveyFormState extends State<SurveyForm> {
               isSelected: _selectedTemperature,
               children: const [Text('Cold'), Text("Niether"), Text("Hot")],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
             const Text(
               'Did your lights bother you before your alarm?',
               textAlign: TextAlign.center,
@@ -136,7 +143,6 @@ class _SurveyFormState extends State<SurveyForm> {
                 });
               },
             ),
-            const SizedBox(height: 16),
             const Text(
               'Would you like to try to go to sleep earlier next week?',
               textAlign: TextAlign.center,
@@ -153,24 +159,56 @@ class _SurveyFormState extends State<SurveyForm> {
                 });
               },
             ),
-            const SizedBox(height: 16),
-            const Text(
-              'Did you eat within 90 minutes before sleeping?',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.black,
+            Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+              const Text(
+                'Did you eat within 90 minutes before sleeping?',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.black,
+                ),
               ),
+              Switch(
+                value: _ateLate,
+                onChanged: (bool value) {
+                  setState(() {
+                    _ateLate = value;
+                  });
+                },
+              ),
+            ]),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Override Collected Sleep Duration: $_sleepDuration',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.black,
+                  ),
+                ),
+                Switch(
+                  value: _overrideDuration,
+                  onChanged: (bool value) {
+                    setState(() {
+                      _overrideDuration = value;
+                    });
+                  },
+                ),
+              ],
             ),
-            Switch(
-              value: _ateLate,
-              onChanged: (bool value) {
-                setState(() {
-                  _ateLate = value;
-                });
-              },
-            ),
-            const SizedBox(height: 20),
+            if (_overrideDuration)
+              Container(
+                padding: const EdgeInsets.fromLTRB(75, 0, 75, 10),
+                child: TextField(
+                  decoration: const InputDecoration(
+                      hintText: 'Time Slept in Minutes',
+                      labelText: 'Input Actual Sleep Duration'),
+                  controller: _newDurationController,
+                  keyboardType: TextInputType.number,
+                ),
+              ),
             ElevatedButton(
               onPressed: () {
                 Navigator.pop(context, _saveSurvey());
@@ -192,7 +230,8 @@ class _SurveyFormState extends State<SurveyForm> {
       "lightsDisturbance": _lights,
       "sleepEarlier": _sleepTime,
       "ateLate": _ateLate,
-      "sleepDuration": _sleepDuration,
+      "sleepDuration":
+          _overrideDuration ? _newDurationController.text : _sleepDuration,
       "surveyDate": "2023-11-17"
     };
   }
