@@ -34,6 +34,7 @@ CREATE TABLE survey (
     temp_preference INT,
     lights_disturbance BOOLEAN,
     sleep_earlier BOOLEAN,
+    ate_late BOOLEAN,
     sleep_duration INT,
     survey_date DATE NOT NULL
 );

@@ -5,6 +5,7 @@ class Survey {
   final int temperaturePreference;
   final bool lightsDisturbance;
   final bool sleepEarlier;
+  final bool ateLate;
   final int sleepDuration;
   final String surveyDate;
 
@@ -15,6 +16,7 @@ class Survey {
     required this.temperaturePreference,
     required this.lightsDisturbance,
     required this.sleepEarlier,
+    required this.ateLate,
     required this.sleepDuration,
     required this.surveyDate,
   });
@@ -27,6 +29,7 @@ class Survey {
       temperaturePreference: json['temperaturePreference'],
       lightsDisturbance: json['lightsDisturbance'],
       sleepEarlier: json['sleepEarlier'],
+      ateLate: json['ateLate'],
       sleepDuration: json['sleepDuration'] ?? 0,
       surveyDate: json['surveyDate'],
     );

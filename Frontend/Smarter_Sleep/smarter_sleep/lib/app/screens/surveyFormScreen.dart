@@ -15,6 +15,7 @@ class _SurveyFormState extends State<SurveyForm> {
   final List<bool> _selectedTemperature = <bool>[false, true, false];
   bool _lights = false;
   bool _sleepTime = false;
+  bool _ateLate = false;
   int _sleepDuration = 0;
 
   @override
@@ -173,6 +174,7 @@ class _SurveyFormState extends State<SurveyForm> {
       "temperaturePreference": _selectedTemperature.indexOf(true),
       "lightsDisturbance": _lights,
       "sleepEarlier": _sleepTime,
+      "ateLate": _ateLate,
       "sleepDuration": _sleepDuration,
       "surveyDate": "2023-11-17"
     };
