@@ -105,7 +105,7 @@ CREATE TABLE item (
 
 DROP TABLE IF EXISTS challenge CASCADE;
 CREATE TABLE challenge (
-    id SERIAL PRIMARY KEY,
+    id INT PRIMARY KEY,
     name VARCHAR NOT NULL UNIQUE,
     description TEXT,
     reward INT NOT NULL
