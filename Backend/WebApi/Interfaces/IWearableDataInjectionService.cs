@@ -14,7 +14,7 @@ namespace WebApi.Interfaces
         /// <param name="userId"></param>
         /// <param name="inDay"></param>
         /// <returns></returns>
-        Task<WearableData?> AddGoodWearableData(Guid userId, DateTime? inDay = null);
-        Task<WearableData?> AddBadWearableData(Guid userId, DateTime? inDay = null);
+        Task<WearableData?> GetGoodWearableData(Guid userId, DateTime? inDay = null);
+        Task<WearableData?> GetBadWearableData(Guid userId, DateTime? inDay = null);
     }
 }
