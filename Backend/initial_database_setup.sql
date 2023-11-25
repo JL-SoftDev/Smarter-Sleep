@@ -50,7 +50,7 @@ CREATE TABLE sleep_review (
     smarter_sleep_score INT,
     FOREIGN KEY (user_id) REFERENCES app_user(user_id) ON DELETE CASCADE,
     FOREIGN KEY (wearable_log_id) REFERENCES wearable_data(id) ON DELETE CASCADE,
-    FOREIGN KEY (survey_id) REFERENCES survey(id) ON DELETE CASCADE,
+    FOREIGN KEY (survey_id) REFERENCES survey(id) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS sleep_settings CASCADE;
@@ -120,7 +120,7 @@ CREATE TABLE user_challenge (
     expire_date TIMESTAMP,
     user_selected BOOLEAN NOT NULL, 
     FOREIGN KEY (user_id) REFERENCES app_user(user_id) ON DELETE CASCADE,
-    FOREIGN KEY (challenge_id) REFERENCES challenge(id) ON DELETE CASCADE,
+    FOREIGN KEY (challenge_id) REFERENCES challenge(id) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS transaction CASCADE;
@@ -139,7 +139,7 @@ CREATE TABLE purchase_log (
     item_id INT NOT NULL,
     transaction_id INT NOT NULL,
     FOREIGN KEY (item_id) REFERENCES item(id),
-    FOREIGN KEY (transaction_id) REFERENCES transaction(id) ON DELETE CASCADE,
+    FOREIGN KEY (transaction_id) REFERENCES transaction(id) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS challenge_log;
@@ -148,5 +148,5 @@ CREATE TABLE challenge_log (
     challenge_id INT NOT NULL,
     transaction_id INT NOT NULL,
     FOREIGN KEY (challenge_id) REFERENCES challenge(id) ON DELETE CASCADE,
-    FOREIGN KEY (transaction_id) REFERENCES transaction(id) ON DELETE CASCADE,
+    FOREIGN KEY (transaction_id) REFERENCES transaction(id) ON DELETE CASCADE
 );
