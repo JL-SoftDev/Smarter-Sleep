@@ -153,6 +153,23 @@ class _SurveyFormState extends State<SurveyForm> {
                 });
               },
             ),
+            const SizedBox(height: 16),
+            const Text(
+              'Did you eat within 90 minutes before sleeping?',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.black,
+              ),
+            ),
+            Switch(
+              value: _ateLate,
+              onChanged: (bool value) {
+                setState(() {
+                  _ateLate = value;
+                });
+              },
+            ),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
