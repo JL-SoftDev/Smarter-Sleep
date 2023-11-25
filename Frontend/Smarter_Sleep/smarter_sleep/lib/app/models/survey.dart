@@ -28,8 +28,8 @@ class Survey {
       wakePreference: json['wakePreference'],
       temperaturePreference: json['temperaturePreference'],
       lightsDisturbance: json['lightsDisturbance'],
-      sleepEarlier: json['sleepEarlier'],
-      ateLate: json['ateLate'],
+      sleepEarlier: json['sleepEarlier'] ?? false,
+      ateLate: json['ateLate'] ?? false,
       sleepDuration: json['sleepDuration'] ?? 0,
       surveyDate: json['surveyDate'],
     );

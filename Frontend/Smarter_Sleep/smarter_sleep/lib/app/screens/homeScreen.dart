@@ -117,6 +117,50 @@ class _HomeScreenState extends State<HomeScreen> {
     return data;
   }
 
+  Future<void> _popupReview(SleepReview review) async {
+    return showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Sleep Review Data'),
+            content: SingleChildScrollView(
+                child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Created At: ${review.createdAt.toString()}'),
+                Text('Smarter Sleep Score: ${review.smarterSleepScore}'),
+                SizedBox(height: 10),
+                Text('Survey Details:'),
+                Text('  Sleep Quality: ${review.survey.sleepQuality}'),
+                Text('  Wake Preference: ${review.survey.wakePreference}'),
+                Text(
+                    '  Temperature Preference: ${review.survey.temperaturePreference}'),
+                Text(
+                    '  Lights Disturbance: ${review.survey.lightsDisturbance}'),
+                Text('  Sleep Earlier: ${review.survey.sleepEarlier}'),
+                Text('  Ate Late: ${review.survey.ateLate}'),
+                Text('  Sleep Duration: ${review.survey.sleepDuration}'),
+                Text('  Survey Date: ${review.survey.surveyDate}'),
+                SizedBox(height: 10),
+                Text('Wearable Log Details:'),
+                Text(
+                    '  Sleep Start: ${review.wearableLog.sleepStart.toString()}'),
+                Text('  Sleep End: ${review.wearableLog.sleepEnd.toString()}'),
+                Text('  Hypnogram: ${review.wearableLog.hypnogram}'),
+                Text('  Sleep Score: ${review.wearableLog.sleepScore}'),
+                Text('  Sleep Date: ${review.wearableLog.sleepDate}'),
+              ],
+            )),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.pop(context, 'OK'),
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -228,7 +272,7 @@ class _HomeScreenState extends State<HomeScreen> {
               body: jsonEncode(payload))
           .then((response) {
         if (response.statusCode == 201) {
-          //TODO: Create popup window with data?
+          _popupReview(SleepReview.fromJson(json.decode(response.body)));
         } else {
           print(response.body);
           print('Error: ${response.statusCode}');
