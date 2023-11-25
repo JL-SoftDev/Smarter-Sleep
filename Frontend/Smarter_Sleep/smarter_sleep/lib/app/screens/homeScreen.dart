@@ -55,18 +55,21 @@ class _HomeScreenState extends State<HomeScreen> {
         startDate: DateTime.now(),
         expireDate: DateTime.now().add(const Duration(days: 4)),
         userSelected: true,
+        completionPercentage: (Random().nextInt(4) + 1) / 5,
       ),
       UserChallenge(
         challengeName: "No Lights 1 Hour",
         startDate: DateTime.now(),
         expireDate: DateTime.now().add(const Duration(days: 14)),
         userSelected: true,
+        completionPercentage: (Random().nextInt(4) + 1) / 5,
       ),
       UserChallenge(
         challengeName: "No Eating Before Bed",
         startDate: DateTime.now(),
         expireDate: DateTime.now().add(const Duration(days: 2)),
         userSelected: true,
+        completionPercentage: (Random().nextInt(4) + 1) / 5,
       ),
     ];
 
@@ -241,15 +244,15 @@ class _HomeScreenState extends State<HomeScreen> {
         sleepTime.start();
       } else {
         sleepTime.stop();
-        var minutesSlept = sleepTime.elapsed.inMinutes;
+        int minutesSlept = sleepTime.elapsed.inMinutes;
         sleepTime.reset();
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => const SurveyForm(),
+            builder: (context) => SurveyForm(trackedTime: minutesSlept),
           ),
         ).then((survey) async {
-          survey['sleepDuration'] = minutesSlept;
+          //survey['sleepDuration'] = minutesSlept;
           var wearableData = await fetchWearableData(false);
           submitSleepData(survey, wearableData);
         });
@@ -278,8 +281,6 @@ class ChallengeList extends StatelessWidget {
         final Duration remainingTime =
             userChallenge.expireDate.difference(DateTime.now());
 
-        double completionPercentage = (Random().nextInt(4) + 1) / 5;
-
         Color color = predefinedColors[colorIndex];
         colorIndex = (colorIndex + 1) % predefinedColors.length;
 
@@ -293,7 +294,7 @@ class ChallengeList extends StatelessWidget {
                     borderRadius: BorderRadius.circular(4),
                     backgroundColor: Colors.blueGrey[100],
                     color: color,
-                    value: completionPercentage,
+                    value: userChallenge.completionPercentage,
                     minHeight: 50,
                   ),
                   Positioned(
@@ -323,7 +324,7 @@ class ChallengeList extends StatelessWidget {
                     right: 10,
                     top: 13,
                     child: Text(
-                      "${(completionPercentage * 100).toInt()}%",
+                      "${(userChallenge.completionPercentage * 100).toInt()}%",
                       style: const TextStyle(
                         fontSize: 20,
                         color: Colors.black,

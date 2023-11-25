@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 
 class SurveyForm extends StatefulWidget {
-  //final int? trackedTime;
+  final int? trackedTime;
 
-  //const SurveyForm({super.key, this.trackedTime});
-  const SurveyForm({super.key});
+  const SurveyForm({super.key, this.trackedTime});
 
   @override
   State<SurveyForm> createState() => _SurveyFormState();
@@ -16,16 +15,15 @@ class _SurveyFormState extends State<SurveyForm> {
   final List<bool> _selectedTemperature = <bool>[false, true, false];
   bool _lights = false;
   bool _sleepTime = false;
-  //int _sleepDuration = 0;
+  int _sleepDuration = 0;
 
-  /* Can be used if wished to pass sleep duration to be editable.
   @override
   void initState() {
     if (widget.trackedTime != null) {
       _sleepDuration = widget.trackedTime!;
     }
     super.initState();
-  }*/
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -175,7 +173,7 @@ class _SurveyFormState extends State<SurveyForm> {
       "temperaturePreference": _selectedTemperature.indexOf(true),
       "lightsDisturbance": _lights,
       "sleepEarlier": _sleepTime,
-      //"sleepDuration": _sleepDuration,
+      "sleepDuration": _sleepDuration,
       "surveyDate": "2023-11-17"
     };
   }
