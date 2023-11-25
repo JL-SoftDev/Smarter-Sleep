@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 
 import 'package:smarter_sleep/app/models/user_challenge.dart';
 import 'package:smarter_sleep/app/models/sleep_review.dart';
+import 'package:smarter_sleep/app/models/wearable_log.dart';
 
 import 'surveyFormScreen.dart';
 import '../appFrame.dart';
@@ -98,7 +99,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   //TODO: Convert to WearableLog?
-  Future<Map<String, dynamic>> fetchWearableData(bool goodData) async {
+  Future<WearableLog?> fetchWearableData(bool goodData) async {
     //TODO: Fetch the generated wearable data from the Web API using the goodData var
     DateTime now = DateTime.now();
 
@@ -114,7 +115,7 @@ class _HomeScreenState extends State<HomeScreen> {
       "sleepDate": DateFormat('yyyy-MM-dd').format(lastNight)
     };
 
-    return data;
+    return WearableLog.fromJson(data);
   }
 
   Future<void> _popupReview(SleepReview review) async {
@@ -261,7 +262,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (survey != null && wearableData != null) {
       Map<String, dynamic> payload = {
         "survey": survey,
-        "wearableData": wearableData
+        "wearableData": wearableData.toJson()
       };
       //TODO: Change to use the api/devicesRoutes instead of directly calling it.
       http
@@ -288,17 +289,25 @@ class _HomeScreenState extends State<HomeScreen> {
         sleepTime.start();
       } else {
         sleepTime.stop();
-        int minutesSlept = sleepTime.elapsed.inMinutes;
-        sleepTime.reset();
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => SurveyForm(trackedTime: minutesSlept),
-          ),
-        ).then((survey) async {
-          //survey['sleepDuration'] = minutesSlept;
-          var wearableData = await fetchWearableData(false);
-          submitSleepData(survey, wearableData);
+
+        fetchWearableData(false).then((wearableData) {
+          //Use wearable data to calculate sleep duration if it exists, otherwise use timer
+          int minutesSlept = wearableData != null
+              ? wearableData.sleepEnd
+                  .difference(wearableData.sleepStart)
+                  .inMinutes
+              : sleepTime.elapsed.inMinutes;
+
+          sleepTime.reset();
+
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => SurveyForm(trackedTime: minutesSlept),
+            ),
+          ).then((survey) async {
+            submitSleepData(survey, wearableData);
+          });
         });
       }
     });

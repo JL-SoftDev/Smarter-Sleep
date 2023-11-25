@@ -1,5 +1,4 @@
 class WearableLog {
-  final int id;
   final DateTime sleepStart;
   final DateTime sleepEnd;
   final String hypnogram;
@@ -7,7 +6,6 @@ class WearableLog {
   final String sleepDate;
 
   WearableLog({
-    required this.id,
     required this.sleepStart,
     required this.sleepEnd,
     required this.hypnogram,
@@ -17,7 +15,6 @@ class WearableLog {
 
   factory WearableLog.fromJson(Map<String, dynamic> json) {
     return WearableLog(
-      id: json['id'],
       sleepStart: DateTime.parse(json['sleepStart']),
       sleepEnd: DateTime.parse(json['sleepEnd']),
       hypnogram: json['hypnogram'],
@@ -25,4 +22,12 @@ class WearableLog {
       sleepDate: json['sleepDate'],
     );
   }
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+        'sleepStart': sleepStart.toIso8601String(),
+        'sleepEnd': sleepEnd.toIso8601String(),
+        'hypnogram': hypnogram,
+        'sleepScore': sleepScore,
+        'sleepDate': sleepDate,
+      };
 }
