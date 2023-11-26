@@ -90,7 +90,6 @@ namespace WebApi.Services
 			DateTime currentTime = appTime ?? DateTime.Now;
 
 			List<UserChallenge> assignedChallenges = _databaseContext.UserChallenges.Where(e => e.UserId == userId).ToList();
-			int numChallenges = assignedChallenges.Count;
 			//Adjust sleep date to actual sleepdate following Oura documentation
 			DateOnly adjustedSleepDate = wearableData.SleepDate.AddDays(1);
 			
@@ -102,17 +101,18 @@ namespace WebApi.Services
 				sleepScore *= (double)survey.SleepQuality/10 + .2;
 			}
 
-			//If user wants to wake earlier, assign sleep later challenge
+			//If user wants to wake earlier, assign sleep early challenge
 			if(survey.WakePreference==0){
-				if(numChallenges < 3){
-					numChallenges++;
-					_databaseContext.UserChallenges.Add(new UserChallenge{
+				if(assignedChallenges.Count < 3){
+					UserChallenge sleepEarly = new UserChallenge{
 						UserId = userId,
 						ChallengeId = 1,
 						StartDate = currentTime,
 						ExpireDate = currentTime.AddDays(5),
 						UserSelected = true
-					});
+					};
+					assignedChallenges.Add(sleepEarly);
+					_databaseContext.UserChallenges.Add(sleepEarly);
 				}
 			}
 
@@ -128,30 +128,32 @@ namespace WebApi.Services
 			
 			//If over a hour away, assign 8 hour challenge
 			if(distanceFromEightHours >= 60){
-				if(numChallenges < 3){
-					numChallenges++;
-					_databaseContext.UserChallenges.Add(new UserChallenge{
+				if(assignedChallenges.Count < 3){
+					UserChallenge eightHours = new UserChallenge{
 						UserId = userId,
 						ChallengeId = 2,
 						StartDate = currentTime,
 						ExpireDate = currentTime.AddDays(7),
 						UserSelected = false
-					});
+					};
+					assignedChallenges.Add(eightHours);
+					_databaseContext.UserChallenges.Add(eightHours);
 				}
 			}
 
 			//Assign no eating challenge if ate late
 			if(survey.AteLate ?? false){
 				sleepScore -= 5;
-				if(numChallenges < 3){
-					numChallenges++;
-					_databaseContext.UserChallenges.Add(new UserChallenge{
+				if(assignedChallenges.Count < 3){
+					UserChallenge noEat = new UserChallenge{
 						UserId = userId,
 						ChallengeId = 3,
 						StartDate = currentTime,
 						ExpireDate = currentTime.AddDays(5),
 						UserSelected = true
-					});
+					};
+					assignedChallenges.Add(noEat);
+					_databaseContext.UserChallenges.Add(noEat);
 				}
 			}
 
@@ -168,28 +170,30 @@ namespace WebApi.Services
 					}
 				}
 				//Assign no modifications if 2 settings were changed
-				if(modCounter >= 2 && numChallenges < 3){
-					numChallenges++;
-					_databaseContext.UserChallenges.Add(new UserChallenge{
+				if(modCounter >= 2 && assignedChallenges.Count < 3){
+					UserChallenge noMod = new UserChallenge{
 						UserId = userId,
 						ChallengeId = 5,
 						StartDate = currentTime,
 						ExpireDate = currentTime.AddDays(7),
 						UserSelected = false
-					});
+					};
+					assignedChallenges.Add(noMod);
+					_databaseContext.UserChallenges.Add(noMod);
 				}
 			}
 
 			//If no challenges were assigned, assign 14 day streak
-			if(numChallenges == 0){
-				numChallenges++;
-				_databaseContext.UserChallenges.Add(new UserChallenge{
+			if(assignedChallenges.Count == 0){
+				UserChallenge streak = new UserChallenge{
 					UserId = userId,
 					ChallengeId = 4,
 					StartDate = currentTime,
 					ExpireDate = currentTime.AddDays(14),
 					UserSelected = false
-				});
+				};
+				assignedChallenges.Add(streak);
+				_databaseContext.UserChallenges.Add(streak);
 			}
 			
 			//Average SmarterSleepScore with wearable sleep score.

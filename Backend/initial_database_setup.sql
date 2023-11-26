@@ -121,7 +121,8 @@ CREATE TABLE user_challenge (
     expire_date TIMESTAMP,
     user_selected BOOLEAN NOT NULL, 
     FOREIGN KEY (user_id) REFERENCES app_user(user_id) ON DELETE CASCADE,
-    FOREIGN KEY (challenge_id) REFERENCES challenge(id) ON DELETE CASCADE
+    FOREIGN KEY (challenge_id) REFERENCES challenge(id) ON DELETE CASCADE,
+    CONSTRAINT user_unique_challenge UNIQUE(user_id, challenge_id)
 );
 
 DROP TABLE IF EXISTS transaction CASCADE;
