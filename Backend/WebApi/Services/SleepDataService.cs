@@ -97,6 +97,11 @@ namespace WebApi.Services
 			//Start sleep score at 100
 			double sleepScore = 100.0;
 
+			//Multiply by the user reported sleep quality
+			if(survey.SleepQuality.HasValue){
+				sleepScore *= (double)survey.SleepQuality/10 + .2;
+			}
+
 			//If user wants to wake earlier, assign sleep later challenge
 			if(survey.WakePreference==0){
 				if(numChallenges < 3){
@@ -111,10 +116,16 @@ namespace WebApi.Services
 				}
 			}
 
+			//If user was too hot or cold, -5
+			if(survey.TemperaturePreference.HasValue){
+				sleepScore += Math.Abs((int)survey.TemperaturePreference-1)*-5;
+			}
+
 			//Calculate distance from 8 hours of sleep
 			double distanceFromEightHours = Math.Abs(survey.SleepDuration.Value - 480.0);
 			//Apply gaussian factor onto sleep score
-			sleepScore *= Math.Exp(-0.5 * Math.Pow(distanceFromEightHours / 240, 2));
+			sleepScore = sleepScore * (Math.Exp(-Math.Pow(distanceFromEightHours / 240, 2)) + 1/10);
+			
 			//If over a hour away, assign 8 hour challenge
 			if(distanceFromEightHours >= 60){
 				if(numChallenges < 3){
@@ -183,7 +194,7 @@ namespace WebApi.Services
 			
 			//Average SmarterSleepScore with wearable sleep score.
 			if(wearableData.SleepScore.HasValue){
-				sleepScore = (sleepScore + (double)wearableData.SleepScore) / 2.0;
+				sleepScore = (sleepScore*0.7 + (double)wearableData.SleepScore*0.3);
 			}
 
 			//Ensure sleep score is within range 0-100
