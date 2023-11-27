@@ -19,6 +19,8 @@ class SmarterSleep extends StatefulWidget {
 }
 
 class _SmarterSleepState extends State<SmarterSleep> {
+  final GlobalServices _globalServices = GlobalServices();
+
   @override
   void initState() {
     super.initState();
