@@ -527,7 +527,7 @@ namespace WebApi.Services
                     previousTemp -= 2;
                 }
             }
-            newDeviceSettings.Settings = "{\"temperature\": " + previousTemp + "}";
+            newDeviceSettings.Settings = "{\"Temperature\": " + previousTemp + "}";
             return newDeviceSettings;
         }
 
@@ -537,7 +537,7 @@ namespace WebApi.Services
             newDeviceSettings.DeviceId = deviceId;
             newDeviceSettings.SleepSettingId = inSettings.Id;
             newDeviceSettings.ScheduledTime = inSettings.ScheduledWake;
-            newDeviceSettings.Settings = "{\"alarm\": \"set\"}";
+            newDeviceSettings.Settings = null;
             return newDeviceSettings;
         }
 
@@ -550,19 +550,19 @@ namespace WebApi.Services
             {
                 case 0: //set dim for sleep
                     newDeviceSettings.ScheduledTime = inSettings.ScheduledSleep.AddMinutes(-30);
-                    newDeviceSettings.Settings = "{\"lights\": 40}";
+                    newDeviceSettings.Settings = "{\"Brightness\": 40}";
                     break;
                 case 1: //set off for sleep
                     newDeviceSettings.ScheduledTime = inSettings.ScheduledSleep;
-                    newDeviceSettings.Settings = "{\"lights\": 0}";
+                    newDeviceSettings.Settings = "{\"Brightness\": 0}";
                     break;
                 case 2: //set dim for wake
                     newDeviceSettings.ScheduledTime = inSettings.ScheduledWake.AddMinutes(-5);
-                    newDeviceSettings.Settings = "{\"lights\": 20}";
+                    newDeviceSettings.Settings = "{\"Brightness\": 20}";
                     break;
                 case 3: //set on for wake
                     newDeviceSettings.ScheduledTime = inSettings.ScheduledWake;
-                    newDeviceSettings.Settings = "{\"lights\": 100}";
+                    newDeviceSettings.Settings = "{\"Brightness\": 100}";
                     break;
             }
             return newDeviceSettings;
@@ -577,19 +577,19 @@ namespace WebApi.Services
             {
                 case 0: //set cool for sleep
                     newDeviceSettings.ScheduledTime = inSettings.ScheduledSleep.AddMinutes(-30);
-                    newDeviceSettings.Settings = "{\"temperature\": 68}";
+                    newDeviceSettings.Settings = "{\"Temperature\": 68}";
                     break;
                 case 1: //set sleep temp
                     newDeviceSettings.ScheduledTime = inSettings.ScheduledSleep;
-                    newDeviceSettings.Settings = "{\"temperature\": 65}";
+                    newDeviceSettings.Settings = "{\"Temperature\": 65}";
                     break;
                 case 2: //set warm for wake
                     newDeviceSettings.ScheduledTime = inSettings.ScheduledWake.AddMinutes(-30);
-                    newDeviceSettings.Settings = "{\"temperature\": 68}";
+                    newDeviceSettings.Settings = "{\"Temperature\": 68}";
                     break;
                 case 3: //set wake temp
                     newDeviceSettings.ScheduledTime = inSettings.ScheduledWake;
-                    newDeviceSettings.Settings = "{\"temperature\": 72}";
+                    newDeviceSettings.Settings = "{\"Temperature\": 72}";
                     break;
             }
             return newDeviceSettings;
