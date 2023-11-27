@@ -43,3 +43,14 @@ class _SmarterSleepState extends State<SmarterSleep> {
     );
   }
 }
+
+class GlobalServices {
+  static final GlobalServices _instance = GlobalServices._initialize();
+  late DateTime currentTime;
+  factory GlobalServices() {
+    return _instance;
+  }
+  GlobalServices._initialize() {
+    currentTime = DateTime.now();
+  }
+}
