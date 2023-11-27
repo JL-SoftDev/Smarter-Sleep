@@ -83,6 +83,28 @@ namespace WebApi.Services
 			return 204;
 		}
 
+		
+		public async Task<SleepReview?> GenerateReview(Guid userId, Survey survey, WearableData wearableData)
+		{
+			//TODO: Fetch sleepsettings from the relevant day
+
+			//TODO: Calculate sleep score
+			var sleepScore = 100;
+
+			//TODO: Assign user challenges
+			
+			SleepReview review = new SleepReview {
+				UserId = userId,
+				CreatedAt = DateTime.UtcNow,
+				SmarterSleepScore = sleepScore,
+				Survey = survey,
+				WearableLog = wearableData
+			};
+			_databaseContext.SleepReviews.Add(review);
+			await _databaseContext.SaveChangesAsync();
+			return review;
+		}
+
 		private bool SleepReviewExists(int id)
 		{
 			return (_databaseContext.SleepReviews?.Any(e => e.Id == id)).GetValueOrDefault();

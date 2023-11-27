@@ -37,6 +37,12 @@ namespace WebApi.Interfaces
 		/// <param name="id"></param>
 		/// <returns></returns>
 		public Task<int> DeleteSleepReview(int id);
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="survey"></param>
+		/// <returns></returns>
+		public Task<SleepReview?> GenerateReview(Guid userId, Survey survey, WearableData wearableData);
 
 		#endregion
 

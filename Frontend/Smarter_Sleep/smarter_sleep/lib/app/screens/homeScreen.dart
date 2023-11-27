@@ -1,49 +1,165 @@
+import 'dart:async';
+import 'dart:convert';
 import 'dart:math';
+import 'package:amplify_flutter/amplify_flutter.dart';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
-import 'package:smarter_sleep/app/appFrame.dart';
+import 'package:intl/intl.dart';
+
+import 'package:smarter_sleep/app/models/user_challenge.dart';
+import 'package:smarter_sleep/app/models/sleep_review.dart';
+import 'package:smarter_sleep/app/models/wearable_log.dart';
+
+import 'surveyFormScreen.dart';
+import '../appFrame.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
   List<UserChallenge> userChallenges = [];
+  bool isSleeping = false;
+  late Stopwatch sleepTime;
+  late Timer updateTime;
+  int? _sleepScore;
+  late String userId;
 
   @override
   void initState() {
     super.initState();
-    fetchUserChallenges();
+
+    sleepTime = Stopwatch();
+    updateTime = Timer.periodic(const Duration(minutes: 1), (timer) {
+      setState(() {});
+    });
+
+    _initializeUser();
   }
 
-  Future<void> fetchUserChallenges() async {
+  @override
+  void dispose() {
+    updateTime.cancel();
+    super.dispose();
+  }
+
+  Future<void> _initializeUser() async {
+    final user = await Amplify.Auth.getCurrentUser();
+
+    //TODO: Fetch challenges from API(likely need to define a new api to return challenge progress)
+    List<UserChallenge> fetchedChallenges = [
+      UserChallenge(
+        challengeName: "Sleep On Schedule",
+        startDate: DateTime.now(),
+        expireDate: DateTime.now().add(const Duration(days: 4)),
+        userSelected: true,
+        completionPercentage: (Random().nextInt(4) + 1) / 5,
+      ),
+      UserChallenge(
+        challengeName: "No Lights 1 Hour",
+        startDate: DateTime.now(),
+        expireDate: DateTime.now().add(const Duration(days: 14)),
+        userSelected: true,
+        completionPercentage: (Random().nextInt(4) + 1) / 5,
+      ),
+      UserChallenge(
+        challengeName: "No Eating Before Bed",
+        startDate: DateTime.now(),
+        expireDate: DateTime.now().add(const Duration(days: 2)),
+        userSelected: true,
+        completionPercentage: (Random().nextInt(4) + 1) / 5,
+      ),
+    ];
+
+    final response = await http.get(Uri.parse(
+        'http://ec2-54-87-139-255.compute-1.amazonaws.com/api/SleepReviews'));
+
+    int fetchedSleepScore = 0;
+    if (response.statusCode == 200) {
+      List<dynamic> body = json.decode(response.body);
+      List<SleepReview> reviews = body
+          .map((json) => SleepReview.fromJson(json))
+          .where((review) => review.userId == user.userId)
+          .toList();
+      if (reviews.isNotEmpty) {
+        SleepReview lastReview =
+            reviews.reduce((a, b) => a.createdAt.isAfter(b.createdAt) ? a : b);
+        fetchedSleepScore = lastReview.smarterSleepScore;
+      }
+    }
+
     setState(() {
-      userChallenges = [
-        UserChallenge(
-          id: 1,
-          challengeName: "Sleep On Schedule",
-          startDate: DateTime.now(),
-          expireDate: DateTime.now().add(const Duration(days: 4)),
-          userSelected: true,
-        ),
-        UserChallenge(
-          id: 2,
-          challengeName: "No Lights 1 Hour",
-          startDate: DateTime.now(),
-          expireDate: DateTime.now().add(const Duration(days: 14)),
-          userSelected: true,
-        ),
-        UserChallenge(
-          id: 3,
-          challengeName: "No Eating Before Bed",
-          startDate: DateTime.now(),
-          expireDate: DateTime.now().add(const Duration(days: 2)),
-          userSelected: true,
-        ),
-      ];
+      userId = user.userId;
+      userChallenges = fetchedChallenges;
+      _sleepScore = fetchedSleepScore;
     });
+  }
+
+  //TODO: Convert to WearableLog?
+  Future<WearableLog?> fetchWearableData(bool goodData) async {
+    //TODO: Fetch the generated wearable data from the Web API using the goodData var
+    DateTime now = DateTime.now();
+
+    DateTime lastNight =
+        now.subtract(const Duration(days: 1)).add(const Duration(hours: 21));
+    DateTime wakeTime = lastNight.add(const Duration(hours: 8));
+    Map<String, dynamic> data = {
+      "sleepStart": lastNight.toIso8601String(),
+      "sleepEnd": wakeTime.toIso8601String(),
+      "hypnogram":
+          "443432222211222333321112222222222111133333322221111223333333333223222233222111223333333333332224",
+      "sleepScore": 100,
+      "sleepDate": DateFormat('yyyy-MM-dd').format(lastNight)
+    };
+
+    return WearableLog.fromJson(data);
+  }
+
+  Future<void> _popupReview(SleepReview review) async {
+    return showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Sleep Review Data'),
+            content: SingleChildScrollView(
+                child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Created At: ${review.createdAt.toString()}'),
+                Text('Smarter Sleep Score: ${review.smarterSleepScore}'),
+                const SizedBox(height: 10),
+                const Text('Survey Details:'),
+                Text('  Sleep Quality: ${review.survey.sleepQuality}'),
+                Text('  Wake Preference: ${review.survey.wakePreference}'),
+                Text(
+                    '  Temperature Preference: ${review.survey.temperaturePreference}'),
+                Text(
+                    '  Lights Disturbance: ${review.survey.lightsDisturbance}'),
+                Text('  Sleep Earlier: ${review.survey.sleepEarlier}'),
+                Text('  Ate Late: ${review.survey.ateLate}'),
+                Text('  Sleep Duration: ${review.survey.sleepDuration}'),
+                Text('  Survey Date: ${review.survey.surveyDate}'),
+                const SizedBox(height: 10),
+                const Text('Wearable Details:'),
+                Text(
+                    '  Sleep Start: ${review.wearableLog.sleepStart.toString()}'),
+                Text('  Sleep End: ${review.wearableLog.sleepEnd.toString()}'),
+                Text('  Hypnogram: ${review.wearableLog.hypnogram}'),
+                Text('  Sleep Score: ${review.wearableLog.sleepScore}'),
+                Text('  Sleep Date: ${review.wearableLog.sleepDate}'),
+              ],
+            )),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.pop(context, 'OK'),
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        });
   }
 
   @override
@@ -67,35 +183,41 @@ class _HomeScreenState extends State<HomeScreen> {
               widthFactor: 1.0,
               child: Container(
                 height: MediaQuery.of(context).size.height * 0.28,
-                color: Colors.blue[800],
+                color: isSleeping ? Colors.purple[900] : Colors.blue[800],
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    const Text(
-                      "Smarter Sleep Score",
-                      style: TextStyle(
+                    Text(
+                      isSleeping ? "Sleeping" : "Smarter Sleep Score",
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(height: 40),
-                    Stack(
-                      alignment: Alignment.center,
-                      children: <Widget>[
-                        Transform.scale(
-                          scale: 2.5,
-                          child: const CircularProgressIndicator(
-                            value: 93 / 100,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.white),
+                    isSleeping
+                        ? Text(
+                            '${sleepTime.elapsed.inHours.toString().padLeft(2, "0")}H:${(sleepTime.elapsed.inMinutes % 60).toString().padLeft(2, "0")}M',
+                            style: const TextStyle(
+                                fontSize: 40, color: Colors.white))
+                        : Stack(
+                            alignment: Alignment.center,
+                            children: <Widget>[
+                              Transform.scale(
+                                scale: 2.5,
+                                child: CircularProgressIndicator(
+                                  value: (_sleepScore ?? 100) / 100,
+                                  valueColor:
+                                      const AlwaysStoppedAnimation<Color>(
+                                          Colors.white),
+                                ),
+                              ),
+                              Text(_sleepScore?.toString() ?? '--',
+                                  style: const TextStyle(
+                                      fontSize: 40, color: Colors.white)),
+                            ],
                           ),
-                        ),
-                        const Text('93',
-                            style:
-                                TextStyle(fontSize: 40, color: Colors.white)),
-                      ],
-                    ),
                   ],
                 ),
               ),
@@ -119,12 +241,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     width: 290,
                     height: 50,
                     child: FilledButton(
-                        onPressed: () => {},
+                        onPressed: () => toggleSleep(),
                         style: FilledButton.styleFrom(
                             backgroundColor: const Color(0xff6750a4)),
-                        child: const Text(
-                          "Start Sleeping",
-                          style: TextStyle(
+                        child: Text(
+                          isSleeping ? "End Sleep" : "Start Sleeping",
+                          style: const TextStyle(
                             fontSize: 30,
                           ),
                         )),
@@ -134,6 +256,61 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> submitSleepData(survey, wearableData) async {
+    if (survey != null && wearableData != null) {
+      Map<String, dynamic> payload = {
+        "survey": survey,
+        "wearableData": wearableData.toJson()
+      };
+      //TODO: Change to use the api/devicesRoutes instead of directly calling it.
+      http
+          .post(
+              Uri.parse(
+                  'http://ec2-54-87-139-255.compute-1.amazonaws.com/api/SleepReviews/GenerateReview/$userId'),
+              headers: {'Content-Type': 'application/json'},
+              body: jsonEncode(payload))
+          .then((response) {
+        if (response.statusCode == 201) {
+          _popupReview(SleepReview.fromJson(json.decode(response.body)));
+        } else {
+          print(response.body);
+          print('Error: ${response.statusCode}');
+        }
+      }).catchError(print);
+    }
+  }
+
+  void toggleSleep() {
+    setState(() {
+      isSleeping = !isSleeping;
+      if (isSleeping) {
+        sleepTime.start();
+      } else {
+        sleepTime.stop();
+
+        fetchWearableData(false).then((wearableData) {
+          //Use wearable data to calculate sleep duration if it exists, otherwise use timer
+          int minutesSlept = wearableData != null
+              ? wearableData.sleepEnd
+                  .difference(wearableData.sleepStart)
+                  .inMinutes
+              : sleepTime.elapsed.inMinutes;
+
+          sleepTime.reset();
+
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => SurveyForm(trackedTime: minutesSlept),
+            ),
+          ).then((survey) async {
+            submitSleepData(survey, wearableData);
+          });
+        });
+      }
+    });
   }
 }
 
@@ -148,7 +325,7 @@ class ChallengeList extends StatelessWidget {
 
   int colorIndex = 0;
 
-  ChallengeList({required this.userChallenges});
+  ChallengeList({super.key, required this.userChallenges});
 
   @override
   Widget build(BuildContext context) {
@@ -156,8 +333,6 @@ class ChallengeList extends StatelessWidget {
       children: userChallenges.map((userChallenge) {
         final Duration remainingTime =
             userChallenge.expireDate.difference(DateTime.now());
-
-        double completionPercentage = (Random().nextInt(4) + 1) / 5;
 
         Color color = predefinedColors[colorIndex];
         colorIndex = (colorIndex + 1) % predefinedColors.length;
@@ -172,7 +347,7 @@ class ChallengeList extends StatelessWidget {
                     borderRadius: BorderRadius.circular(4),
                     backgroundColor: Colors.blueGrey[100],
                     color: color,
-                    value: completionPercentage,
+                    value: userChallenge.completionPercentage,
                     minHeight: 50,
                   ),
                   Positioned(
@@ -202,7 +377,7 @@ class ChallengeList extends StatelessWidget {
                     right: 10,
                     top: 13,
                     child: Text(
-                      "${(completionPercentage * 100).toInt()}%",
+                      "${(userChallenge.completionPercentage * 100).toInt()}%",
                       style: const TextStyle(
                         fontSize: 20,
                         color: Colors.black,
@@ -218,20 +393,4 @@ class ChallengeList extends StatelessWidget {
       }).toList(),
     );
   }
-}
-
-class UserChallenge {
-  final int id;
-  final String challengeName;
-  final DateTime startDate;
-  final DateTime expireDate;
-  final bool userSelected;
-
-  UserChallenge({
-    required this.id,
-    required this.challengeName,
-    required this.startDate,
-    required this.expireDate,
-    required this.userSelected,
-  });
 }

@@ -40,6 +40,8 @@ dependencies:
   amplify_auth_cognito: ^1.4.2
   amplify_authenticator: ^1.4.2
   json_annotation: ^4.8.1
+  fl_chart: ^0.64.0
+  intl: ^0.18.1
 
 dev_dependencies:
   flutter_test:
