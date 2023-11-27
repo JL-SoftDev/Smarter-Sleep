@@ -97,11 +97,11 @@ class _DeviceSchedulePageState extends State<DeviceSchedulePage> {
 
   Widget _buildSettingsWidget(DeviceSchedule schedule) {
     if (widget.device.type == 'alarm') {
-      return Text('Next Alarm: ${schedule.settings['NextAlarm']}');
+      return Text('Next Alarm: ${schedule.scheduledTime}');
     } else if (widget.device.type == 'light') {
-      return Text('Set brightness to ${schedule.settings['Brightness']}%');
+      return Text('Set brightness to ${schedule.settings!['Brightness']}%');
     } else if (widget.device.type == 'thermostat') {
-      return Text('Set temperature to ${schedule.settings['Temperature']}°F');
+      return Text('Set temperature to ${schedule.settings!['Temperature']}°F');
     }
     return Text('Settings: ${schedule.settings.toString()}');
   }

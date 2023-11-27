@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:smarter_sleep/app/models/user_challenge.dart';
 import 'package:smarter_sleep/app/models/sleep_review.dart';
 import 'package:smarter_sleep/app/models/wearable_log.dart';
+import 'package:smarter_sleep/main.dart';
 
 import 'surveyFormScreen.dart';
 import '../appFrame.dart';
@@ -21,6 +22,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final GlobalServices _globalServices = GlobalServices();
+
   List<UserChallenge> userChallenges = [];
   bool isSleeping = false;
   late Stopwatch sleepTime;
@@ -344,6 +347,14 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Future<void> scheduleDevices() async {
+    http.post(
+        Uri.parse(
+            'http://ec2-54-87-139-255.compute-1.amazonaws.com/api/DeviceScheduling?UserId=$userId'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(_globalServices.currentTime.toIso8601String()));
+  }
+
   Future<void> submitSleepData(survey, wearableData) async {
     if (survey != null && wearableData != null) {
       Map<String, dynamic> payload = {
@@ -360,6 +371,7 @@ class _HomeScreenState extends State<HomeScreen> {
           .then((response) {
         if (response.statusCode == 201) {
           _popupReview(SleepReview.fromJson(json.decode(response.body)));
+          scheduleDevices();
         } else {
           print(response.body);
           print('Error: ${response.statusCode}');

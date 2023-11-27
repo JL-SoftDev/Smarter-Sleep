@@ -36,9 +36,9 @@ class _ScheduleFormState extends State<ScheduleForm> {
         final settings = widget.initialData!.settings;
 
         if (widget.device.type == 'light') {
-          brightnessValue = settings['Brightness'];
+          brightnessValue = settings!['Brightness'];
         } else if (widget.device.type == 'thermostat') {
-          temperatureValue = settings['Temperature'];
+          temperatureValue = settings!['Temperature'];
         }
       });
     }
