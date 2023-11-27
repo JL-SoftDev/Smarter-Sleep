@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using WebApi.Interfaces;
 using WebApi.Models;
@@ -60,7 +61,8 @@ namespace WebApi.Services
             }
             var getSleepReviews = await _sleepDataService.GetSleepReviews();
             List<SleepReview> sleepReviews = getSleepReviews.ToList();
-            SleepReview? lastWeekTomorrowReview;
+            SleepReview? previousReview1;
+            SleepReview? previousReview2;
             if (sleepReviews.Count != 0)
             {
                 for (int i = 0; i < sleepReviews.Count; i++)
@@ -70,32 +72,52 @@ namespace WebApi.Services
                         sleepReviews.RemoveAt(i);
                         i--;
                     }
-                    else if (sleepReviews[i].CreatedAt.Date != tomorrow.AddDays(-7).Date)
+                    else if (sleepReviews[i].CreatedAt.Date != tomorrow.AddDays(-7).Date && sleepReviews[i].CreatedAt.Date != tomorrow.AddDays(-14).Date)
                     {
                         sleepReviews.RemoveAt(i);
                         i--;
                     }
                 }
             }
-            if (sleepReviews.Count != 0)
+            if (sleepReviews.Count == 2)
             {
-                lastWeekTomorrowReview = sleepReviews[0];
+                previousReview1 = sleepReviews[0];
+                previousReview2 = sleepReviews[1];
+            }
+            else if (sleepReviews.Count == 1)
+            {
+                previousReview1 = sleepReviews[0];
+                previousReview2 = null;
             }
             else
             {
-                lastWeekTomorrowReview = null;
+                previousReview1 = null;
+                previousReview2 = null;
             }
-            WearableData? lastWeekTomorrowData = null;
-            Survey? lastWeekTomorrowSurvey = null;
-            if (lastWeekTomorrowReview != null)
+            WearableData? previousWearableData1 = null;
+            WearableData? previousWearableData2 = null;
+            Survey? previousSurvey1 = null;
+            Survey? previousSurvey2 = null;
+            if (previousReview1 != null)
             {
-                if (lastWeekTomorrowReview.WearableLog != null)
+                if (previousReview1.WearableLog != null)
                 {
-                    lastWeekTomorrowData = lastWeekTomorrowReview.WearableLog;
+                    previousWearableData1 = previousReview1.WearableLog;
                 }
-                if (lastWeekTomorrowReview.Survey != null)
+                if (previousReview1.Survey != null)
                 {
-                    lastWeekTomorrowSurvey = lastWeekTomorrowReview.Survey;
+                    previousSurvey1 = previousReview1.Survey;
+                }
+            }
+            if (previousReview2 != null)
+            {
+                if (previousReview2.WearableLog != null)
+                {
+                    previousWearableData2 = previousReview2.WearableLog;
+                }
+                if (previousReview2.Survey != null)
+                {
+                    previousSurvey2 = previousReview2.Survey;
                 }
             }
             var getCustomSchedules = await _userDataService.GetAllCustomSchedules();
@@ -152,7 +174,8 @@ namespace WebApi.Services
             }
             var getSleepSettings = await _settingsService.GetAllSleepSettings();
             List<SleepSetting> sleepSettings = getSleepSettings.ToList();
-            SleepSetting? lastWeekTomorrowSettings;
+            SleepSetting? previousSettings1;
+            SleepSetting? previousSettings2;
             if (sleepSettings.Count != 0)
             {
                 for (int i = 0; i < sleepSettings.Count; i++)
@@ -162,61 +185,30 @@ namespace WebApi.Services
                         sleepSettings.RemoveAt(i);
                         i--;
                     }
-                    else if (sleepSettings[i].ScheduledWake.Date != tomorrow.AddDays(-7).Date)
+                    else if (sleepSettings[i].ScheduledWake.Date != tomorrow.AddDays(-7).Date && sleepSettings[i].ScheduledWake.Date != tomorrow.AddDays(-14).Date)
                     {
                         sleepSettings.RemoveAt(i);
                         i--;
                     }
                 }
             }
-            if (sleepSettings.Count != 0)
+            if (sleepSettings.Count == 2)
             {
-                lastWeekTomorrowSettings = sleepSettings[0];
+                previousSettings1 = sleepSettings[0];
+                previousSettings2 = sleepSettings[1];
+            }
+            else if (sleepSettings.Count == 1)
+            {
+                previousSettings1 = sleepSettings [0];
+                previousSettings2 = null;
             }
             else
             {
-                lastWeekTomorrowSettings = null;
+                previousSettings1 = null;
+                previousSettings2 = null;
             }
-            int[] hypnoIntArray;
-            int[] wearableWeight;
-            if (lastWeekTomorrowData != null)
-            {
-                if (lastWeekTomorrowData.Hypnogram != null)
-                {
-                    hypnoIntArray = Array.ConvertAll(lastWeekTomorrowData.Hypnogram.ToCharArray(), c => (int)Char.GetNumericValue(c));
-                    wearableWeight = WeightHypno(hypnoIntArray);
-                }
-                else
-                {
-                    wearableWeight = new int[3];
-                    for (int i = 0; i < 3; i++)
-                    {
-                        wearableWeight[i] = 0;
-                    }
-                }
-            }
-            else
-            {
-                wearableWeight = new int[3];
-                for (int i = 0; i < 3; i++)
-                {
-                    wearableWeight[i] = 0;
-                }
-            }
-            int[] surveyWeight;
-            if (lastWeekTomorrowSurvey != null)
-            {
-                surveyWeight = WeightSurvey(lastWeekTomorrowSurvey);
-            }
-            else
-            {
-                surveyWeight = new int[3];
-                for (int i = 0; i < 3; i++)
-                {
-                    surveyWeight[i] = 0;
-                }
-            }
-            int[] combinedWeight = CombineWeight(wearableWeight, surveyWeight);
+            SleepSetting? useSettings = WeightHypno(previousWearableData1, previousWearableData2, previousSettings1, previousSettings2);
+            int?[] surveyWeight = WeightSurvey(previousSurvey1, previousSurvey2, tomorrow.AddDays(-7));
             SleepSetting newSettings = new SleepSetting();
             newSettings.UserId = userId;
             DateTime wakeTime = DateOnly.FromDateTime(scheduleDay).AddDays(1).ToDateTime(new TimeOnly(6, 0));
@@ -227,7 +219,19 @@ namespace WebApi.Services
                     wakeTime = DateOnly.FromDateTime(scheduleDay).AddDays(1).ToDateTime((TimeOnly)tomorrowSchedule.WakeTime);
                 }
             }
+            if (surveyWeight[0] == 0)
+            {
+                wakeTime.AddMinutes(-5);
+            }
+            else if (surveyWeight[0] == 2)
+            {
+                wakeTime.AddMinutes(5);
+            }
             DateTime sleepTime = wakeTime.AddHours(-8);
+            if (surveyWeight[3] == 1)
+            {
+                sleepTime.AddMinutes(-5);
+            }
             newSettings.ScheduledSleep = sleepTime;
             newSettings.ScheduledWake = wakeTime;
             newSettings.ScheduledHypnogram = "scheduled hypnogram";
@@ -242,9 +246,9 @@ namespace WebApi.Services
                 return final;
             }
             List<DeviceSetting> listDeviceSettings = new List<DeviceSetting>();
-            if (lastWeekTomorrowSettings != null && lastWeekTomorrowSettings.DeviceSettings != null)
+            if (useSettings != null && useSettings.DeviceSettings != null)
             {
-                List<DeviceSetting> lastWeekTomorrowDeviceSettings = lastWeekTomorrowSettings.DeviceSettings.ToList();
+                List<DeviceSetting> lastWeekTomorrowDeviceSettings = useSettings.DeviceSettings.ToList();
                 for (int i = 0; i < userDevices.Count; i++)
                 {
                     List<DeviceSetting> lastWeekSettings = new List<DeviceSetting>();
@@ -259,21 +263,14 @@ namespace WebApi.Services
                     switch (userDevices[i].Type)
                     {
                         case "alarm":
-                            if (lastWeekSettings.Count > 0)
-                            {
-                                listDeviceSettings.Add(SetAlarm(combinedWeight[2], lastWeekSettings[0], userDevices[i].Id, newSettings, lastWeekTomorrowSettings));
-                            }
-                            else
-                            {
-                                listDeviceSettings.Add(SetAlarm(userDevices[i].Id, newSettings));
-                            }
+                            listDeviceSettings.Add(SetAlarm(userDevices[i].Id, newSettings));
                             break;
-                        case "lights":
+                        case "light":
                             if (lastWeekSettings.Count > 0)
                             {
                                 for (int l = 0; l < lastWeekSettings.Count; l++)
                                 {
-                                    listDeviceSettings.Add(SetLights(combinedWeight[0], lastWeekSettings[l], userDevices[i].Id, newSettings, lastWeekTomorrowSettings));
+                                    listDeviceSettings.Add(SetLights(surveyWeight[3], lastWeekSettings[l], userDevices[i].Id, newSettings, useSettings));
                                 }
                             }
                             else
@@ -289,7 +286,7 @@ namespace WebApi.Services
                             {
                                 for (int l = 0; l < lastWeekSettings.Count; l++)
                                 {
-                                    listDeviceSettings.Add(SetThermostat(combinedWeight[1], lastWeekSettings[l], userDevices[i].Id, newSettings, lastWeekTomorrowSettings));
+                                    listDeviceSettings.Add(SetThermostat(surveyWeight[1], lastWeekSettings[l], userDevices[i].Id, newSettings, useSettings));
                                 }
                             }
                             else
@@ -312,7 +309,7 @@ namespace WebApi.Services
                         case "alarm":
                             listDeviceSettings.Add(SetAlarm(userDevices[i].Id, newSettings));
                             break;
-                        case "lights":
+                        case "light":
                             for (int l = 0; l < 4; l++)
                             {
                                 listDeviceSettings.Add(SetLights(l, userDevices[i].Id, newSettings));
@@ -335,85 +332,202 @@ namespace WebApi.Services
             return final;
         }
 
-        private int[] WeightHypno(int[] hypnoIntArray)
+        private SleepSetting? WeightHypno(WearableData? data1, WearableData? data2, SleepSetting? setting1, SleepSetting? setting2)
         {
-            //Determine how to weight changes based on hypno
-            //light, temp, alarm
-            int[] wearableWeight = { 0, 0, 0 };
-            return wearableWeight;
+            if (data1 != null)
+            {
+                if (setting1 != null)
+                {
+                    if (data1.SleepDate != DateOnly.FromDateTime(setting1.ScheduledSleep))
+                    {
+                        if (setting2 != null)
+                        {
+                            SleepSetting temp = setting1;
+                            setting1 = setting2;
+                            setting2 = temp;
+                        }
+                    }
+                }
+            }
+            if (data2 != null)
+            {
+                if (setting2 != null)
+                {
+                    if (data2.SleepDate != DateOnly.FromDateTime(setting2.ScheduledSleep))
+                    {
+                        if (setting1 != null)
+                        {
+                            SleepSetting temp = setting1;
+                            setting1 = setting2;
+                            setting2 = temp;
+                        }
+                    }
+                }
+            }
+            if (data1 != null && data2 != null)
+            {
+                if (data1.SleepScore >= data2.SleepScore)
+                {
+                    if (setting1 != null)
+                    {
+                        return setting1;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+                else
+                {
+                    if (setting2 != null)
+                    {
+                        return setting2;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+            }
+            else if (data1 != null)
+            {
+                if (setting1 != null)
+                {
+                    return setting1;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            else if (data2 != null)
+            {
+                if (setting2 != null)
+                {
+                    return setting2;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            else
+            {
+                return null;
+            }
         }
 
-        private int[] WeightSurvey(Survey inSurvey)
+        private int?[] WeightSurvey(Survey? survey1, Survey? survey2, DateTime useDate)
         {
-            //Determine how to weight changes based on survey
-            //light, temp, alarm
-            int[] surveyWeight = { 0, 0, 0 };
+            int?[] surveyWeight = { 0, 0, 0, 0};
+            if (survey1 != null && survey1.SurveyDate == DateOnly.FromDateTime(useDate))
+            {
+                surveyWeight[0] = survey1.WakePreference;
+                surveyWeight[1] = survey1.TemperaturePreference;
+                if (survey1.LightsDisturbance != null)
+                {
+                    if ((bool)survey1.LightsDisturbance)
+                    {
+                        surveyWeight[2] = 1;
+                    }
+                    else
+                    {
+                        surveyWeight[2] = 0;
+                    }
+                }
+                if (survey1.SleepEarlier != null)
+                {
+                    if ((bool)survey1.SleepEarlier)
+                    {
+                        surveyWeight[3] = 1;
+                    }
+                    else
+                    {
+                        surveyWeight[3] = 0;
+                    }
+                }
+            }
+            else if (survey2 != null && survey2.SurveyDate == DateOnly.FromDateTime(useDate))
+            {
+                surveyWeight[0] = survey2.WakePreference;
+                surveyWeight[1] = survey2.TemperaturePreference;
+                if (survey2.LightsDisturbance != null)
+                {
+                    if ((bool)survey2.LightsDisturbance)
+                    {
+                        surveyWeight[2] = 1;
+                    }
+                    else
+                    {
+                        surveyWeight[2] = 0;
+                    }
+                }
+                if (survey2.SleepEarlier != null)
+                {
+                    if ((bool)survey2.SleepEarlier)
+                    {
+                        surveyWeight[3] = 1;
+                    }
+                    else
+                    {
+                        surveyWeight[3] = 0;
+                    }
+                }
+            }
             return surveyWeight;
         }
 
-        private int[] CombineWeight(int[] hypnoIntArray, int[] surveyIntArray)
-        {
-            //Determine how to combine weights
-            //light, temp, alarm
-            int[] combinedWeight = { 0, 0, 0 };
-            return combinedWeight;
-        }
-
-        private DeviceSetting SetAlarm(int alarmOption, DeviceSetting previousAlarmSettings, int deviceId, SleepSetting inSettings, SleepSetting oldSettings)
+        private DeviceSetting SetLights(int? lightOption, DeviceSetting previousLightSettings, int deviceId, SleepSetting inSettings, SleepSetting oldSettings)
         {
             DeviceSetting newDeviceSettings = new DeviceSetting();
             newDeviceSettings.DeviceId = deviceId;
             newDeviceSettings.SleepSettingId = inSettings.Id;
-            newDeviceSettings.ScheduledTime = inSettings.ScheduledWake;
-            newDeviceSettings.Settings = previousAlarmSettings.Settings;
-            return newDeviceSettings;
-        }
-
-        private DeviceSetting SetLights(int lightOption, DeviceSetting previousLightSettings, int deviceId, SleepSetting inSettings, SleepSetting oldSettings)
-        {
-            DeviceSetting newDeviceSettings = new DeviceSetting();
-            newDeviceSettings.DeviceId = deviceId;
-            newDeviceSettings.SleepSettingId = inSettings.Id;
+            TimeSpan spanSleepToWake = inSettings.ScheduledWake.Subtract(inSettings.ScheduledSleep);
             TimeSpan spanPreviousToPreviousWake = previousLightSettings.ScheduledTime.Subtract(oldSettings.ScheduledWake);
-            switch (lightOption)
+            if (TimeSpan.Compare(spanSleepToWake, spanPreviousToPreviousWake)  == 1 && TimeSpan.Compare(TimeSpan.Zero, spanPreviousToPreviousWake)  != 0)
             {
-                case 0: //same
-                    newDeviceSettings.ScheduledTime = inSettings.ScheduledWake.Add(spanPreviousToPreviousWake);
-                    break;
-                case 1: //earlier
-                    newDeviceSettings.ScheduledTime = inSettings.ScheduledWake.Add(spanPreviousToPreviousWake).AddMinutes(-5);
-                    break;
-                case 2: //later no later than wake time
+                if (lightOption == 1)
+                {
                     newDeviceSettings.ScheduledTime = inSettings.ScheduledWake.Add(spanPreviousToPreviousWake).AddMinutes(5);
                     if (newDeviceSettings.ScheduledTime > inSettings.ScheduledWake)
                     {
                         newDeviceSettings.ScheduledTime = inSettings.ScheduledWake;
                     }
-                    break;
+                }
+                else
+                {
+                    newDeviceSettings.ScheduledTime = inSettings.ScheduledWake.Add(spanPreviousToPreviousWake);
+                }
+            }
+            else
+            {
+                newDeviceSettings.ScheduledTime = inSettings.ScheduledWake.Add(spanPreviousToPreviousWake);
             }
             newDeviceSettings.Settings = previousLightSettings.Settings;
             return newDeviceSettings;
         }
 
-        private DeviceSetting SetThermostat(int tempOption, DeviceSetting previousTempSettings, int deviceId, SleepSetting inSettings, SleepSetting oldSettings)
+        private DeviceSetting SetThermostat(int? tempOption, DeviceSetting previousTempSettings, int deviceId, SleepSetting inSettings, SleepSetting oldSettings)
         {
             DeviceSetting newDeviceSettings = new DeviceSetting();
             newDeviceSettings.DeviceId = deviceId;
             newDeviceSettings.SleepSettingId = inSettings.Id;
             TimeSpan spanPreviousToPreviousWake = previousTempSettings.ScheduledTime.Subtract(oldSettings.ScheduledWake);
-            switch (tempOption)
+            newDeviceSettings.ScheduledTime = inSettings.ScheduledWake.Add(spanPreviousToPreviousWake);
+            String previousSet = Regex.Match(previousTempSettings.Settings!, @"\d+").Value;
+            int previousTemp = Int32.Parse(previousSet);
+            if (tempOption != null)
             {
-                case 0: //same
-                    newDeviceSettings.ScheduledTime = inSettings.ScheduledWake.Add(spanPreviousToPreviousWake);
-                    break;
-                case 1: //earlier
-                    newDeviceSettings.ScheduledTime = inSettings.ScheduledWake.Add(spanPreviousToPreviousWake).AddMinutes(-5);
-                    break;
-                case 2: //later
-                    newDeviceSettings.ScheduledTime = inSettings.ScheduledWake.Add(spanPreviousToPreviousWake).AddMinutes(5);
-                    break;
+                if (tempOption == 0)
+                {
+                    previousTemp += 2;
+                }
+                else if (tempOption == 2)
+                {
+                    previousTemp -= 2;
+                }
             }
-            newDeviceSettings.Settings = previousTempSettings.Settings;
+            newDeviceSettings.Settings = "{\"temperature\": " + previousTemp + "}";
             return newDeviceSettings;
         }
 
