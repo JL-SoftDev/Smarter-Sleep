@@ -34,4 +34,16 @@ class Survey {
       surveyDate: json['surveyDate'],
     );
   }
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+        'createdAt': createdAt.toIso8601String(),
+        'sleepQuality': sleepQuality,
+        'wakePreference': wakePreference,
+        'temperaturePreference': temperaturePreference,
+        'lightsDisturbance': lightsDisturbance,
+        'sleepEarlier': sleepEarlier,
+        'ateLate': ateLate,
+        'sleepDuration': sleepDuration,
+        'surveyDate': surveyDate,
+      };
 }

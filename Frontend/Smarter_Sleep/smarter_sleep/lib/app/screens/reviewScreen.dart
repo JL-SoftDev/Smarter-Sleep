@@ -4,6 +4,7 @@ import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:smarter_sleep/app/models/sleep_review.dart';
+import 'package:smarter_sleep/app/utils/color_utils.dart';
 
 import 'sleepInsightScreen.dart';
 
@@ -53,18 +54,6 @@ class _SleepReviewScreenState extends State<SleepReviewScreen> {
     }
   }
 
-  Color getSleepScoreColor(int score) {
-    if (score >= 0 && score <= 100) {
-      final colorTween = ColorTween(
-        begin: Colors.red,
-        end: Colors.green,
-      );
-      return colorTween.transform(score / 100)!;
-    } else {
-      return Colors.black;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -76,8 +65,7 @@ class _SleepReviewScreenState extends State<SleepReviewScreen> {
         itemBuilder: (context, index) {
           SleepReview review = sleepReviews[index];
           final sleepScore = review.smarterSleepScore;
-          final sleepDuration = review.survey.sleepDuration;
-          final sleepScoreColor = getSleepScoreColor(sleepScore);
+          final sleepScoreColor = ColorUtils.getScoreColor(sleepScore);
           final sleepIcon = getSleepIcon(sleepScore);
 
           return Card(

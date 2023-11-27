@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 
 import 'package:smarter_sleep/app/models/sleep_review.dart';
+import 'package:smarter_sleep/app/utils/color_utils.dart';
 
 class SleepInsightScreen extends StatefulWidget {
   final SleepReview review;
@@ -13,7 +14,6 @@ class SleepInsightScreen extends StatefulWidget {
 }
 
 class _SleepInsightScreenState extends State<SleepInsightScreen> {
-  int _sleepScore = 100;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,24 +29,47 @@ class _SleepInsightScreenState extends State<SleepInsightScreen> {
             "Smarter Sleep Score",
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: Colors.blue[800],
+              color: ColorUtils.getScoreColor(widget.review.smarterSleepScore),
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 12),
           Text(
-            _sleepScore?.toString() ?? '--',
+            widget.review.smarterSleepScore.toString(),
             textAlign: TextAlign.center,
             style: TextStyle(
                 fontSize: 35,
                 fontWeight: FontWeight.bold,
-                color: Colors.blue[800]),
+                color:
+                    ColorUtils.getScoreColor(widget.review.smarterSleepScore)),
           ),
-          const Padding(
-            padding: const EdgeInsets.all(32.0),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(32, 0, 32, 12),
             child: Column(
               children: [
+                ListTile(
+                  title: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Total Sleep'),
+                      Text(
+                          '${(widget.review.survey.sleepDuration / 60).floor()}h ${(widget.review.survey.sleepDuration % 60).toString().padLeft(2, "0")}m'),
+                    ],
+                  ),
+                ),
+                LinearProgressIndicator(
+                  value: widget.review.survey.sleepDuration / 480,
+                  color: ColorUtils.getScoreColor(
+                      (widget.review.survey.sleepDuration / 4.8).round(),
+                      start: Colors.red,
+                      end: Colors.blue),
+                  backgroundColor: ColorUtils.getScoreColor(
+                      (widget.review.survey.sleepDuration / 4.8).round(),
+                      start: Colors.red[100]!,
+                      end: Colors.blue[100]!),
+                  minHeight: 2,
+                ),
                 ListTile(
                   title: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -60,41 +83,105 @@ class _SleepInsightScreenState extends State<SleepInsightScreen> {
                   value: 0.5,
                   minHeight: 2,
                 ),
+                ListTile(
+                  title: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Total Sleep'),
+                      Text('5h 32m'),
+                    ],
+                  ),
+                ),
+                LinearProgressIndicator(
+                  value: 0.5,
+                  minHeight: 2,
+                ),
+                const SizedBox(height: 15.0),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        _listDataPopup("Collected Survey Data",
+                            widget.review.survey.toJson());
+                      },
+                      icon: const Icon(Icons.description),
+                      label: const Text('Survey Input'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black26,
+                      ),
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        _listDataPopup("Collected Wearable Data",
+                            widget.review.wearableLog.toJson());
+                      },
+                      icon: const Icon(Icons.accessibility),
+                      label: const Text('Wearable Data'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black26,
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
-          AspectRatio(
-            aspectRatio: 1.23,
-            child: Column(
-              children: [
-                SizedBox(height: 50),
-                Text(
-                  'Sleep Stages',
-                  style: TextStyle(
-                    color: Colors.blue[800],
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 2,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 16, left: 6),
-                    child: Center(
-                      child: SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.28,
-                        width: MediaQuery.of(context).size.width * 0.9,
-                        child: LineChart(mainData()),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+          Text(
+            'Sleep Stages',
+            style: TextStyle(
+              color: Colors.blue[800],
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 2,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          Padding(
+            padding: const EdgeInsets.only(right: 16, left: 6, top: 15),
+            child: Center(
+              child: SizedBox(
+                height: MediaQuery.of(context).size.height * 0.28,
+                width: MediaQuery.of(context).size.width * 0.9,
+                child: LineChart(mainData()),
+              ),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  void _listDataPopup(String name, Map<String, dynamic> data) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(name),
+          content: Container(
+            constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.50),
+            child: SingleChildScrollView(
+              child: Column(
+                children: data.keys.map((key) {
+                  return ListTile(
+                    title: Text(key),
+                    subtitle: Text('${data[key]}'),
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
     );
   }
 
