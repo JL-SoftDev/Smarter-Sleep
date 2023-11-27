@@ -28,6 +28,14 @@ class _HomeScreenState extends State<HomeScreen> {
   int? _sleepScore;
   late String userId;
 
+  final List<Color> predefinedColors = [
+    Colors.indigo.shade400,
+    Colors.lightGreen,
+    Colors.deepPurple.shade400,
+  ];
+
+  int colorIndex = 0;
+
   @override
   void initState() {
     super.initState();
@@ -49,7 +57,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _initializeUser() async {
     final user = await Amplify.Auth.getCurrentUser();
 
-    //TODO: Fetch challenges from API(likely need to define a new api to return challenge progress)
+    //TODO: Fetch challenges from API(awaiting implementation of challege-progress route)
     List<UserChallenge> fetchedChallenges = [
       UserChallenge(
         challengeName: "Sleep On Schedule",
@@ -98,24 +106,40 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  //TODO: Convert to WearableLog?
-  Future<WearableLog?> fetchWearableData(bool goodData) async {
-    //TODO: Fetch the generated wearable data from the Web API using the goodData var
-    DateTime now = DateTime.now();
+  //Currently always returns a wearable log, implemented to support no wearable data found.
+  Future<WearableLog?> _fetchWearableData(bool goodData) async {
+    //TODO: Fetch application defined time
+    DateTime currentTime = DateTime.now();
 
-    DateTime lastNight =
-        now.subtract(const Duration(days: 1)).add(const Duration(hours: 21));
-    DateTime wakeTime = lastNight.add(const Duration(hours: 8));
-    Map<String, dynamic> data = {
-      "sleepStart": lastNight.toIso8601String(),
-      "sleepEnd": wakeTime.toIso8601String(),
-      "hypnogram":
-          "443432222211222333321112222222222111133333322221111223333333333223222233222111223333333333332224",
-      "sleepScore": 100,
-      "sleepDate": DateFormat('yyyy-MM-dd').format(lastNight)
-    };
+    WearableLog useDefaultLog() {
+      DateTime lastNight = currentTime
+          .subtract(const Duration(days: 1))
+          .add(const Duration(hours: 21));
+      DateTime wakeTime = lastNight.add(const Duration(hours: 8));
 
-    return WearableLog.fromJson(data);
+      return WearableLog(
+          sleepStart: lastNight,
+          sleepEnd: wakeTime,
+          hypnogram:
+              "443432222211222333321112222222222111133333322221111223333333333223222233222111223333333333332224",
+          sleepScore: 100,
+          sleepDate: DateFormat('yyyy-MM-dd').format(lastNight));
+    }
+
+    try {
+      var response = await http.get(Uri.parse(
+          'http://ec2-54-87-139-255.compute-1.amazonaws.com/api/WearableDataInjection/${goodData ? 'better' : 'worse'}?UserId=$userId&dateTime=$currentTime'));
+      if (response.statusCode == 200) {
+        Map<String, dynamic> body = json.decode(response.body);
+        WearableLog data = WearableLog.fromJson(body);
+        return data;
+      } else {
+        // No wearable log found
+        return useDefaultLog();
+      }
+    } catch (e) {
+      return useDefaultLog();
+    }
   }
 
   Future<void> _popupReview(SleepReview review) async {
@@ -231,7 +255,69 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             const SizedBox(height: 10),
-            ChallengeList(userChallenges: userChallenges),
+            Column(
+              children: userChallenges.map((userChallenge) {
+                final Duration remainingTime =
+                    userChallenge.expireDate.difference(DateTime.now());
+
+                Color color = predefinedColors[colorIndex];
+                colorIndex = (colorIndex + 1) % predefinedColors.length;
+
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    children: <Widget>[
+                      Stack(
+                        children: [
+                          LinearProgressIndicator(
+                            borderRadius: BorderRadius.circular(4),
+                            backgroundColor: Colors.blueGrey[100],
+                            color: color,
+                            value: userChallenge.completionPercentage,
+                            minHeight: 50,
+                          ),
+                          Positioned(
+                            left: 8,
+                            top: 5,
+                            child: Text(
+                              userChallenge.challengeName,
+                              style: const TextStyle(
+                                fontSize: 22,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            left: 8,
+                            top: 30,
+                            child: Text(
+                              'Expires in ${remainingTime.inDays} days',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            right: 10,
+                            top: 13,
+                            child: Text(
+                              "${(userChallenge.completionPercentage * 100).toInt()}%",
+                              style: const TextStyle(
+                                fontSize: 20,
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+            ),
             Expanded(
                 child: Align(
               alignment: FractionalOffset.bottomCenter,
@@ -278,7 +364,7 @@ class _HomeScreenState extends State<HomeScreen> {
           print(response.body);
           print('Error: ${response.statusCode}');
         }
-      }).catchError(print);
+      }).catchError((e) {});
     }
   }
 
@@ -290,107 +376,62 @@ class _HomeScreenState extends State<HomeScreen> {
       } else {
         sleepTime.stop();
 
-        fetchWearableData(false).then((wearableData) {
-          //Use wearable data to calculate sleep duration if it exists, otherwise use timer
-          int minutesSlept = wearableData != null
-              ? wearableData.sleepEnd
-                  .difference(wearableData.sleepStart)
-                  .inMinutes
-              : sleepTime.elapsed.inMinutes;
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Simulated Wearable Data'),
+              content: const Text(
+                  "For prototype purposes, would you like to simulate better or worse wearable data for this session?"),
+              actions: <Widget>[
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(context, false);
+                  },
+                  icon: const Icon(Icons.sentiment_very_dissatisfied),
+                  label: const Text('Worse'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                  ),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(context, true);
+                  },
+                  icon: const Icon(Icons.sentiment_very_satisfied),
+                  label: const Text('Better'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                  ),
+                ),
+              ],
+            );
+          },
+        ).then((userSelection) {
+          if (userSelection == null) {
+            return;
+          }
+          _fetchWearableData(userSelection).then((wearableData) {
+            //Use wearable data to calculate sleep duration if it exists, otherwise use timer
+            int minutesSlept = wearableData != null
+                ? wearableData.sleepEnd
+                    .difference(wearableData.sleepStart)
+                    .inMinutes
+                : sleepTime.elapsed.inMinutes;
 
-          sleepTime.reset();
+            sleepTime.reset();
 
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => SurveyForm(trackedTime: minutesSlept),
-            ),
-          ).then((survey) async {
-            submitSleepData(survey, wearableData);
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => SurveyForm(trackedTime: minutesSlept),
+              ),
+            ).then((survey) async {
+              submitSleepData(survey, wearableData);
+            });
           });
         });
       }
     });
-  }
-}
-
-class ChallengeList extends StatelessWidget {
-  final List<UserChallenge> userChallenges;
-
-  final List<Color> predefinedColors = [
-    Colors.indigo.shade400,
-    Colors.lightGreen,
-    Colors.deepPurple.shade400,
-  ];
-
-  int colorIndex = 0;
-
-  ChallengeList({super.key, required this.userChallenges});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: userChallenges.map((userChallenge) {
-        final Duration remainingTime =
-            userChallenge.expireDate.difference(DateTime.now());
-
-        Color color = predefinedColors[colorIndex];
-        colorIndex = (colorIndex + 1) % predefinedColors.length;
-
-        return Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            children: <Widget>[
-              Stack(
-                children: [
-                  LinearProgressIndicator(
-                    borderRadius: BorderRadius.circular(4),
-                    backgroundColor: Colors.blueGrey[100],
-                    color: color,
-                    value: userChallenge.completionPercentage,
-                    minHeight: 50,
-                  ),
-                  Positioned(
-                    left: 8,
-                    top: 5,
-                    child: Text(
-                      userChallenge.challengeName,
-                      style: const TextStyle(
-                        fontSize: 22,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    left: 8,
-                    top: 30,
-                    child: Text(
-                      'Expires in ${remainingTime.inDays} days',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    right: 10,
-                    top: 13,
-                    child: Text(
-                      "${(userChallenge.completionPercentage * 100).toInt()}%",
-                      style: const TextStyle(
-                        fontSize: 20,
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
-      }).toList(),
-    );
   }
 }

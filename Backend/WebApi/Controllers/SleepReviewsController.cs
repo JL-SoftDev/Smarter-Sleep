@@ -95,6 +95,7 @@ namespace WebApi.Controllers
         {
             public Survey Survey { get; set; }
             public WearableData WearableData { get; set; }
+            public DateTime? AppTime { get; set; }
         }
 
         [HttpPost("GenerateReview/{userId}")]
@@ -105,7 +106,7 @@ namespace WebApi.Controllers
                 return BadRequest("Invalid payload or missing data.");
             }
             try {
-                SleepReview generatedReview = await _sleepDataService.GenerateReview(userId, payload.Survey, payload.WearableData);
+                SleepReview generatedReview = await _sleepDataService.GenerateReview(userId, payload.Survey, payload.WearableData, payload.AppTime);
 			    
                 return CreatedAtAction("GetSleepReview", new { id = generatedReview.Id }, generatedReview);
             } catch(Exception e) {

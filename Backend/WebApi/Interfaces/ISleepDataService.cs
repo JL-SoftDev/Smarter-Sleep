@@ -42,7 +42,7 @@ namespace WebApi.Interfaces
 		/// </summary>
 		/// <param name="survey"></param>
 		/// <returns></returns>
-		public Task<SleepReview?> GenerateReview(Guid userId, Survey survey, WearableData wearableData);
+		public Task<SleepReview?> GenerateReview(Guid userId, Survey survey, WearableData wearableData, DateTime? appTime);
 
 		#endregion
 
