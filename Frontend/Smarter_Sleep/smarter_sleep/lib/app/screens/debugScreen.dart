@@ -46,20 +46,32 @@ class _DebugScreenState extends State<DebugScreen> {
 
   _onChangeTimePressed() async {
     //TODO - Popup allowing the user to set the time
+    var newDate = await selectDate(context, _globalServices.currentTime);
     var newTime = await selectTime(
         context, TimeOfDay.fromDateTime(_globalServices.currentTime));
-    if (newTime == null) return;
+    if (newTime == null || newDate == null) return;
 
     setState(() {
       //Update the datetime with the new time
       _globalServices.currentTime = DateTime(
-        _globalServices.currentTime.year,
-        _globalServices.currentTime.month,
-        _globalServices.currentTime.day,
+        newDate.year,
+        newDate.month,
+        newDate.day,
         newTime.hour,
         newTime.minute,
       );
     });
+  }
+
+  Future<DateTime?> selectDate(
+      BuildContext context, DateTime initialDate) async {
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: DateTime(2000), // Adjust the range as needed
+      lastDate: DateTime(2030),
+    );
+    return pickedDate;
   }
 
   Future<TimeOfDay?> selectTime(
