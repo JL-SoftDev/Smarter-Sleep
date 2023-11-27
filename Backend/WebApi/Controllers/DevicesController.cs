@@ -12,11 +12,11 @@ namespace WebApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class DeviceController : ControllerBase
+    public class DevicesController : ControllerBase
     {
 		private readonly IDeviceService _deviceService;
 
-        public DeviceController(IDeviceService deviceService)
+        public DevicesController(IDeviceService deviceService)
         {
 			_deviceService = deviceService;
         }

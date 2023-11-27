@@ -170,6 +170,7 @@ public partial class postgresContext : DbContext
             entity.Property(e => e.Settings)
                 .HasColumnType("jsonb")
                 .HasColumnName("settings");
+            entity.Property(e => e.UserModified).HasColumnName("user_modified");
         });
 
         modelBuilder.Entity<Item>(entity =>
@@ -268,6 +269,7 @@ public partial class postgresContext : DbContext
             entity.Property(e => e.TemperaturePreference).HasColumnName("temp_preference");
             entity.Property(e => e.LightsDisturbance).HasColumnName("lights_disturbance");
             entity.Property(e => e.SleepEarlier).HasColumnName("sleep_earlier");
+            entity.Property(e => e.AteLate).HasColumnName("ate_late");
             entity.Property(e => e.SleepDuration).HasColumnName("sleep_duration");
             entity.Property(e => e.SurveyDate).HasColumnName("survey_date");
         });

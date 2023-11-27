@@ -20,6 +20,8 @@ public partial class Survey
 
     public bool? SleepEarlier{get; set;}
 
+    public bool? AteLate{get; set;}
+
     public int? SleepDuration { get; set; }
 
     public DateOnly SurveyDate { get; set; }

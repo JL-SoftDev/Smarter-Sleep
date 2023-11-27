@@ -3,7 +3,7 @@ import 'package:flutter/rendering.dart';
 import 'package:smarter_sleep/app/screens/deviceConnectionScreen.dart';
 
 import '../appFrame.dart';
-import 'accountPage.dart';
+import 'accountScreen.dart';
 
 class TestingScreen extends StatefulWidget {
   const TestingScreen({super.key});

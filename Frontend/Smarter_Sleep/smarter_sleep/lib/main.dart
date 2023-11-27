@@ -19,6 +19,8 @@ class SmarterSleep extends StatefulWidget {
 }
 
 class _SmarterSleepState extends State<SmarterSleep> {
+  final GlobalServices _globalServices = GlobalServices();
+
   @override
   void initState() {
     super.initState();
@@ -41,5 +43,16 @@ class _SmarterSleepState extends State<SmarterSleep> {
       child:
           MaterialApp(builder: Authenticator.builder(), home: const AppFrame()),
     );
+  }
+}
+
+class GlobalServices {
+  static final GlobalServices _instance = GlobalServices._initialize();
+  late DateTime currentTime;
+  factory GlobalServices() {
+    return _instance;
+  }
+  GlobalServices._initialize() {
+    currentTime = DateTime.now();
   }
 }

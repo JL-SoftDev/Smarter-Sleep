@@ -34,6 +34,7 @@ CREATE TABLE survey (
     temp_preference INT,
     lights_disturbance BOOLEAN,
     sleep_earlier BOOLEAN,
+    ate_late BOOLEAN,
     sleep_duration INT,
     survey_date DATE NOT NULL
 );
@@ -48,8 +49,8 @@ CREATE TABLE sleep_review (
     created_at TIMESTAMP NOT NULL,
     smarter_sleep_score INT,
     FOREIGN KEY (user_id) REFERENCES app_user(user_id) ON DELETE CASCADE,
-    FOREIGN KEY (wearable_log_id) REFERENCES wearable_data(id),
-    FOREIGN KEY (survey_id) REFERENCES survey(id)
+    FOREIGN KEY (wearable_log_id) REFERENCES wearable_data(id) ON DELETE CASCADE,
+    FOREIGN KEY (survey_id) REFERENCES survey(id) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS sleep_settings CASCADE;
@@ -81,6 +82,7 @@ CREATE TABLE device_settings (
     sleep_settings_id INT NOT NULL,
     scheduled_time TIMESTAMP NOT NULL,
     settings JSONB,
+    user_modified BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (device_id) REFERENCES device(id) ON DELETE CASCADE,
     FOREIGN KEY (sleep_settings_id) REFERENCES sleep_settings(id) ON DELETE CASCADE
 );
@@ -103,7 +105,7 @@ CREATE TABLE item (
 
 DROP TABLE IF EXISTS challenge CASCADE;
 CREATE TABLE challenge (
-    id SERIAL PRIMARY KEY,
+    id INT PRIMARY KEY,
     name VARCHAR NOT NULL UNIQUE,
     description TEXT,
     reward INT NOT NULL
@@ -119,7 +121,8 @@ CREATE TABLE user_challenge (
     expire_date TIMESTAMP,
     user_selected BOOLEAN NOT NULL, 
     FOREIGN KEY (user_id) REFERENCES app_user(user_id) ON DELETE CASCADE,
-    FOREIGN KEY (challenge_id) REFERENCES challenge(id)
+    FOREIGN KEY (challenge_id) REFERENCES challenge(id) ON DELETE CASCADE,
+    CONSTRAINT user_unique_challenge UNIQUE(user_id, challenge_id)
 );
 
 DROP TABLE IF EXISTS transaction CASCADE;
@@ -138,7 +141,7 @@ CREATE TABLE purchase_log (
     item_id INT NOT NULL,
     transaction_id INT NOT NULL,
     FOREIGN KEY (item_id) REFERENCES item(id),
-    FOREIGN KEY (transaction_id) REFERENCES transaction(id)
+    FOREIGN KEY (transaction_id) REFERENCES transaction(id) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS challenge_log;
@@ -146,6 +149,6 @@ CREATE TABLE challenge_log (
     id SERIAL PRIMARY KEY,
     challenge_id INT NOT NULL,
     transaction_id INT NOT NULL,
-    FOREIGN KEY (challenge_id) REFERENCES challenge(id),
-    FOREIGN KEY (transaction_id) REFERENCES transaction(id)
+    FOREIGN KEY (challenge_id) REFERENCES challenge(id) ON DELETE CASCADE,
+    FOREIGN KEY (transaction_id) REFERENCES transaction(id) ON DELETE CASCADE
 );

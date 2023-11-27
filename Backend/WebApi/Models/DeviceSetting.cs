@@ -18,6 +18,8 @@ public partial class DeviceSetting
     [Column(TypeName = "jsonb")]
     public string? Settings { get; set; }
 
+    public bool? UserModified {get; set; } = false;
+
     [JsonIgnore]
     public virtual SleepSetting? SleepSetting { get; set; }
 }
