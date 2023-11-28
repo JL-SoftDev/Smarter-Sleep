@@ -376,7 +376,9 @@ class _HomeScreenState extends State<HomeScreen> {
           print(response.body);
           print('Error: ${response.statusCode}');
         }
-      }).catchError((e) {});
+      }).catchError((e) {
+        print(e);
+      });
     }
   }
 

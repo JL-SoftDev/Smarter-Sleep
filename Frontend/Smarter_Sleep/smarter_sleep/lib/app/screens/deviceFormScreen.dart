@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:smarter_sleep/app/screens/deviceConnectionScreen.dart';
+import 'package:smarter_sleep/app/models/device.dart';
 
 class DeviceForm extends StatefulWidget {
   final Device? initialData;
@@ -182,7 +182,7 @@ class _DeviceFormState extends State<DeviceForm> {
     );
   }
 
-  Map<String, dynamic> _saveDeviceSettings() {
+  Device _saveDeviceSettings() {
     String settings = '0';
 
     if (selectedType == 'alarm') {
@@ -199,10 +199,11 @@ class _DeviceFormState extends State<DeviceForm> {
       settings = temperatureValue.toString();
     }
 
-    return {
-      'name': name.text,
-      'type': selectedType,
-      'status': settings,
-    };
+    return Device(
+      userId: "",
+      name: name.text,
+      type: selectedType,
+      status: settings,
+    );
   }
 }

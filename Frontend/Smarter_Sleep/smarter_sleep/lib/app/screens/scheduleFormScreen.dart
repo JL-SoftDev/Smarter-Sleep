@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:smarter_sleep/app/screens/deviceConnectionScreen.dart';
+import 'package:smarter_sleep/app/models/device.dart';
 import 'package:smarter_sleep/app/models/device_schedule.dart';
 
 class ScheduleForm extends StatefulWidget {
@@ -151,7 +151,7 @@ class _ScheduleFormState extends State<ScheduleForm> {
     );
   }
 
-  Map<String, dynamic> _saveSchedule() {
+  DeviceSchedule _saveSchedule() {
     Map<String, dynamic> settings = {};
 
     if (widget.device.type == 'alarm') {
@@ -170,17 +170,12 @@ class _ScheduleFormState extends State<ScheduleForm> {
       settings = {'Temperature': temperatureValue};
     }
 
-    return {
-      'deviceId': widget.device.id,
-      'scheduledTime': DateTime(
-        selectedDate.year,
-        selectedDate.month,
-        selectedDate.day,
-        selectedTime.hour,
-        selectedTime.minute,
-      ).toIso8601String(),
-      'settings': jsonEncode(settings),
-      'userModified': true
-    };
+    return DeviceSchedule(
+      deviceId: widget.device.id!,
+      sleepSettingId: 1,
+      scheduledTime: DateTime.now(),
+      settings: settings,
+      userModified: true,
+    );
   }
 }

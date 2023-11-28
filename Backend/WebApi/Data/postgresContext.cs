@@ -102,10 +102,11 @@ public partial class postgresContext : DbContext
             entity.Property(e => e.ChallengeId).HasColumnName("challenge_id");
             entity.Property(e => e.TransactionId).HasColumnName("transaction_id");
 
-            entity.HasOne(d => d.Transaction).WithMany(p => p.ChallengeLogs)
-                .HasForeignKey(d => d.TransactionId)
+            entity.HasOne(d => d.Transaction).WithOne(p => p.ChallengeLog)
+                .HasForeignKey<ChallengeLog>(d => d.TransactionId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("challenge_log_transaction_id_fkey");
+                .HasConstraintName("challenge_log_transaction_id_fkey")
+                .IsRequired(false);
         });
 
         modelBuilder.Entity<CustomSchedule>(entity =>
@@ -153,6 +154,10 @@ public partial class postgresContext : DbContext
                 .HasColumnType("character varying")
                 .HasColumnName("type");
             entity.Property(e => e.UserId).HasColumnName("user_id");
+
+            entity.HasMany(s => s.DeviceSettings).WithOne(d => d.Device)
+                .HasForeignKey(d => d.DeviceId)
+                .HasConstraintName("device_settings_device_id_fkey");
         });
 
         modelBuilder.Entity<DeviceSetting>(entity =>
@@ -199,10 +204,11 @@ public partial class postgresContext : DbContext
             entity.Property(e => e.ItemId).HasColumnName("item_id");
             entity.Property(e => e.TransactionId).HasColumnName("transaction_id");
 
-            entity.HasOne(d => d.Transaction).WithMany(p => p.PurchaseLogs)
-                .HasForeignKey(d => d.TransactionId)
+            entity.HasOne(d => d.Transaction).WithOne(p => p.PurchaseLog)
+                .HasForeignKey<PurchaseLog>(d => d.TransactionId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("purchase_log_transaction_id_fkey");
+                .HasConstraintName("purchase_log_transaction_id_fkey")
+                .IsRequired(false);
         });
 
         modelBuilder.Entity<SleepReview>(entity =>
@@ -220,13 +226,15 @@ public partial class postgresContext : DbContext
             entity.Property(e => e.UserId).HasColumnName("user_id");
             entity.Property(e => e.WearableLogId).HasColumnName("wearable_log_id");
 
-            entity.HasOne(d => d.Survey).WithMany(p => p.SleepReviews)
-                .HasForeignKey(d => d.SurveyId)
-                .HasConstraintName("sleep_review_survey_id_fkey");
+            entity.HasOne(d => d.Survey).WithOne(p => p.SleepReview)
+                .HasForeignKey<SleepReview>(d => d.SurveyId)
+                .HasConstraintName("sleep_review_survey_id_fkey")
+                .IsRequired(false);
 
-            entity.HasOne(d => d.WearableLog).WithMany(p => p.SleepReviews)
-                .HasForeignKey(d => d.WearableLogId)
-                .HasConstraintName("sleep_review_wearable_log_id_fkey");
+            entity.HasOne(d => d.WearableLog).WithOne(p => p.SleepReview)
+                .HasForeignKey<SleepReview>(d => d.WearableLogId)
+                .HasConstraintName("sleep_review_wearable_log_id_fkey")
+                .IsRequired(false);
         });
 
         modelBuilder.Entity<SleepSetting>(entity =>
@@ -251,7 +259,7 @@ public partial class postgresContext : DbContext
 
             entity.HasMany(s => s.DeviceSettings).WithOne(d => d.SleepSetting)
                 .HasForeignKey(d => d.SleepSettingId)
-                .HasConstraintName("sleep_settings_device_settings_id_fkey");
+                .HasConstraintName("device_settings_sleep_settings_id_fkey");
         });
 
         modelBuilder.Entity<Survey>(entity =>

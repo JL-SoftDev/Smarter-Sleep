@@ -19,5 +19,5 @@ public partial class WearableData
     public DateOnly SleepDate { get; set; }
 
     [JsonIgnore]
-    public virtual ICollection<SleepReview> SleepReviews { get; set; } = new List<SleepReview>();
+    public virtual SleepReview SleepReview { get; set; }
 }

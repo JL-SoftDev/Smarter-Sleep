@@ -14,6 +14,23 @@ class SleepInsightScreen extends StatefulWidget {
 }
 
 class _SleepInsightScreenState extends State<SleepInsightScreen> {
+  late int totalSleep;
+  late int remDuration;
+  late int lightDuration;
+  late int deepDuration;
+
+  @override
+  void initState() {
+    super.initState();
+
+    totalSleep = widget.review.survey.sleepDuration;
+    List<String> sleepStages = widget.review.wearableLog.hypnogram.split('');
+
+    remDuration = sleepStages.where((stage) => stage == '3').length * 5;
+    lightDuration = sleepStages.where((stage) => stage == '2').length * 5;
+    deepDuration = sleepStages.where((stage) => stage == '1').length * 5;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -49,51 +66,113 @@ class _SleepInsightScreenState extends State<SleepInsightScreen> {
             child: Column(
               children: [
                 ListTile(
+                  contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 0.0, vertical: 0.0),
+                  visualDensity:
+                      const VisualDensity(horizontal: 0, vertical: -4),
                   title: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text('Total Sleep'),
+                      const Text(
+                        'Total Sleep',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
                       Text(
-                          '${(widget.review.survey.sleepDuration / 60).floor()}h ${(widget.review.survey.sleepDuration % 60).toString().padLeft(2, "0")}m'),
+                        '${(totalSleep / 60).floor()}h ${(totalSleep % 60).toString().padLeft(2, "0")}m',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
                     ],
                   ),
                 ),
                 LinearProgressIndicator(
-                  value: widget.review.survey.sleepDuration / 480,
+                  value: totalSleep / 480,
+                  color: ColorUtils.getScoreColor((totalSleep / 4.8).round(),
+                      start: Colors.red, end: Colors.blue),
+                  backgroundColor: ColorUtils.getScoreColor(
+                      (totalSleep / 4.8).round(),
+                      start: Colors.red[100]!,
+                      end: Colors.blue[100]!),
+                  minHeight: 4,
+                ),
+                ListTile(
+                  dense: true,
+                  contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 0.0, vertical: 0.0),
+                  visualDensity:
+                      const VisualDensity(horizontal: 0, vertical: -4),
+                  title: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('REM Duration'),
+                      Text(
+                          '${(remDuration / 60).floor()}h ${(remDuration % 60).toString().padLeft(2, "0")}m'),
+                    ],
+                  ),
+                ),
+                LinearProgressIndicator(
+                  value: remDuration / (480 * .25),
                   color: ColorUtils.getScoreColor(
-                      (widget.review.survey.sleepDuration / 4.8).round(),
+                      (remDuration / (4.8 * .25)).round(),
                       start: Colors.red,
                       end: Colors.blue),
                   backgroundColor: ColorUtils.getScoreColor(
-                      (widget.review.survey.sleepDuration / 4.8).round(),
+                      (remDuration / (4.8 * .25)).round(),
                       start: Colors.red[100]!,
                       end: Colors.blue[100]!),
                   minHeight: 2,
                 ),
                 ListTile(
+                  dense: true,
+                  contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 0.0, vertical: 0.0),
+                  visualDensity:
+                      const VisualDensity(horizontal: 0, vertical: -4),
                   title: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Total Sleep'),
-                      Text('5h 32m'),
+                      const Text('Light Sleep Duration (N1/N2)'),
+                      Text(
+                          '${(lightDuration / 60).floor()}h ${(lightDuration % 60).toString().padLeft(2, "0")}m'),
                     ],
                   ),
                 ),
                 LinearProgressIndicator(
-                  value: 0.5,
+                  value: lightDuration / (480 * .55),
+                  color: ColorUtils.getScoreColor(
+                      (lightDuration / (4.8 * .55)).round(),
+                      start: Colors.red,
+                      end: Colors.blue),
+                  backgroundColor: ColorUtils.getScoreColor(
+                      (lightDuration / (4.8 * .55)).round(),
+                      start: Colors.red[100]!,
+                      end: Colors.blue[100]!),
                   minHeight: 2,
                 ),
                 ListTile(
+                  dense: true,
+                  contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 0.0, vertical: 0.0),
+                  visualDensity:
+                      const VisualDensity(horizontal: 0, vertical: -4),
                   title: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Total Sleep'),
-                      Text('5h 32m'),
+                      const Text('Deep Sleep Duration (N3)'),
+                      Text(
+                          '${(deepDuration / 60).floor()}h ${(deepDuration % 60).toString().padLeft(2, "0")}m'),
                     ],
                   ),
                 ),
                 LinearProgressIndicator(
-                  value: 0.5,
+                  value: deepDuration / (480 * .20),
+                  color: ColorUtils.getScoreColor(
+                      (deepDuration / (4.8 * .20)).round(),
+                      start: Colors.red,
+                      end: Colors.blue),
+                  backgroundColor: ColorUtils.getScoreColor(
+                      (deepDuration / (4.8 * .20)).round(),
+                      start: Colors.red[100]!,
+                      end: Colors.blue[100]!),
                   minHeight: 2,
                 ),
                 const SizedBox(height: 15.0),
@@ -144,6 +223,20 @@ class _SleepInsightScreenState extends State<SleepInsightScreen> {
                 height: MediaQuery.of(context).size.height * 0.28,
                 width: MediaQuery.of(context).size.width * 0.9,
                 child: LineChart(mainData()),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: ElevatedButton.icon(
+              onPressed: () {
+                _listDataPopup("Collected Wearable Data",
+                    widget.review.wearableLog.toJson());
+              },
+              icon: const Icon(Icons.history),
+              label: const Text("Explore Day's Device Adjustments"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
               ),
             ),
           ),
