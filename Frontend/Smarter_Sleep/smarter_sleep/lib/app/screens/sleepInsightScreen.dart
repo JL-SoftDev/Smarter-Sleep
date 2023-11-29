@@ -230,8 +230,14 @@ class _SleepInsightScreenState extends State<SleepInsightScreen> {
             padding: const EdgeInsets.all(10.0),
             child: ElevatedButton.icon(
               onPressed: () {
-                _listDataPopup("Collected Wearable Data",
-                    widget.review.wearableLog.toJson());
+                if (widget.review.sleepSchedule != null &&
+                    widget.review.sleepSchedule!.deviceSchedules != null &&
+                    widget.review.sleepSchedule!.deviceSchedules!.isNotEmpty) {
+                  _listDeviceSchedules(
+                      widget.review.sleepSchedule!.deviceSchedules);
+                } else {
+                  //No sleepsetting/device settings
+                }
               },
               icon: const Icon(Icons.history),
               label: const Text("Explore Day's Device Adjustments"),
@@ -264,6 +270,37 @@ class _SleepInsightScreenState extends State<SleepInsightScreen> {
                 }).toList(),
               ),
             ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _listDeviceSchedules(deviceSchedules) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Device Schedules"),
+          content: Column(
+            children: [
+              // Create a ListView.builder to display the list of DeviceSchedule items
+              ListView.builder(
+                shrinkWrap: true,
+                itemCount: deviceSchedules.length,
+                itemBuilder: (context, index) {
+                  return ListTile();
+                },
+              ),
+            ],
           ),
           actions: [
             TextButton(

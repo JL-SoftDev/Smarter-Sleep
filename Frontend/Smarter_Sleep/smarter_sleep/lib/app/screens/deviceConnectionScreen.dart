@@ -1,10 +1,8 @@
 import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:smarter_sleep/app/api/api_service.dart';
 import 'package:smarter_sleep/app/models/device.dart';
 import 'package:smarter_sleep/app/screens/deviceScheduleScreen.dart';
-import 'dart:convert';
 
 import 'deviceFormScreen.dart';
 import '../appFrame.dart';
@@ -152,39 +150,26 @@ class _DeviceConnectionsScreenState extends State<DeviceConnectionsScreen> {
     return Text('Status: ${device.status}');
   }
 
-  void _navigateToAddDevice(BuildContext context) {
-    Navigator.push(
+  Future<void> _navigateToAddDevice(BuildContext context) async {
+    Device? device = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => DeviceForm(),
+        builder: (context) => const DeviceForm(),
       ),
-    ).then((result) async {
-      if (result != null) {
-        final user = await Amplify.Auth.getCurrentUser();
-        final userId = user.userId;
-        //TODO: Change to use the api/devicesRoutes instead of directly calling it.
-        result['userId'] = userId;
-        http
-            .post(
-                Uri.parse(
-                    'http://ec2-54-87-139-255.compute-1.amazonaws.com/api/Devices'),
-                headers: {'Content-Type': 'application/json'},
-                body: jsonEncode(result))
-            .then((response) {
-          if (response.statusCode == 201) {
-            fetchDevices();
-          } else {
-            print(response.body);
-            print('Error: ${response.statusCode}');
-          }
-        }).catchError(print);
-      }
-    });
+    );
+    if (device != null) {
+      final user = await Amplify.Auth.getCurrentUser();
+
+      device.userId = user.userId;
+
+      await ApiService.post('api/Devices', device);
+      fetchDevices();
+    }
   }
 
   Future<void> _navigateToEditDevice(
       BuildContext context, Device initialData) async {
-    Device? device = await Navigator.push(
+    Device? newData = await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => DeviceForm(
@@ -192,25 +177,14 @@ class _DeviceConnectionsScreenState extends State<DeviceConnectionsScreen> {
         ),
       ),
     );
-    if (device != null) {
+    if (newData != null) {
       final user = await Amplify.Auth.getCurrentUser();
-      final userId = user.userId;
-      device.userId = userId;
-      device.id = initialData.id;
 
-      http
-          .put(
-              Uri.parse(
-                  'http://ec2-54-87-139-255.compute-1.amazonaws.com/api/Devices/${initialData.id}'),
-              headers: {'Content-Type': 'application/json'},
-              body: jsonEncode(device))
-          .then((response) {
-        if (response.statusCode == 204) {
-          fetchDevices();
-        } else {
-          print('Error: ${response.statusCode}');
-        }
-      }).catchError(print);
+      newData.userId = user.userId;
+      newData.id = initialData.id;
+
+      await ApiService.put('api/Devices/${initialData.id}', newData);
+      fetchDevices();
     }
   }
 }

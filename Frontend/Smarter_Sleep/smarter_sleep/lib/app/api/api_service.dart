@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:smarter_sleep/app/appFrame.dart';
@@ -25,6 +26,7 @@ class ApiService {
   }
 
   static Future<dynamic> post(String endpoint, dynamic body) async {
+    safePrint(jsonEncode(body));
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/$endpoint'),
@@ -42,6 +44,7 @@ class ApiService {
   }
 
   static Future<dynamic> put(String endpoint, dynamic body) async {
+    safePrint(jsonEncode(body));
     try {
       final response = await http.put(
         Uri.parse('$baseUrl/$endpoint'),
@@ -75,6 +78,7 @@ class ApiService {
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return jsonDecode(response.body);
     } else {
+      safePrint(response.body);
       throw HttpStatusException(response.statusCode);
     }
   }

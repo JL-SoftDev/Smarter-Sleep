@@ -5,6 +5,7 @@ import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:smarter_sleep/app/api/api_service.dart';
 
 import 'package:smarter_sleep/app/models/user_challenge.dart';
 import 'package:smarter_sleep/app/models/sleep_review.dart';
@@ -85,14 +86,12 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     ];
 
-    final response = await http.get(Uri.parse(
-        'http://ec2-54-87-139-255.compute-1.amazonaws.com/api/SleepReviews'));
+    dynamic response = await ApiService.get('api/SleepReviews');
 
     int fetchedSleepScore = 0;
-    if (response.statusCode == 200) {
-      List<dynamic> body = json.decode(response.body);
-      List<SleepReview> reviews = body
-          .map((json) => SleepReview.fromJson(json))
+    if (response != null) {
+      List<SleepReview> reviews = response
+          .map<SleepReview>((json) => SleepReview.fromJson(json))
           .where((review) => review.userId == user.userId)
           .toList();
       if (reviews.isNotEmpty) {
@@ -130,11 +129,11 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     try {
-      var response = await http.get(Uri.parse(
-          'http://ec2-54-87-139-255.compute-1.amazonaws.com/api/WearableDataInjection/${goodData ? 'better' : 'worse'}?UserId=$userId&dateTime=$currentTime'));
-      if (response.statusCode == 200) {
-        Map<String, dynamic> body = json.decode(response.body);
-        WearableLog data = WearableLog.fromJson(body);
+      dynamic response = await ApiService.get(
+          'api/WearableDataInjection/${goodData ? 'better' : 'worse'}?UserId=$userId&dateTime=$currentTime');
+
+      if (response != null) {
+        WearableLog data = WearableLog.fromJson(response);
         return data;
       } else {
         // No wearable log found
@@ -348,11 +347,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> scheduleDevices() async {
-    http.post(
-        Uri.parse(
-            'http://ec2-54-87-139-255.compute-1.amazonaws.com/api/DeviceScheduling?UserId=$userId'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(_globalServices.currentTime.toIso8601String()));
+    ApiService.post('api/DeviceScheduling?UserId=$userId',
+        _globalServices.currentTime.toIso8601String());
   }
 
   Future<void> submitSleepData(survey, wearableData) async {
@@ -361,24 +357,14 @@ class _HomeScreenState extends State<HomeScreen> {
         "survey": survey,
         "wearableData": wearableData.toJson()
       };
-      //TODO: Change to use the api/devicesRoutes instead of directly calling it.
-      http
-          .post(
-              Uri.parse(
-                  'http://ec2-54-87-139-255.compute-1.amazonaws.com/api/SleepReviews/GenerateReview/$userId'),
-              headers: {'Content-Type': 'application/json'},
-              body: jsonEncode(payload))
-          .then((response) {
-        if (response.statusCode == 201) {
-          _popupReview(SleepReview.fromJson(json.decode(response.body)));
-          scheduleDevices();
-        } else {
-          print(response.body);
-          print('Error: ${response.statusCode}');
-        }
-      }).catchError((e) {
-        print(e);
-      });
+
+      dynamic response = await ApiService.post(
+          'api/SleepReviews/GenerateReview/$userId', payload);
+
+      if (response != null) {
+        _popupReview(SleepReview.fromJson(response));
+        scheduleDevices();
+      }
     }
   }
 

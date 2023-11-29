@@ -1,14 +1,15 @@
+import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 @JsonSerializable()
 class Device {
   int? id;
-  String userId = "";
-  String name = "";
-  String type = "";
-  String? ip = "";
-  int? port = 0;
-  String? status = "";
+  String userId;
+  String name;
+  String type;
+  String? ip;
+  int? port;
+  String? status;
 
   Device({
     this.id,
@@ -31,13 +32,20 @@ class Device {
         status: json['status']);
   }
 
-  Map<String, dynamic> toJson() => <String, dynamic>{
-        'id': id,
-        'userId': userId,
-        'name': name,
-        'type': type,
-        'ip': ip,
-        'port': port,
-        'status': status,
-      };
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = {
+      'userId': userId,
+      'name': name,
+      'type': type,
+      'ip': ip,
+      'port': port,
+      'status': status,
+    };
+
+    if (id != null) {
+      data['id'] = id;
+    }
+
+    return data;
+  }
 }
