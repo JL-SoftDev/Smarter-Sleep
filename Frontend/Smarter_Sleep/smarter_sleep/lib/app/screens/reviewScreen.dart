@@ -29,7 +29,10 @@ class _SleepReviewScreenState extends State<SleepReviewScreen> {
       final user = await Amplify.Auth.getCurrentUser();
 
       List<SleepReview> fetchedReviews = response
-          .where((reviewData) => reviewData['userId'] == user.userId)
+          .where((reviewData) =>
+              reviewData['userId'] == user.userId &&
+              reviewData['survey'] != null &&
+              reviewData['wearableLog'] != null)
           .map<SleepReview>((reviewData) {
         return SleepReview.fromJson(reviewData);
       }).toList();

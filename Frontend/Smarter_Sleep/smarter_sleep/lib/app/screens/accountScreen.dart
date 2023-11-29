@@ -31,7 +31,7 @@ class _AccountScreenState extends State<AccountScreen> {
         userAttributes = attributes;
       });
     } catch (e) {
-      print('Error fetching user attributes: $e');
+      safePrint('Error fetching user attributes: $e');
     }
   }
 
@@ -39,7 +39,7 @@ class _AccountScreenState extends State<AccountScreen> {
     try {
       await Amplify.Auth.signOut();
     } catch (e) {
-      print('Error signing out: $e');
+      safePrint('Error signing out: $e');
     }
   }
 

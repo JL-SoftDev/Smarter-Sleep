@@ -91,8 +91,11 @@ class _HomeScreenState extends State<HomeScreen> {
     int fetchedSleepScore = 0;
     if (response != null) {
       List<SleepReview> reviews = response
+          .where((reviewData) =>
+              reviewData['userId'] == user.userId &&
+              reviewData['survey'] != null &&
+              reviewData['wearableLog'] != null)
           .map<SleepReview>((json) => SleepReview.fromJson(json))
-          .where((review) => review.userId == user.userId)
           .toList();
       if (reviews.isNotEmpty) {
         SleepReview lastReview =

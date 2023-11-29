@@ -181,7 +181,7 @@ class _DeviceSchedulePageState extends State<DeviceSchedulePage> {
         ),
       ),
     );
-    print("Test");
+
     if (schedule != null) {
       schedule.id = initialData.id;
       schedule.sleepSettingId = initialData.sleepSettingId;
