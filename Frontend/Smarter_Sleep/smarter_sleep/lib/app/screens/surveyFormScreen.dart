@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:smarter_sleep/main.dart';
 
 class SurveyForm extends StatefulWidget {
   final int? trackedTime;
@@ -10,6 +12,8 @@ class SurveyForm extends StatefulWidget {
 }
 
 class _SurveyFormState extends State<SurveyForm> {
+  final GlobalServices _globalServices = GlobalServices();
+
   int _restedRating = 10;
   final List<bool> _selectedWakePreference = <bool>[false, true, false];
   final List<bool> _selectedTemperature = <bool>[false, true, false];
@@ -251,7 +255,7 @@ class _SurveyFormState extends State<SurveyForm> {
 
   Map<String, dynamic> _saveSurvey() {
     return {
-      "createdAt": "2023-11-17T02:44:16.554Z",
+      "createdAt": _globalServices.currentTime,
       "sleepQuality": _restedRating,
       "wakePreference": _selectedWakePreference.indexOf(true),
       "temperaturePreference": _selectedTemperature.indexOf(true),
@@ -260,7 +264,7 @@ class _SurveyFormState extends State<SurveyForm> {
       "ateLate": _ateLate,
       "sleepDuration":
           _overrideDuration ? _newDurationController.text : _sleepDuration,
-      "surveyDate": "2023-11-17"
+      "surveyDate": DateFormat('yyyy-MM-dd').format(_globalServices.currentTime)
     };
   }
 }

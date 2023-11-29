@@ -96,8 +96,6 @@ namespace WebApi.Services
 			DateTime currentTime = appTime ?? DateTime.Now;
 
 			List<UserChallenge> assignedChallenges = _databaseContext.UserChallenges.Where(e => e.UserId == userId).ToList();
-			//Adjust sleep date to actual sleepdate following Oura documentation
-			DateOnly adjustedSleepDate = wearableData.SleepDate.AddDays(-1);
 			
 			//Start sleep score at 100
 			double sleepScore = 100.0;
@@ -163,8 +161,9 @@ namespace WebApi.Services
 				}
 			}
 
-			//Substract one point for every modified schedule, add .1 for every setting applied
-			SleepSetting sleepSetting = _databaseContext.SleepSettings.FirstOrDefault(e => e.UserId == userId && DateOnly.FromDateTime(e.ScheduledSleep) == adjustedSleepDate);
+			//TODO: Check if the sleep setting has already been applied to a SleepReview
+			//Fetch first sleep setting where ScheduledSleep is equal to when user took the survey -1 day
+			SleepSetting sleepSetting = _databaseContext.SleepSettings.FirstOrDefault(e => e.UserId == userId && DateOnly.FromDateTime(e.ScheduledSleep) == survey.surveyDate.AddDays(-1));
 			if(sleepSetting != null){
 				int modCounter = 0;
 				foreach(DeviceSetting deviceSetting in sleepSetting.DeviceSettings){

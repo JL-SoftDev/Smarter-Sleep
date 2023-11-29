@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:smarter_sleep/app/models/device.dart';
 import 'package:smarter_sleep/app/models/device_schedule.dart';
@@ -11,7 +9,7 @@ class ScheduleForm extends StatefulWidget {
   const ScheduleForm({super.key, required this.device, this.initialData});
 
   @override
-  _ScheduleFormState createState() => _ScheduleFormState();
+  State<ScheduleForm> createState() => _ScheduleFormState();
 }
 
 class _ScheduleFormState extends State<ScheduleForm> {
@@ -154,15 +152,17 @@ class _ScheduleFormState extends State<ScheduleForm> {
   DeviceSchedule _saveSchedule() {
     Map<String, dynamic> settings = {};
 
+    DateTime scheduledTime = DateTime(
+      selectedDate.year,
+      selectedDate.month,
+      selectedDate.day,
+      selectedTime.hour,
+      selectedTime.minute,
+    );
+
     if (widget.device.type == 'alarm') {
       settings = {
-        'NextAlarm': DateTime(
-          selectedDate.year,
-          selectedDate.month,
-          selectedDate.day,
-          selectedTime.hour,
-          selectedTime.minute,
-        ).toIso8601String(),
+        'NextAlarm': scheduledTime.toIso8601String(),
       };
     } else if (widget.device.type == 'light') {
       settings = {'Brightness': brightnessValue};
@@ -173,7 +173,7 @@ class _ScheduleFormState extends State<ScheduleForm> {
     return DeviceSchedule(
       deviceId: widget.device.id!,
       sleepSettingId: 1,
-      scheduledTime: DateTime.now(),
+      scheduledTime: scheduledTime,
       settings: settings,
       userModified: true,
     );

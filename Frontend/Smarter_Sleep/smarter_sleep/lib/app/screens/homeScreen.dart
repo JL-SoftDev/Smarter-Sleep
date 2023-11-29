@@ -1,8 +1,6 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:math';
 import 'package:amplify_flutter/amplify_flutter.dart';
-import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:smarter_sleep/app/api/api_service.dart';
@@ -113,11 +111,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   //Currently always returns a wearable log, implemented to support no wearable data found.
   Future<WearableLog?> _fetchWearableData(bool goodData) async {
-    //TODO: Fetch application defined time
-    DateTime currentTime = DateTime.now();
-
     WearableLog useDefaultLog() {
-      DateTime lastNight = currentTime
+      DateTime lastNight = _globalServices.currentTime
           .subtract(const Duration(days: 1))
           .add(const Duration(hours: 21));
       DateTime wakeTime = lastNight.add(const Duration(hours: 8));
@@ -133,7 +128,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     try {
       dynamic response = await ApiService.get(
-          'api/WearableDataInjection/${goodData ? 'better' : 'worse'}?UserId=$userId&dateTime=$currentTime');
+          'api/WearableDataInjection/${goodData ? 'better' : 'worse'}?UserId=$userId&dateTime=${_globalServices.currentTime}');
 
       if (response != null) {
         WearableLog data = WearableLog.fromJson(response);
@@ -262,8 +257,8 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 10),
             Column(
               children: userChallenges.map((userChallenge) {
-                final Duration remainingTime =
-                    userChallenge.expireDate.difference(DateTime.now());
+                final Duration remainingTime = userChallenge.expireDate
+                    .difference(_globalServices.currentTime);
 
                 Color color = predefinedColors[colorIndex];
                 colorIndex = (colorIndex + 1) % predefinedColors.length;

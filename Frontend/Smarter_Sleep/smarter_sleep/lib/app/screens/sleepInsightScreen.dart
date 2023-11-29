@@ -81,7 +81,7 @@ class _SleepInsightScreenState extends State<SleepInsightScreen> {
                       ),
                       Text(
                         '${(totalSleep / 60).floor()}h ${(totalSleep % 60).toString().padLeft(2, "0")}m',
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                        style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
@@ -238,7 +238,24 @@ class _SleepInsightScreenState extends State<SleepInsightScreen> {
                   _listDeviceSchedules(
                       widget.review.sleepSchedule!.deviceSchedules!);
                 } else {
-                  //No sleepsetting/device settings
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text("No Applied Settings"),
+                        content: const Text(
+                            "Smarter Sleep did not apply any device settings for this day"),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text('OK'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
                 }
               },
               icon: const Icon(Icons.history),
@@ -266,6 +283,7 @@ class _SleepInsightScreenState extends State<SleepInsightScreen> {
               child: Column(
                 children: data.keys.map((key) {
                   return ListTile(
+                    dense: true,
                     title: Text(key),
                     subtitle: Text('${data[key]}'),
                   );
