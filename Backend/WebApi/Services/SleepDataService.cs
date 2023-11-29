@@ -105,7 +105,7 @@ namespace WebApi.Services
 
 			//If user wants to wake earlier, assign sleep early challenge
 			if(survey.WakePreference==0){
-				if(assignedChallenges.Count < 3){
+				if(assignedChallenges.Count < 3 && !assignedChallenges.Any(uc => uc.ChallengeId == 1)){
 					UserChallenge sleepEarly = new UserChallenge{
 						UserId = userId,
 						ChallengeId = 1,
@@ -130,7 +130,7 @@ namespace WebApi.Services
 			
 			//If over a hour away, assign 8 hour challenge
 			if(distanceFromEightHours >= 60){
-				if(assignedChallenges.Count < 3){
+				if(assignedChallenges.Count < 3 && !assignedChallenges.Any(uc => uc.ChallengeId == 2)){
 					UserChallenge eightHours = new UserChallenge{
 						UserId = userId,
 						ChallengeId = 2,
@@ -146,7 +146,7 @@ namespace WebApi.Services
 			//Assign no eating challenge if ate late
 			if(survey.AteLate ?? false){
 				sleepScore -= 5;
-				if(assignedChallenges.Count < 3){
+				if(assignedChallenges.Count < 3 && !assignedChallenges.Any(uc => uc.ChallengeId == 3)){
 					UserChallenge noEat = new UserChallenge{
 						UserId = userId,
 						ChallengeId = 3,
@@ -158,7 +158,7 @@ namespace WebApi.Services
 					_databaseContext.UserChallenges.Add(noEat);
 				}
 			}
-
+			Console.WriteLine(adjustedSleepDate);
 			//Substract one point for every modified schedule, add .1 for every setting applied
 			SleepSetting sleepSetting = _databaseContext.SleepSettings.FirstOrDefault(e => e.UserId == userId && DateOnly.FromDateTime(e.ScheduledSleep) == adjustedSleepDate);
 			if(sleepSetting != null){
@@ -172,7 +172,7 @@ namespace WebApi.Services
 					}
 				}
 				//Assign no modifications if 2 settings were changed
-				if(modCounter >= 2 && assignedChallenges.Count < 3){
+				if(modCounter >= 2 && assignedChallenges.Count < 3 && !assignedChallenges.Any(uc => uc.ChallengeId == 5)){
 					UserChallenge noMod = new UserChallenge{
 						UserId = userId,
 						ChallengeId = 5,
