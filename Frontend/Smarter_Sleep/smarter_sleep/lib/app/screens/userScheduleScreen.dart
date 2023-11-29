@@ -11,7 +11,10 @@ class UserScheduleScreen extends StatefulWidget {
 
 class _UserScheduleScreenState extends State<UserScheduleScreen> {
   List<CustomSchedule> schedule = [];
-
+  List<String> daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 
+  'Thursday', 'Friday', 'Saturday'];
+  TimeOfDay selectedTime = TimeOfDay.now();
+  final timeList = List<TimeOfDay>.filled(7, TimeOfDay.now());
   @override
   void initState() {
     super.initState();
@@ -56,8 +59,41 @@ class _UserScheduleScreenState extends State<UserScheduleScreen> {
       ),
       //TODO: Design the page layout and prompt for user to input times
       //TODO: Add some way for the user to submit schedules, send a post request to the api with the new data
-      body: const Center(child: Text("Not yet implemented")),
+      body: 
+      Padding(padding: const EdgeInsets.all(40),
+      child:
+      ListView.builder(
+        itemCount: 7,
+        itemBuilder: (context, index) {
+          final day = daysOfWeek[index];
+          return ListTile(
+            title: Text(day),      
+            subtitle: Text(timeList[index].format(context)),
+            trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () async {
+                       final TimeOfDay? pickedTime = await showTimePicker(
+                        context: context,
+                        initialTime: selectedTime,
+                      );
+                      if (pickedTime != null && pickedTime != selectedTime) {
+                        setState(() {
+                          timeList[index] = pickedTime;
+                        });
+                      }
+                        }
+                      ),
+                    ],
+                  ),
+          );
+        },
+      ),
+      ),
     );
+      
   }
 }
 
