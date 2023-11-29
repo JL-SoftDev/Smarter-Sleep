@@ -24,6 +24,7 @@ namespace WebApi.Services
 			return await _databaseContext.SleepReviews
 				.Include(sr => sr.Survey)
 				.Include(sr => sr.WearableLog)
+				.Include(sr => sr.SleepSetting)
 				.ToListAsync();
 		}
 
@@ -32,6 +33,7 @@ namespace WebApi.Services
 			var sleepReview = await _databaseContext.SleepReviews
 				.Include(sr => sr.Survey)
 				.Include(sr => sr.WearableLog)
+				.Include(sr => sr.SleepSetting)
 				.FirstOrDefaultAsync(sr => sr.Id == id);
 			return sleepReview;
 		}
@@ -206,6 +208,7 @@ namespace WebApi.Services
 			
 			SleepReview review = new SleepReview {
 				UserId = userId,
+				SleepSettingsId = sleepSetting != null ? sleepSetting.Id : null,
 				CreatedAt = currentTime,
 				SmarterSleepScore = Convert.ToInt32(sleepScore),
 				Survey = survey,

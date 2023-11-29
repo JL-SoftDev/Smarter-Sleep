@@ -27,5 +27,5 @@ public partial class Survey
     public DateOnly SurveyDate { get; set; }
 
     [JsonIgnore]
-    public virtual SleepReview SleepReview { get; set; }
+    public virtual SleepReview? SleepReview { get; set; }
 }

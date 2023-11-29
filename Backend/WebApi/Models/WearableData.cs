@@ -19,5 +19,5 @@ public partial class WearableData
     public DateOnly SleepDate { get; set; }
 
     [JsonIgnore]
-    public virtual SleepReview SleepReview { get; set; }
+    public virtual SleepReview? SleepReview { get; set; }
 }
