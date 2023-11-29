@@ -4,9 +4,11 @@ import 'package:http/http.dart' as http;
 import 'package:smarter_sleep/app/appFrame.dart';
 
 class ApiService {
-  static const bool debug = true;
+  /// If true makes requests to localhost(127.0.0.1).
+  /// For Android Studio Emulation must set proxy config for 10.0.2.2:port
+  static const bool localhost = true;
 
-  static const String baseUrl = !debug
+  static const String baseUrl = !localhost
       ? "http://ec2-54-87-139-255.compute-1.amazonaws.com"
       : "http://10.0.2.2";
 
@@ -72,7 +74,7 @@ class ApiService {
 
   static dynamic _parseResponse(http.Response response) {
     if (response.statusCode >= 200 && response.statusCode < 300) {
-      return jsonDecode(response.body);
+      return response.body.isNotEmpty ? jsonDecode(response.body) : null;
     } else {
       throw HttpStatusException(response.statusCode);
     }

@@ -174,6 +174,9 @@ class _DeviceConnectionsScreenState extends State<DeviceConnectionsScreen> {
       MaterialPageRoute(
         builder: (context) => DeviceForm(
           initialData: initialData,
+          onDelete: () {
+            _deleteDevice(initialData.id!);
+          },
         ),
       ),
     );
@@ -186,5 +189,13 @@ class _DeviceConnectionsScreenState extends State<DeviceConnectionsScreen> {
       await ApiService.put('api/Devices/${initialData.id}', newData);
       fetchDevices();
     }
+  }
+
+  Future<void> _deleteDevice(int id) async {
+    ApiService.delete('api/Devices/$id').then(
+      (_) {
+        fetchDevices();
+      },
+    );
   }
 }
