@@ -16,6 +16,9 @@ public partial class SleepReview
     [JsonIgnore]
     public int? SurveyId { get; set; }
 
+    [JsonIgnore]
+    public int? SleepSettingsId { get; set; }
+
     public DateTime CreatedAt { get; set; }
 
     public int? SmarterSleepScore { get; set; }
@@ -23,4 +26,6 @@ public partial class SleepReview
     public virtual Survey? Survey { get; set; }
 
     public virtual WearableData? WearableLog { get; set; }
+
+    public virtual SleepSetting? SleepSetting { get; set; }
 }

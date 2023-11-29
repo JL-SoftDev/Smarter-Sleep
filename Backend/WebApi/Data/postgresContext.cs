@@ -211,32 +211,6 @@ public partial class postgresContext : DbContext
                 .IsRequired(false);
         });
 
-        modelBuilder.Entity<SleepReview>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("sleep_review_pkey");
-
-            entity.ToTable("sleep_review");
-
-            entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.CreatedAt)
-                .HasColumnType("timestamp without time zone")
-                .HasColumnName("created_at");
-            entity.Property(e => e.SmarterSleepScore).HasColumnName("smarter_sleep_score");
-            entity.Property(e => e.SurveyId).HasColumnName("survey_id");
-            entity.Property(e => e.UserId).HasColumnName("user_id");
-            entity.Property(e => e.WearableLogId).HasColumnName("wearable_log_id");
-
-            entity.HasOne(d => d.Survey).WithOne(p => p.SleepReview)
-                .HasForeignKey<SleepReview>(d => d.SurveyId)
-                .HasConstraintName("sleep_review_survey_id_fkey")
-                .IsRequired(false);
-
-            entity.HasOne(d => d.WearableLog).WithOne(p => p.SleepReview)
-                .HasForeignKey<SleepReview>(d => d.WearableLogId)
-                .HasConstraintName("sleep_review_wearable_log_id_fkey")
-                .IsRequired(false);
-        });
-
         modelBuilder.Entity<SleepSetting>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("sleep_settings_pkey");
@@ -260,6 +234,38 @@ public partial class postgresContext : DbContext
             entity.HasMany(s => s.DeviceSettings).WithOne(d => d.SleepSetting)
                 .HasForeignKey(d => d.SleepSettingId)
                 .HasConstraintName("device_settings_sleep_settings_id_fkey");
+        });
+
+        modelBuilder.Entity<SleepReview>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("sleep_review_pkey");
+
+            entity.ToTable("sleep_review");
+
+            entity.Property(e => e.Id).HasColumnName("id");
+            entity.Property(e => e.CreatedAt)
+                .HasColumnType("timestamp without time zone")
+                .HasColumnName("created_at");
+            entity.Property(e => e.SmarterSleepScore).HasColumnName("smarter_sleep_score");
+            entity.Property(e => e.SurveyId).HasColumnName("survey_id");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.WearableLogId).HasColumnName("wearable_log_id");
+            entity.Property(e => e.SleepSettingsId).HasColumnName("sleep_settings_id");
+
+            entity.HasOne(d => d.Survey).WithOne(p => p.SleepReview)
+                .HasForeignKey<SleepReview>(d => d.SurveyId)
+                .HasConstraintName("sleep_review_survey_id_fkey")
+                .IsRequired(false);
+
+            entity.HasOne(d => d.WearableLog).WithOne(p => p.SleepReview)
+                .HasForeignKey<SleepReview>(d => d.WearableLogId)
+                .HasConstraintName("sleep_review_wearable_log_id_fkey")
+                .IsRequired(false);
+
+            entity.HasOne(d => d.SleepSetting).WithOne(p => p.SleepReview)
+                .HasForeignKey<SleepReview>(d => d.SleepSettingsId)
+                .HasConstraintName("sleep_review_sleep_settings_id_fkey")
+                .IsRequired(false);
         });
 
         modelBuilder.Entity<Survey>(entity =>
