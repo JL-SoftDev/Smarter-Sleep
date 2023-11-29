@@ -10,13 +10,10 @@ public partial class SleepReview
 
     public Guid UserId { get; set; }
 
-    [JsonIgnore]
     public int? WearableLogId { get; set; }
 
-    [JsonIgnore]
     public int? SurveyId { get; set; }
 
-    [JsonIgnore]
     public int? SleepSettingsId { get; set; }
 
     public DateTime CreatedAt { get; set; }
