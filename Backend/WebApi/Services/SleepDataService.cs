@@ -25,6 +25,7 @@ namespace WebApi.Services
 				.Include(sr => sr.Survey)
 				.Include(sr => sr.WearableLog)
 				.Include(sr => sr.SleepSetting)
+					.ThenInclude(ss => ss.DeviceSettings)
 				.ToListAsync();
 		}
 
@@ -34,6 +35,7 @@ namespace WebApi.Services
 				.Include(sr => sr.Survey)
 				.Include(sr => sr.WearableLog)
 				.Include(sr => sr.SleepSetting)
+					.ThenInclude(ss => ss.DeviceSettings)
 				.FirstOrDefaultAsync(sr => sr.Id == id);
 			return sleepReview;
 		}
@@ -93,7 +95,7 @@ namespace WebApi.Services
 
 			List<UserChallenge> assignedChallenges = _databaseContext.UserChallenges.Where(e => e.UserId == userId).ToList();
 			//Adjust sleep date to actual sleepdate following Oura documentation
-			DateOnly adjustedSleepDate = wearableData.SleepDate.AddDays(1);
+			DateOnly adjustedSleepDate = wearableData.SleepDate.AddDays(-1);
 			
 			//Start sleep score at 100
 			double sleepScore = 100.0;
@@ -158,7 +160,7 @@ namespace WebApi.Services
 					_databaseContext.UserChallenges.Add(noEat);
 				}
 			}
-			Console.WriteLine(adjustedSleepDate);
+
 			//Substract one point for every modified schedule, add .1 for every setting applied
 			SleepSetting sleepSetting = _databaseContext.SleepSettings.FirstOrDefault(e => e.UserId == userId && DateOnly.FromDateTime(e.ScheduledSleep) == adjustedSleepDate);
 			if(sleepSetting != null){
