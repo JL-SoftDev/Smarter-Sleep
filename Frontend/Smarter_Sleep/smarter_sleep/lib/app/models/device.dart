@@ -1,4 +1,4 @@
-import 'package:amplify_flutter/amplify_flutter.dart';
+import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 @JsonSerializable()
@@ -47,5 +47,18 @@ class Device {
     }
 
     return data;
+  }
+
+  IconData getDeviceIcon() {
+    switch (type) {
+      case 'alarm':
+        return Icons.alarm;
+      case 'light':
+        return Icons.lightbulb;
+      case 'thermostat':
+        return Icons.thermostat;
+      default:
+        return Icons.device_unknown;
+    }
   }
 }
