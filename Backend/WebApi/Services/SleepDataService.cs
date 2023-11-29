@@ -26,6 +26,7 @@ namespace WebApi.Services
 				.Include(sr => sr.WearableLog)
 				.Include(sr => sr.SleepSetting)
 					.ThenInclude(ss => ss.DeviceSettings)
+						.ThenInclude(ds => ds.Device)
 				.ToListAsync();
 		}
 
@@ -36,6 +37,7 @@ namespace WebApi.Services
 				.Include(sr => sr.WearableLog)
 				.Include(sr => sr.SleepSetting)
 					.ThenInclude(ss => ss.DeviceSettings)
+						.ThenInclude(ds => ds.Device)
 				.FirstOrDefaultAsync(sr => sr.Id == id);
 			return sleepReview;
 		}
