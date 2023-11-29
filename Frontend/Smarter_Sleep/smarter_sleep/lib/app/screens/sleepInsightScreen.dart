@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:smarter_sleep/app/models/device.dart';
+import 'package:smarter_sleep/app/models/device_schedule.dart';
 
 import 'package:smarter_sleep/app/models/sleep_review.dart';
 import 'package:smarter_sleep/app/utils/color_utils.dart';
@@ -234,7 +236,7 @@ class _SleepInsightScreenState extends State<SleepInsightScreen> {
                     widget.review.sleepSchedule!.deviceSchedules != null &&
                     widget.review.sleepSchedule!.deviceSchedules!.isNotEmpty) {
                   _listDeviceSchedules(
-                      widget.review.sleepSchedule!.deviceSchedules);
+                      widget.review.sleepSchedule!.deviceSchedules!);
                 } else {
                   //No sleepsetting/device settings
                 }
@@ -284,23 +286,56 @@ class _SleepInsightScreenState extends State<SleepInsightScreen> {
     );
   }
 
-  void _listDeviceSchedules(deviceSchedules) {
+  void _listDeviceSchedules(List<DeviceSchedule> deviceSchedules) {
+    deviceSchedules.sort((a, b) => a.scheduledTime.compareTo(b.scheduledTime));
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text("Device Schedules"),
-          content: Column(
-            children: [
-              // Create a ListView.builder to display the list of DeviceSchedule items
-              ListView.builder(
-                shrinkWrap: true,
-                itemCount: deviceSchedules.length,
-                itemBuilder: (context, index) {
-                  return ListTile();
-                },
-              ),
-            ],
+          content: SizedBox(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height * 0.5,
+            child: ListView.builder(
+              itemCount: deviceSchedules.length,
+              itemBuilder: (context, index) {
+                DeviceSchedule deviceSchedule = deviceSchedules[index];
+                Device device = deviceSchedule.device ??
+                    Device(userId: '', name: "Unknown Device", type: "?");
+
+                String settingString = deviceSchedule.settings.toString();
+                switch (device.type) {
+                  case "light":
+                    settingString =
+                        "Set to ${deviceSchedule.settings!['Brightness']}%";
+                    break;
+                  case "thermostat":
+                    settingString =
+                        "Set to ${deviceSchedule.settings!['Temperature']}°F";
+                    break;
+                  case "alarm":
+                    settingString = "Activate";
+                }
+
+                return ListTile(
+                  leading: Icon(device.getDeviceIcon()),
+                  dense: true,
+                  horizontalTitleGap: 0.0,
+                  contentPadding: const EdgeInsets.all(0.0),
+                  title: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(device.name),
+                      ),
+                      Text(settingString),
+                    ],
+                  ),
+                  subtitle: Text("${deviceSchedule.scheduledTime.toLocal()}"),
+                );
+              },
+            ),
           ),
           actions: [
             TextButton(
