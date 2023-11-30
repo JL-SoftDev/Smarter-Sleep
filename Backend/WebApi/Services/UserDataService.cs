@@ -101,38 +101,40 @@ namespace WebApi.Services
             return await _databaseContext.CustomSchedules.ToListAsync();
         }
 
-        public async Task<CustomSchedule?> GetCustomSchedule(Guid id)
+        public async Task<CustomSchedule?> GetCustomSchedule(Guid userId, int dayOfWeek)
         {
-            var customSchedule = await _databaseContext.CustomSchedules.FindAsync(id);
+            var customSchedule = await _databaseContext.CustomSchedules
+                .FirstOrDefaultAsync(cs => cs.UserId == userId && cs.DayOfWeek == dayOfWeek);
             return customSchedule;
         }
 
-        public async Task<int> PutCustomSchedule(Guid id, CustomSchedule customSchedule)
+        public async Task<int> PutCustomSchedule(Guid userId, int dayOfWeek, CustomSchedule updatedSchedule)
         {
-            if (id != customSchedule.UserId)
+            if (userId != updatedSchedule.UserId || dayOfWeek != updatedSchedule.DayOfWeek)
             {
-                return 400;
+                return 400; 
             }
 
-            _databaseContext.Entry(customSchedule).State = EntityState.Modified;
-
-            try
+            if (!CustomScheduleExists(userId, dayOfWeek))
             {
+                _databaseContext.CustomSchedules.Add(updatedSchedule);
                 await _databaseContext.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!CustomScheduleExists(id))
-                {
-                    return 404;
-                }
-                else
-                {
-                    throw;
-                }
-            }
+                return 201;
+            } else {
 
-            return 204;
+                _databaseContext.Entry(updatedSchedule).State = EntityState.Modified;
+
+                try
+                {
+                    await _databaseContext.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    return 400;
+                }
+
+                return 204;
+            }
         }
 
         public async Task<CustomSchedule?> PostCustomSchedule(CustomSchedule customSchedule)
@@ -142,9 +144,11 @@ namespace WebApi.Services
             return customSchedule;
         }
 
-        public async Task<int> DeleteCustomSchedule(Guid id)
+        public async Task<int> DeleteCustomSchedule(Guid userId, int dayOfWeek)
         {
-            var customSchedule = await _databaseContext.CustomSchedules.FindAsync(id);
+            var customSchedule = await _databaseContext.CustomSchedules
+                .FirstOrDefaultAsync(cs => cs.UserId == userId && cs.DayOfWeek == dayOfWeek);
+
             if (customSchedule == null)
             {
                 return 404;
@@ -154,9 +158,9 @@ namespace WebApi.Services
             return 204;
         }
 
-        private bool CustomScheduleExists(Guid id)
+        private bool CustomScheduleExists(Guid userId, int dayOfWeek)
         {
-            return (_databaseContext.CustomSchedules?.Any(e => e.UserId == id)).GetValueOrDefault();
+            return (_databaseContext.CustomSchedules?.Any(e => e.UserId == userId && e.DayOfWeek == dayOfWeek)).GetValueOrDefault();
         }
     }
 }
