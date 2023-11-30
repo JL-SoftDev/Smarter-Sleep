@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:smarter_sleep/app/models/device_schedule.dart';
 
 class SleepSchedule {
