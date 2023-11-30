@@ -33,9 +33,6 @@ class PageRouter {
       case '/schedule':
         builder = (BuildContext _) => const UserScheduleScreen();
         break;
-      case '/schedule':
-        builder = (BuildContext _) => const UserScheduleScreen();
-        break;
 
       //DEBUG SCREENS
       case '/debug':
