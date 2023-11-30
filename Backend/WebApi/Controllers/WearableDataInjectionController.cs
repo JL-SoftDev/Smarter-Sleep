@@ -17,20 +17,20 @@ namespace WebApi.Controllers
             _wearableDataInjectionService = wearableDataInjectionService;
         }
 
-        [Route("[action]")]
-        [HttpPost]
-        public async Task<IActionResult> PostGoodWearableData(Guid UserId, [FromBody] DateTime? dateTime)
+        [Route("better")]
+        [HttpGet]
+        public async Task<IActionResult> GetGoodWearableData(Guid UserId, DateTime? dateTime)
         {
-            var wearableData = await _wearableDataInjectionService.AddGoodWearableData(UserId, dateTime ?? DateTime.Today);
+            var wearableData = await _wearableDataInjectionService.GetGoodWearableData(UserId, dateTime ?? DateTime.Today);
             if (wearableData == null) return BadRequest();
             return Ok(wearableData);
         }
 
-        [Route("[action]")]
-        [HttpPost]
-        public async Task<IActionResult> PostBadWearableData(Guid UserId, [FromBody] DateTime? dateTime)
+        [Route("worse")]
+        [HttpGet]
+        public async Task<IActionResult> GetBadWearableData(Guid UserId, DateTime? dateTime)
         {
-            var wearableData = await _wearableDataInjectionService.AddBadWearableData(UserId, dateTime ?? DateTime.Today);
+            var wearableData = await _wearableDataInjectionService.GetBadWearableData(UserId, dateTime ?? DateTime.Today);
             if (wearableData == null) return BadRequest();
             return Ok(wearableData);
         }

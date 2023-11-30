@@ -1,5 +1,4 @@
-DROP TABLE IF EXISTS app_user CASCADE;
-CREATE TABLE app_user (
+CREATE TABLE IF NOT EXISTS app_user (
     user_id UUID PRIMARY KEY,
     username VARCHAR(20) NOT NULL,
     created_at TIMESTAMP,
@@ -34,22 +33,9 @@ CREATE TABLE survey (
     temp_preference INT,
     lights_disturbance BOOLEAN,
     sleep_earlier BOOLEAN,
+    ate_late BOOLEAN,
     sleep_duration INT,
     survey_date DATE NOT NULL
-);
-
-
-DROP TABLE IF EXISTS sleep_review;
-CREATE TABLE sleep_review (
-    id SERIAL PRIMARY KEY,
-    user_id UUID NOT NULL,
-    wearable_log_id INT,
-    survey_id INT,
-    created_at TIMESTAMP NOT NULL,
-    smarter_sleep_score INT,
-    FOREIGN KEY (user_id) REFERENCES app_user(user_id) ON DELETE CASCADE,
-    FOREIGN KEY (wearable_log_id) REFERENCES wearable_data(id),
-    FOREIGN KEY (survey_id) REFERENCES survey(id)
 );
 
 DROP TABLE IF EXISTS sleep_settings CASCADE;
@@ -60,6 +46,21 @@ CREATE TABLE sleep_settings (
     scheduled_wake TIMESTAMP NOT NULL,
     scheduled_hypnogram VARCHAR,
     FOREIGN KEY (user_id) REFERENCES app_user(user_id) ON DELETE CASCADE
+);
+
+DROP TABLE IF EXISTS sleep_review;
+CREATE TABLE sleep_review (
+    id SERIAL PRIMARY KEY,
+    user_id UUID NOT NULL,
+    wearable_log_id INT,
+    survey_id INT,
+    sleep_settings_id INT,
+    created_at TIMESTAMP NOT NULL,
+    smarter_sleep_score INT,
+    FOREIGN KEY (user_id) REFERENCES app_user(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (wearable_log_id) REFERENCES wearable_data(id) ON DELETE CASCADE,
+    FOREIGN KEY (survey_id) REFERENCES survey(id) ON DELETE CASCADE,
+    FOREIGN KEY (sleep_settings_id) REFERENCES sleep_settings(id) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS device CASCADE;
@@ -104,7 +105,7 @@ CREATE TABLE item (
 
 DROP TABLE IF EXISTS challenge CASCADE;
 CREATE TABLE challenge (
-    id SERIAL PRIMARY KEY,
+    id INT PRIMARY KEY,
     name VARCHAR NOT NULL UNIQUE,
     description TEXT,
     reward INT NOT NULL
@@ -120,7 +121,8 @@ CREATE TABLE user_challenge (
     expire_date TIMESTAMP,
     user_selected BOOLEAN NOT NULL, 
     FOREIGN KEY (user_id) REFERENCES app_user(user_id) ON DELETE CASCADE,
-    FOREIGN KEY (challenge_id) REFERENCES challenge(id)
+    FOREIGN KEY (challenge_id) REFERENCES challenge(id) ON DELETE CASCADE,
+    CONSTRAINT user_unique_challenge UNIQUE(user_id, challenge_id)
 );
 
 DROP TABLE IF EXISTS transaction CASCADE;
@@ -139,7 +141,7 @@ CREATE TABLE purchase_log (
     item_id INT NOT NULL,
     transaction_id INT NOT NULL,
     FOREIGN KEY (item_id) REFERENCES item(id),
-    FOREIGN KEY (transaction_id) REFERENCES transaction(id)
+    FOREIGN KEY (transaction_id) REFERENCES transaction(id) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS challenge_log;
@@ -147,6 +149,6 @@ CREATE TABLE challenge_log (
     id SERIAL PRIMARY KEY,
     challenge_id INT NOT NULL,
     transaction_id INT NOT NULL,
-    FOREIGN KEY (challenge_id) REFERENCES challenge(id),
-    FOREIGN KEY (transaction_id) REFERENCES transaction(id)
+    FOREIGN KEY (challenge_id) REFERENCES challenge(id) ON DELETE CASCADE,
+    FOREIGN KEY (transaction_id) REFERENCES transaction(id) ON DELETE CASCADE
 );

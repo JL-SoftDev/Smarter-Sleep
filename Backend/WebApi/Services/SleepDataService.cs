@@ -24,6 +24,9 @@ namespace WebApi.Services
 			return await _databaseContext.SleepReviews
 				.Include(sr => sr.Survey)
 				.Include(sr => sr.WearableLog)
+				.Include(sr => sr.SleepSetting)
+					.ThenInclude(ss => ss.DeviceSettings)
+						.ThenInclude(ds => ds.Device)
 				.ToListAsync();
 		}
 
@@ -32,6 +35,9 @@ namespace WebApi.Services
 			var sleepReview = await _databaseContext.SleepReviews
 				.Include(sr => sr.Survey)
 				.Include(sr => sr.WearableLog)
+				.Include(sr => sr.SleepSetting)
+					.ThenInclude(ss => ss.DeviceSettings)
+						.ThenInclude(ds => ds.Device)
 				.FirstOrDefaultAsync(sr => sr.Id == id);
 			return sleepReview;
 		}
@@ -81,6 +87,140 @@ namespace WebApi.Services
 			_databaseContext.SleepReviews.Remove(sleepReview);
 			await _databaseContext.SaveChangesAsync();
 			return 204;
+		}
+
+		
+		public async Task<SleepReview?> GenerateReview(Guid userId, Survey survey, WearableData wearableData, DateTime? appTime = null)
+		{
+			
+			DateTime currentTime = appTime ?? DateTime.Now;
+
+			List<UserChallenge> assignedChallenges = _databaseContext.UserChallenges.Where(e => e.UserId == userId).ToList();
+			
+			//Start sleep score at 100
+			double sleepScore = 100.0;
+
+			//Multiply by the user reported sleep quality
+			if(survey.SleepQuality.HasValue){
+				sleepScore *= (double)survey.SleepQuality/10 + .2;
+			}
+
+			//If user wants to wake earlier, assign sleep early challenge
+			if(survey.WakePreference==0){
+				if(assignedChallenges.Count < 3 && !assignedChallenges.Any(uc => uc.ChallengeId == 1)){
+					UserChallenge sleepEarly = new UserChallenge{
+						UserId = userId,
+						ChallengeId = 1,
+						StartDate = currentTime,
+						ExpireDate = currentTime.AddDays(5),
+						UserSelected = true
+					};
+					assignedChallenges.Add(sleepEarly);
+					_databaseContext.UserChallenges.Add(sleepEarly);
+				}
+			}
+
+			//If user was too hot or cold, -5
+			if(survey.TemperaturePreference.HasValue){
+				sleepScore += Math.Abs((int)survey.TemperaturePreference-1)*-5;
+			}
+
+			//Calculate distance from 8 hours of sleep
+			double distanceFromEightHours = Math.Abs(survey.SleepDuration.Value - 480.0);
+			//Apply gaussian factor onto sleep score
+			sleepScore = sleepScore * (Math.Exp(-Math.Pow(distanceFromEightHours / 240, 2)) + 1/10);
+			
+			//If over a hour away, assign 8 hour challenge
+			if(distanceFromEightHours >= 60){
+				if(assignedChallenges.Count < 3 && !assignedChallenges.Any(uc => uc.ChallengeId == 2)){
+					UserChallenge eightHours = new UserChallenge{
+						UserId = userId,
+						ChallengeId = 2,
+						StartDate = currentTime,
+						ExpireDate = currentTime.AddDays(7),
+						UserSelected = false
+					};
+					assignedChallenges.Add(eightHours);
+					_databaseContext.UserChallenges.Add(eightHours);
+				}
+			}
+
+			//Assign no eating challenge if ate late
+			if(survey.AteLate ?? false){
+				sleepScore -= 5;
+				if(assignedChallenges.Count < 3 && !assignedChallenges.Any(uc => uc.ChallengeId == 3)){
+					UserChallenge noEat = new UserChallenge{
+						UserId = userId,
+						ChallengeId = 3,
+						StartDate = currentTime,
+						ExpireDate = currentTime.AddDays(5),
+						UserSelected = true
+					};
+					assignedChallenges.Add(noEat);
+					_databaseContext.UserChallenges.Add(noEat);
+				}
+			}
+
+			//TODO: Check if the sleep setting has already been applied to a SleepReview
+			//Fetch first sleep setting where ScheduledSleep is equal to when user took the survey -1 day
+			SleepSetting sleepSetting = _databaseContext.SleepSettings.FirstOrDefault(e => e.UserId == userId && DateOnly.FromDateTime(e.ScheduledSleep) == survey.surveyDate.AddDays(-1));
+			if(sleepSetting != null){
+				int modCounter = 0;
+				foreach(DeviceSetting deviceSetting in sleepSetting.DeviceSettings){
+					if(deviceSetting.UserModified == true){
+						sleepScore -= 1.0;
+						modCounter++;
+					} else {
+						sleepScore += 0.1;
+					}
+				}
+				//Assign no modifications if 2 settings were changed
+				if(modCounter >= 2 && assignedChallenges.Count < 3 && !assignedChallenges.Any(uc => uc.ChallengeId == 5)){
+					UserChallenge noMod = new UserChallenge{
+						UserId = userId,
+						ChallengeId = 5,
+						StartDate = currentTime,
+						ExpireDate = currentTime.AddDays(7),
+						UserSelected = false
+					};
+					assignedChallenges.Add(noMod);
+					_databaseContext.UserChallenges.Add(noMod);
+				}
+			}
+
+			//If no challenges were assigned, assign 14 day streak
+			if(assignedChallenges.Count == 0){
+				UserChallenge streak = new UserChallenge{
+					UserId = userId,
+					ChallengeId = 4,
+					StartDate = currentTime,
+					ExpireDate = currentTime.AddDays(14),
+					UserSelected = false
+				};
+				assignedChallenges.Add(streak);
+				_databaseContext.UserChallenges.Add(streak);
+			}
+			
+			//Average SmarterSleepScore with wearable sleep score.
+			if(wearableData.SleepScore.HasValue){
+				sleepScore = (sleepScore*0.7 + (double)wearableData.SleepScore*0.3);
+			}
+
+			//Ensure sleep score is within range 0-100
+			sleepScore = Math.Min(100,Math.Max(0, sleepScore));
+			
+			SleepReview review = new SleepReview {
+				UserId = userId,
+				SleepSettingsId = sleepSetting != null ? sleepSetting.Id : null,
+				CreatedAt = currentTime,
+				SmarterSleepScore = Convert.ToInt32(sleepScore),
+				Survey = survey,
+				WearableLog = wearableData
+			};
+			_databaseContext.SleepReviews.Add(review);
+			await _databaseContext.SaveChangesAsync();
+			
+			return review;
 		}
 
 		private bool SleepReviewExists(int id)

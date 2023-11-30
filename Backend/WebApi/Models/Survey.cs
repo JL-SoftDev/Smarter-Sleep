@@ -20,10 +20,12 @@ public partial class Survey
 
     public bool? SleepEarlier{get; set;}
 
+    public bool? AteLate{get; set;}
+
     public int? SleepDuration { get; set; }
 
     public DateOnly SurveyDate { get; set; }
 
     [JsonIgnore]
-    public virtual ICollection<SleepReview> SleepReviews { get; set; } = new List<SleepReview>();
+    public virtual SleepReview? SleepReview { get; set; }
 }

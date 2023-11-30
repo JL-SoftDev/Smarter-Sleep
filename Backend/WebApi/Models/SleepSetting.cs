@@ -17,4 +17,7 @@ public partial class SleepSetting
     public string? ScheduledHypnogram { get; set; }
 
     public virtual ICollection<DeviceSetting> DeviceSettings { get; set; } = new List<DeviceSetting>();
+
+    [JsonIgnore]
+    public virtual SleepReview SleepReview { get; set; }
 }

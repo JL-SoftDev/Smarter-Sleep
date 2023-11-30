@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:smarter_sleep/app/screens/deviceConnectionScreen.dart';
+import 'package:smarter_sleep/app/models/device.dart';
 
 class DeviceForm extends StatefulWidget {
   final Device? initialData;
+  final VoidCallback? onDelete;
 
-  const DeviceForm({super.key, this.initialData});
+  const DeviceForm({super.key, this.initialData, this.onDelete});
 
   @override
   State<DeviceForm> createState() => _DeviceFormState();
@@ -170,19 +171,32 @@ class _DeviceFormState extends State<DeviceForm> {
                 ],
               ),
             const SizedBox(height: 20),
-            ElevatedButton(
+            ElevatedButton.icon(
+              icon: const Icon(Icons.save),
               onPressed: () {
                 Navigator.pop(context, _saveDeviceSettings());
               },
-              child: const Text('Save Device Settings'),
+              label: const Text('Save Device Settings'),
             ),
+            if (widget.onDelete != null)
+              ElevatedButton.icon(
+                icon: const Icon(Icons.delete),
+                onPressed: () {
+                  widget.onDelete!();
+                  Navigator.pop(context);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                ),
+                label: const Text('Delete Device'),
+              ),
           ],
         ),
       ),
     );
   }
 
-  Map<String, dynamic> _saveDeviceSettings() {
+  Device _saveDeviceSettings() {
     String settings = '0';
 
     if (selectedType == 'alarm') {
@@ -199,10 +213,11 @@ class _DeviceFormState extends State<DeviceForm> {
       settings = temperatureValue.toString();
     }
 
-    return {
-      'name': name.text,
-      'type': selectedType,
-      'status': settings,
-    };
+    return Device(
+      userId: "",
+      name: name.text,
+      type: selectedType,
+      status: settings,
+    );
   }
 }

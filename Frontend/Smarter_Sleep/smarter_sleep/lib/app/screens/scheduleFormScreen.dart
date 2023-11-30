@@ -1,7 +1,5 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:smarter_sleep/app/screens/deviceConnectionScreen.dart';
+import 'package:smarter_sleep/app/models/device.dart';
 import 'package:smarter_sleep/app/models/device_schedule.dart';
 
 class ScheduleForm extends StatefulWidget {
@@ -11,7 +9,7 @@ class ScheduleForm extends StatefulWidget {
   const ScheduleForm({super.key, required this.device, this.initialData});
 
   @override
-  _ScheduleFormState createState() => _ScheduleFormState();
+  State<ScheduleForm> createState() => _ScheduleFormState();
 }
 
 class _ScheduleFormState extends State<ScheduleForm> {
@@ -36,9 +34,9 @@ class _ScheduleFormState extends State<ScheduleForm> {
         final settings = widget.initialData!.settings;
 
         if (widget.device.type == 'light') {
-          brightnessValue = settings['Brightness'];
+          brightnessValue = settings!['Brightness'];
         } else if (widget.device.type == 'thermostat') {
-          temperatureValue = settings['Temperature'];
+          temperatureValue = settings!['Temperature'];
         }
       });
     }
@@ -151,18 +149,20 @@ class _ScheduleFormState extends State<ScheduleForm> {
     );
   }
 
-  Map<String, dynamic> _saveSchedule() {
+  DeviceSchedule _saveSchedule() {
     Map<String, dynamic> settings = {};
+
+    DateTime scheduledTime = DateTime(
+      selectedDate.year,
+      selectedDate.month,
+      selectedDate.day,
+      selectedTime.hour,
+      selectedTime.minute,
+    );
 
     if (widget.device.type == 'alarm') {
       settings = {
-        'NextAlarm': DateTime(
-          selectedDate.year,
-          selectedDate.month,
-          selectedDate.day,
-          selectedTime.hour,
-          selectedTime.minute,
-        ).toIso8601String(),
+        'NextAlarm': scheduledTime.toIso8601String(),
       };
     } else if (widget.device.type == 'light') {
       settings = {'Brightness': brightnessValue};
@@ -170,17 +170,12 @@ class _ScheduleFormState extends State<ScheduleForm> {
       settings = {'Temperature': temperatureValue};
     }
 
-    return {
-      'deviceId': widget.device.id,
-      'scheduledTime': DateTime(
-        selectedDate.year,
-        selectedDate.month,
-        selectedDate.day,
-        selectedTime.hour,
-        selectedTime.minute,
-      ).toIso8601String(),
-      'settings': jsonEncode(settings),
-      'userModified': true
-    };
+    return DeviceSchedule(
+      deviceId: widget.device.id!,
+      sleepSettingId: 1,
+      scheduledTime: scheduledTime,
+      settings: settings,
+      userModified: true,
+    );
   }
 }

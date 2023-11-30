@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:smarter_sleep/app/api/api_service.dart';
+import 'package:smarter_sleep/app/models/device.dart';
 
 import 'package:smarter_sleep/app/screens/ScheduleFormScreen.dart';
-import 'package:smarter_sleep/app/screens/deviceConnectionScreen.dart';
 import 'package:smarter_sleep/app/models/device_schedule.dart';
 
 class DeviceSchedulePage extends StatefulWidget {
@@ -12,7 +11,7 @@ class DeviceSchedulePage extends StatefulWidget {
   const DeviceSchedulePage({super.key, required this.device});
 
   @override
-  _DeviceSchedulePageState createState() => _DeviceSchedulePageState();
+  State<DeviceSchedulePage> createState() => _DeviceSchedulePageState();
 }
 
 class _DeviceSchedulePageState extends State<DeviceSchedulePage> {
@@ -21,21 +20,18 @@ class _DeviceSchedulePageState extends State<DeviceSchedulePage> {
   @override
   void initState() {
     super.initState();
-    fetchDeviceSchedules(widget.device.id);
+    fetchDeviceSchedules(widget.device.id!);
   }
 
   Future<void> fetchDeviceSchedules(int deviceId) async {
-    final response = await http.get(Uri.parse(
-        'http://ec2-54-87-139-255.compute-1.amazonaws.com/api/DeviceSettings'));
-
-    if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body);
+    dynamic fetchedSchedules = await ApiService.get('api/DeviceSettings');
+    if (fetchedSchedules != null) {
       final now = DateTime.now();
-      List<DeviceSchedule> deviceSchedules = data
+      List<DeviceSchedule> deviceSchedules = fetchedSchedules
           .where((scheduleData) =>
               scheduleData['deviceId'] == deviceId &&
               DateTime.parse(scheduleData['scheduledTime']).isAfter(now))
-          .map((scheduleData) {
+          .map<DeviceSchedule>((scheduleData) {
         return DeviceSchedule.fromJson(scheduleData);
       }).toList();
 
@@ -97,11 +93,11 @@ class _DeviceSchedulePageState extends State<DeviceSchedulePage> {
 
   Widget _buildSettingsWidget(DeviceSchedule schedule) {
     if (widget.device.type == 'alarm') {
-      return Text('Next Alarm: ${schedule.settings['NextAlarm']}');
+      return Text('Next Alarm: ${schedule.scheduledTime}');
     } else if (widget.device.type == 'light') {
-      return Text('Set brightness to ${schedule.settings['Brightness']}%');
+      return Text('Set brightness to ${schedule.settings!['Brightness']}%');
     } else if (widget.device.type == 'thermostat') {
-      return Text('Set temperature to ${schedule.settings['Temperature']}°F');
+      return Text('Set temperature to ${schedule.settings!['Temperature']}°F');
     }
     return Text('Settings: ${schedule.settings.toString()}');
   }
@@ -123,7 +119,9 @@ class _DeviceSchedulePageState extends State<DeviceSchedulePage> {
             TextButton(
               child: const Text('Delete'),
               onPressed: () {
-                _deleteSchedule(schedule.id);
+                if (schedule.id != null) {
+                  _deleteSchedule(schedule.id!);
+                }
                 Navigator.of(context).pop();
               },
             ),
@@ -133,51 +131,48 @@ class _DeviceSchedulePageState extends State<DeviceSchedulePage> {
     );
   }
 
-  void _navigateToAddSchedule(BuildContext context) {
-    Navigator.push(
+  /// Dropped due to conflicts with sleep setting generation.
+  Future<void> _navigateToAddSchedule(BuildContext context) async {
+    DeviceSchedule? schedule = await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => ScheduleForm(device: widget.device),
       ),
-    ).then((schedule) {
-      if (schedule != null) {
-        //TODO: Get the exact sleep setting for that day otherwise create one.
-        schedule['sleepSettingId'] =
-            schedules.isNotEmpty ? schedules[0].sleepSettingId : 1;
-
-        http
-            .post(
-                Uri.parse(
-                    'http://ec2-54-87-139-255.compute-1.amazonaws.com/api/DeviceSettings'),
-                headers: {'Content-Type': 'application/json'},
-                body: jsonEncode(schedule))
-            .then((response) {
-          if (response.statusCode == 201) {
-            fetchDeviceSchedules(widget.device.id);
-          } else {
-            print('Error: ${response.statusCode}');
+    );
+    if (schedule != null) {
+      /*
+       * List sleepSchedules = fetchSleepSchedules()
+       * sleepSchedules.foreach(schedule) =>
+       *  if device_setting.scheduled_time < schedule.scheduled_wake and device_setting.scheduled_time > schedule.scheduled_wake + 1 day then
+       *    device_setting.sleep_settings_id = schedule.id
+       * 
+       * if !device_setting.sleep_settings_id then
+       *  device_setting.sleep_settings_id = createNewSleepSetting(device_setting.scheduled_time);
+      */
+      //Does it make sense for every device setting after scheduled_wake goes to the next one
+      ApiService.post('api/DeviceSettings', schedule.toJson()).then(
+        (response) {
+          if (response != null) {
+            fetchDeviceSchedules(widget.device.id!);
           }
-        }).catchError(print);
-      }
-    });
+        },
+      );
+    }
   }
 
   void _deleteSchedule(int id) {
-    http
-        .delete(Uri.parse(
-            'http://ec2-54-87-139-255.compute-1.amazonaws.com/api/DeviceSettings/${id}'))
-        .then((response) {
-      if (response.statusCode == 204) {
-        fetchDeviceSchedules(widget.device.id);
-      } else {
-        print('Error: ${response.statusCode}');
-      }
-    }).catchError(print);
+    ApiService.delete('api/DeviceSettings/$id').then(
+      (response) {
+        if (response != null) {
+          fetchDeviceSchedules(widget.device.id!);
+        }
+      },
+    );
   }
 
-  void _navigateToEditSchedule(
-      BuildContext context, DeviceSchedule initialData) {
-    Navigator.push(
+  Future<void> _navigateToEditSchedule(
+      BuildContext context, DeviceSchedule initialData) async {
+    DeviceSchedule? schedule = await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => ScheduleForm(
@@ -185,24 +180,20 @@ class _DeviceSchedulePageState extends State<DeviceSchedulePage> {
           initialData: initialData,
         ),
       ),
-    ).then((schedule) {
-      if (schedule != null) {
-        schedule['id'] = initialData.id;
-        schedule['sleepSettingId'] = initialData.sleepSettingId;
-        http
-            .put(
-                Uri.parse(
-                    'http://ec2-54-87-139-255.compute-1.amazonaws.com/api/DeviceSettings/${initialData.id}'),
-                headers: {'Content-Type': 'application/json'},
-                body: jsonEncode(schedule))
-            .then((response) {
-          if (response.statusCode == 204) {
-            fetchDeviceSchedules(widget.device.id);
-          } else {
-            print('Error: ${response.statusCode}');
+    );
+
+    if (schedule != null) {
+      schedule.id = initialData.id;
+      schedule.sleepSettingId = initialData.sleepSettingId;
+
+      ApiService.put('api/DeviceSettings/${initialData.id}', schedule.toJson())
+          .then(
+        (response) {
+          if (response != null) {
+            fetchDeviceSchedules(widget.device.id!);
           }
-        }).catchError(print);
-      }
-    });
+        },
+      );
+    }
   }
 }

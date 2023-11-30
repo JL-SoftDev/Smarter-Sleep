@@ -1,22 +1,47 @@
 import 'dart:convert';
 
-class DeviceSchedule {
-  final int id;
-  final int deviceId;
-  final int sleepSettingId;
-  final DateTime scheduledTime;
-  final Map<String, dynamic> settings;
+import 'package:smarter_sleep/app/models/device.dart';
 
-  DeviceSchedule(this.id, this.deviceId, this.sleepSettingId,
-      this.scheduledTime, this.settings);
+class DeviceSchedule {
+  int? id;
+  int deviceId;
+  Device? device;
+  int? sleepSettingId;
+  final DateTime scheduledTime;
+  final Map<String, dynamic>? settings;
+  bool? userModified = false;
+
+  DeviceSchedule({
+    this.id,
+    required this.deviceId,
+    this.device,
+    required this.sleepSettingId,
+    required this.scheduledTime,
+    this.settings,
+    this.userModified,
+  });
 
   factory DeviceSchedule.fromJson(Map<String, dynamic> json) {
+    Device? jsonDevice;
+    int? jsonId;
+    if (json['device'] != null) {
+      jsonDevice = Device.fromJson(json['device']);
+      if (jsonDevice.id != null) {
+        jsonId = jsonDevice.id!;
+      }
+    }
+    if (json['id'] != null) {
+      jsonId = json['id'];
+    }
+
     return DeviceSchedule(
-      json['id'] as int,
-      json['deviceId'] as int,
-      json['sleepSettingId'] as int,
-      DateTime.parse(json['scheduledTime'] as String),
-      _decodeSettings(json['settings']),
+      id: json['id'],
+      deviceId: jsonId!,
+      device: jsonDevice,
+      sleepSettingId: json['sleepSettingId'],
+      scheduledTime: DateTime.parse(json['scheduledTime']),
+      settings: _decodeSettings(json['settings']),
+      userModified: json['userModified'],
     );
   }
 
@@ -26,9 +51,14 @@ class DeviceSchedule {
         'sleepSettingId': sleepSettingId,
         'scheduledTime': scheduledTime.toIso8601String(),
         'settings': settings,
+        'userModified': userModified,
       };
 
-  static Map<String, dynamic> _decodeSettings(String jsonString) {
-    return json.decode(jsonString);
+  static Map<String, dynamic>? _decodeSettings(String? jsonString) {
+    if (jsonString != null) {
+      return json.decode(jsonString);
+    } else {
+      return null;
+    }
   }
 }
