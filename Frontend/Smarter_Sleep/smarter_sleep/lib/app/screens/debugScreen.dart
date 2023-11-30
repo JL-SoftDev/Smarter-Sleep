@@ -9,8 +9,6 @@ class DebugScreen extends StatefulWidget {
   State<DebugScreen> createState() => _DebugScreenState();
 }
 
-//TODO: Allow user to set current DateTime throughout device
-
 class _DebugScreenState extends State<DebugScreen> {
   final GlobalServices _globalServices = GlobalServices();
 
@@ -32,14 +30,16 @@ class _DebugScreenState extends State<DebugScreen> {
           children: [
             //Show time
             Center(
-                child: Text(
-              "Current Time: ${_globalServices.currentTime}",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            )),
+              child: Text(
+                "Current Time: ${_globalServices.currentTime}",
+                style:
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ),
             //Change Current Time button
             TextButton(
                 onPressed: _onChangeTimePressed,
-                child: Text("Change Current Time")),
+                child: const Text("Change Current Time")),
           ],
         ));
   }
