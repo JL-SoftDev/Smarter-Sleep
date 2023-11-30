@@ -6,7 +6,7 @@ import 'package:smarter_sleep/app/appFrame.dart';
 class ApiService {
   /// If true makes requests to localhost(127.0.0.1).
   /// For Android Studio Emulation must set proxy config for 10.0.2.2:port
-  static const bool localhost = true;
+  static const bool localhost = false;
 
   static const String baseUrl = !localhost
       ? "http://ec2-54-87-139-255.compute-1.amazonaws.com"
