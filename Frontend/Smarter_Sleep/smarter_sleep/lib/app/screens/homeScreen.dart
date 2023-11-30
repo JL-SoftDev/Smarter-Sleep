@@ -175,7 +175,6 @@ class ChallengeList extends StatelessWidget {
               Stack(
                 children: [
                   LinearProgressIndicator(
-                    borderRadius: BorderRadius.circular(4),
                     backgroundColor: Colors.blueGrey[100],
                     color: color,
                     value: completionPercentage,

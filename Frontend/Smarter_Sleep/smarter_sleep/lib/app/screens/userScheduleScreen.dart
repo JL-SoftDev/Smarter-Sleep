@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:flutter/material.dart';
 import '../appFrame.dart';
+import 'package:http/http.dart' as http;
 
 class UserScheduleScreen extends StatefulWidget {
   const UserScheduleScreen({super.key});
@@ -23,13 +26,28 @@ class _UserScheduleScreenState extends State<UserScheduleScreen> {
 
   Future<void> fetchUserSchedule() async {
     //TODO: Fetch schedules from API, expect the data shown below
-    List<dynamic> body = [
-      {
-        "UserId": "73b11e71-e9ac-4fb1-9b9b-f7b667d1e45a",
-        "DayOfWeek": 1,
-        "WakeTime": "08:00:00"
-      }
-    ];
+    //List<dynamic> body = [
+        //"UserId": "73b11e71-e9ac-4fb1-9b9b-f7b667d1e45a",
+        //"DayOfWeek": 1,
+        //"WakeTime": "08:00:00"
+    final response = await http.get(Uri.parse(
+        'http://ec2-54-87-139-255.compute-1.amazonaws.com/api/CustomSchedules'));
+
+    if (response.statusCode == 200) {
+      final user = await Amplify.Auth.getCurrentUser();
+      final userId = user.userId;
+      final List<TimeOfDay> data = json.decode(response.body);
+      List<TimeOfDay> fetchedDevices = data
+          .where((deviceData) => deviceData['userId'] == userId)
+          .map((deviceData) {
+        return Device(deviceData['id'], deviceData['name'], deviceData['type'],
+            deviceData['status']);
+      }).toList();
+      setState(() {
+        devices = fetchedDevices;
+      });
+    };
+  };
 
     //TODO: Filter for logged in user through amplify
     List<CustomSchedule> fetchedSchedule =
@@ -57,7 +75,6 @@ class _UserScheduleScreenState extends State<UserScheduleScreen> {
           ),
         ],
       ),
-      //TODO: Design the page layout and prompt for user to input times
       //TODO: Add some way for the user to submit schedules, send a post request to the api with the new data
       body: 
       Padding(padding: const EdgeInsets.all(40),
