@@ -22,4 +22,6 @@ public partial class DeviceSetting
 
     [JsonIgnore]
     public virtual SleepSetting? SleepSetting { get; set; }
+
+    public virtual Device? Device { get; set; }
 }

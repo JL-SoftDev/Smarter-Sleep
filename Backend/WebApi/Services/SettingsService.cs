@@ -98,12 +98,13 @@ namespace WebApi.Services
             {
                 return new List<DeviceSetting>();
             }
-            return await _databaseContext.DeviceSetting.ToListAsync();
+            return await _databaseContext.DeviceSetting.Include(ds => ds.Device).ToListAsync();
         }
 
         public async Task<DeviceSetting?> GetDeviceSetting(int id)
         {
-            var deviceSetting = await _databaseContext.DeviceSetting.FindAsync(id);
+            var deviceSetting = await _databaseContext.DeviceSetting.Include(ds => ds.Device)
+				.FirstOrDefaultAsync(ds => ds.Id == id);
             return deviceSetting;
         }
 

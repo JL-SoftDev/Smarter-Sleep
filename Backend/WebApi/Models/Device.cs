@@ -19,4 +19,7 @@ public partial class Device
     public int? Port { get; set; }
 
     public string? Status { get; set; }
+
+    [JsonIgnore]
+    public virtual ICollection<DeviceSetting> DeviceSettings { get; set; } = new List<DeviceSetting>();
 }

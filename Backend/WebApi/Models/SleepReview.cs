@@ -10,11 +10,11 @@ public partial class SleepReview
 
     public Guid UserId { get; set; }
 
-    [JsonIgnore]
     public int? WearableLogId { get; set; }
 
-    [JsonIgnore]
     public int? SurveyId { get; set; }
+
+    public int? SleepSettingsId { get; set; }
 
     public DateTime CreatedAt { get; set; }
 
@@ -23,4 +23,6 @@ public partial class SleepReview
     public virtual Survey? Survey { get; set; }
 
     public virtual WearableData? WearableLog { get; set; }
+
+    public virtual SleepSetting? SleepSetting { get; set; }
 }

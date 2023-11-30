@@ -17,8 +17,8 @@ public partial class Transaction
     public string? Description { get; set; }
 
     [JsonIgnore]
-    public virtual ICollection<ChallengeLog> ChallengeLogs { get; set; } = new List<ChallengeLog>();
+    public virtual ChallengeLog? ChallengeLog { get; set; }
 
     [JsonIgnore]
-    public virtual ICollection<PurchaseLog> PurchaseLogs { get; set; } = new List<PurchaseLog>();
+    public virtual PurchaseLog? PurchaseLog { get; set; }
 }

@@ -24,6 +24,9 @@ namespace WebApi.Services
 			return await _databaseContext.SleepReviews
 				.Include(sr => sr.Survey)
 				.Include(sr => sr.WearableLog)
+				.Include(sr => sr.SleepSetting)
+					.ThenInclude(ss => ss.DeviceSettings)
+						.ThenInclude(ds => ds.Device)
 				.ToListAsync();
 		}
 
@@ -32,6 +35,9 @@ namespace WebApi.Services
 			var sleepReview = await _databaseContext.SleepReviews
 				.Include(sr => sr.Survey)
 				.Include(sr => sr.WearableLog)
+				.Include(sr => sr.SleepSetting)
+					.ThenInclude(ss => ss.DeviceSettings)
+						.ThenInclude(ds => ds.Device)
 				.FirstOrDefaultAsync(sr => sr.Id == id);
 			return sleepReview;
 		}
@@ -90,8 +96,6 @@ namespace WebApi.Services
 			DateTime currentTime = appTime ?? DateTime.Now;
 
 			List<UserChallenge> assignedChallenges = _databaseContext.UserChallenges.Where(e => e.UserId == userId).ToList();
-			//Adjust sleep date to actual sleepdate following Oura documentation
-			DateOnly adjustedSleepDate = wearableData.SleepDate.AddDays(1);
 			
 			//Start sleep score at 100
 			double sleepScore = 100.0;
@@ -103,7 +107,7 @@ namespace WebApi.Services
 
 			//If user wants to wake earlier, assign sleep early challenge
 			if(survey.WakePreference==0){
-				if(assignedChallenges.Count < 3){
+				if(assignedChallenges.Count < 3 && !assignedChallenges.Any(uc => uc.ChallengeId == 1)){
 					UserChallenge sleepEarly = new UserChallenge{
 						UserId = userId,
 						ChallengeId = 1,
@@ -128,7 +132,7 @@ namespace WebApi.Services
 			
 			//If over a hour away, assign 8 hour challenge
 			if(distanceFromEightHours >= 60){
-				if(assignedChallenges.Count < 3){
+				if(assignedChallenges.Count < 3 && !assignedChallenges.Any(uc => uc.ChallengeId == 2)){
 					UserChallenge eightHours = new UserChallenge{
 						UserId = userId,
 						ChallengeId = 2,
@@ -144,7 +148,7 @@ namespace WebApi.Services
 			//Assign no eating challenge if ate late
 			if(survey.AteLate ?? false){
 				sleepScore -= 5;
-				if(assignedChallenges.Count < 3){
+				if(assignedChallenges.Count < 3 && !assignedChallenges.Any(uc => uc.ChallengeId == 3)){
 					UserChallenge noEat = new UserChallenge{
 						UserId = userId,
 						ChallengeId = 3,
@@ -157,8 +161,9 @@ namespace WebApi.Services
 				}
 			}
 
-			//Substract one point for every modified schedule, add .1 for every setting applied
-			SleepSetting sleepSetting = _databaseContext.SleepSettings.FirstOrDefault(e => e.UserId == userId && DateOnly.FromDateTime(e.ScheduledSleep) == adjustedSleepDate);
+			//TODO: Check if the sleep setting has already been applied to a SleepReview
+			//Fetch first sleep setting where ScheduledSleep is equal to when user took the survey -1 day
+			SleepSetting sleepSetting = _databaseContext.SleepSettings.FirstOrDefault(e => e.UserId == userId && DateOnly.FromDateTime(e.ScheduledSleep) == survey.surveyDate.AddDays(-1));
 			if(sleepSetting != null){
 				int modCounter = 0;
 				foreach(DeviceSetting deviceSetting in sleepSetting.DeviceSettings){
@@ -170,7 +175,7 @@ namespace WebApi.Services
 					}
 				}
 				//Assign no modifications if 2 settings were changed
-				if(modCounter >= 2 && assignedChallenges.Count < 3){
+				if(modCounter >= 2 && assignedChallenges.Count < 3 && !assignedChallenges.Any(uc => uc.ChallengeId == 5)){
 					UserChallenge noMod = new UserChallenge{
 						UserId = userId,
 						ChallengeId = 5,
@@ -206,6 +211,7 @@ namespace WebApi.Services
 			
 			SleepReview review = new SleepReview {
 				UserId = userId,
+				SleepSettingsId = sleepSetting != null ? sleepSetting.Id : null,
 				CreatedAt = currentTime,
 				SmarterSleepScore = Convert.ToInt32(sleepScore),
 				Survey = survey,

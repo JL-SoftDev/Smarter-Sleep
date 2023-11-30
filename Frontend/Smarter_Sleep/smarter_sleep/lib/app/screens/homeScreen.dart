@@ -1,10 +1,10 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:math';
 import 'package:amplify_flutter/amplify_flutter.dart';
-import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:smarter_sleep/app/api/api_service.dart';
+import 'package:smarter_sleep/app/models/survey.dart';
 
 import 'package:smarter_sleep/app/models/user_challenge.dart';
 import 'package:smarter_sleep/app/models/sleep_review.dart';
@@ -85,15 +85,16 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     ];
 
-    final response = await http.get(Uri.parse(
-        'http://ec2-54-87-139-255.compute-1.amazonaws.com/api/SleepReviews'));
+    dynamic response = await ApiService.get('api/SleepReviews');
 
     int fetchedSleepScore = 0;
-    if (response.statusCode == 200) {
-      List<dynamic> body = json.decode(response.body);
-      List<SleepReview> reviews = body
-          .map((json) => SleepReview.fromJson(json))
-          .where((review) => review.userId == user.userId)
+    if (response != null) {
+      List<SleepReview> reviews = response
+          .where((reviewData) =>
+              reviewData['userId'] == user.userId &&
+              reviewData['survey'] != null &&
+              reviewData['wearableLog'] != null)
+          .map<SleepReview>((json) => SleepReview.fromJson(json))
           .toList();
       if (reviews.isNotEmpty) {
         SleepReview lastReview =
@@ -111,11 +112,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   //Currently always returns a wearable log, implemented to support no wearable data found.
   Future<WearableLog?> _fetchWearableData(bool goodData) async {
-    //TODO: Fetch application defined time
-    DateTime currentTime = DateTime.now();
-
     WearableLog useDefaultLog() {
-      DateTime lastNight = currentTime
+      DateTime lastNight = _globalServices.currentTime
           .subtract(const Duration(days: 1))
           .add(const Duration(hours: 21));
       DateTime wakeTime = lastNight.add(const Duration(hours: 8));
@@ -130,11 +128,11 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     try {
-      var response = await http.get(Uri.parse(
-          'http://ec2-54-87-139-255.compute-1.amazonaws.com/api/WearableDataInjection/${goodData ? 'better' : 'worse'}?UserId=$userId&dateTime=$currentTime'));
-      if (response.statusCode == 200) {
-        Map<String, dynamic> body = json.decode(response.body);
-        WearableLog data = WearableLog.fromJson(body);
+      dynamic response = await ApiService.get(
+          'api/WearableDataInjection/${goodData ? 'better' : 'worse'}?UserId=$userId&dateTime=${_globalServices.currentTime}');
+
+      if (response != null) {
+        WearableLog data = WearableLog.fromJson(response);
         return data;
       } else {
         // No wearable log found
@@ -260,8 +258,8 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 10),
             Column(
               children: userChallenges.map((userChallenge) {
-                final Duration remainingTime =
-                    userChallenge.expireDate.difference(DateTime.now());
+                final Duration remainingTime = userChallenge.expireDate
+                    .difference(_globalServices.currentTime);
 
                 Color color = predefinedColors[colorIndex];
                 colorIndex = (colorIndex + 1) % predefinedColors.length;
@@ -348,102 +346,96 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> scheduleDevices() async {
-    http.post(
-        Uri.parse(
-            'http://ec2-54-87-139-255.compute-1.amazonaws.com/api/DeviceScheduling?UserId=$userId'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(_globalServices.currentTime.toIso8601String()));
+    ApiService.post('api/DeviceScheduling?UserId=$userId',
+        _globalServices.currentTime.toIso8601String());
   }
 
-  Future<void> submitSleepData(survey, wearableData) async {
+  Future<void> submitSleepData(
+      Survey? survey, WearableLog? wearableData) async {
     if (survey != null && wearableData != null) {
       Map<String, dynamic> payload = {
-        "survey": survey,
-        "wearableData": wearableData.toJson()
+        "survey": survey.toJson(),
+        "wearableData": wearableData.toJson(),
+        "appTime": _globalServices.currentTime.toIso8601String()
       };
-      //TODO: Change to use the api/devicesRoutes instead of directly calling it.
-      http
-          .post(
-              Uri.parse(
-                  'http://ec2-54-87-139-255.compute-1.amazonaws.com/api/SleepReviews/GenerateReview/$userId'),
-              headers: {'Content-Type': 'application/json'},
-              body: jsonEncode(payload))
-          .then((response) {
-        if (response.statusCode == 201) {
-          _popupReview(SleepReview.fromJson(json.decode(response.body)));
-          scheduleDevices();
-        } else {
-          print(response.body);
-          print('Error: ${response.statusCode}');
-        }
-      }).catchError((e) {});
+
+      dynamic response = await ApiService.post(
+          'api/SleepReviews/GenerateReview/$userId', payload);
+
+      if (response != null) {
+        SleepReview review = SleepReview.fromJson(response);
+        _popupReview(review);
+        scheduleDevices();
+        setState(() {
+          _sleepScore = review.smarterSleepScore;
+        });
+      }
     }
   }
 
-  void toggleSleep() {
+  Future<void> toggleSleep() async {
+    final navigator = Navigator.of(context);
+    int duration = sleepTime.elapsed.inMinutes;
+
     setState(() {
       isSleeping = !isSleeping;
       if (isSleeping) {
         sleepTime.start();
       } else {
         sleepTime.stop();
-
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: const Text('Simulated Wearable Data'),
-              content: const Text(
-                  "For prototype purposes, would you like to simulate better or worse wearable data for this session?"),
-              actions: <Widget>[
-                ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.pop(context, false);
-                  },
-                  icon: const Icon(Icons.sentiment_very_dissatisfied),
-                  label: const Text('Worse'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
-                  ),
-                ),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.pop(context, true);
-                  },
-                  icon: const Icon(Icons.sentiment_very_satisfied),
-                  label: const Text('Better'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                  ),
-                ),
-              ],
-            );
-          },
-        ).then((userSelection) {
-          if (userSelection == null) {
-            return;
-          }
-          _fetchWearableData(userSelection).then((wearableData) {
-            //Use wearable data to calculate sleep duration if it exists, otherwise use timer
-            int minutesSlept = wearableData != null
-                ? wearableData.sleepEnd
-                    .difference(wearableData.sleepStart)
-                    .inMinutes
-                : sleepTime.elapsed.inMinutes;
-
-            sleepTime.reset();
-
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => SurveyForm(trackedTime: minutesSlept),
-              ),
-            ).then((survey) async {
-              submitSleepData(survey, wearableData);
-            });
-          });
-        });
+        sleepTime.reset();
       }
     });
+
+    if (!isSleeping) {
+      bool? userSelection = await showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Simulated Wearable Data'),
+            content: const Text(
+                "For prototype purposes, would you like to simulate better or worse wearable data for this session?"),
+            actions: <Widget>[
+              ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.pop(context, false);
+                },
+                icon: const Icon(Icons.sentiment_very_dissatisfied),
+                label: const Text('Worse'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                ),
+              ),
+              ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.pop(context, true);
+                },
+                icon: const Icon(Icons.sentiment_very_satisfied),
+                label: const Text('Better'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                ),
+              ),
+            ],
+          );
+        },
+      );
+      if (userSelection == null) {
+        return;
+      }
+      //Use wearable data to calculate sleep duration if it exists, otherwise use timer
+      WearableLog? wearableData = await _fetchWearableData(userSelection);
+      int minutesSlept = wearableData != null
+          ? wearableData.sleepEnd.difference(wearableData.sleepStart).inMinutes
+          : duration;
+
+      Survey? survey = await navigator.push(
+        //context,
+        MaterialPageRoute(
+          builder: (context) => SurveyForm(trackedTime: minutesSlept),
+        ),
+      );
+      submitSleepData(survey, wearableData);
+    }
   }
 }

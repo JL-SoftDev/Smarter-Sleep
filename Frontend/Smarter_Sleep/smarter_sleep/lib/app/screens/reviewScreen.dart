@@ -1,9 +1,8 @@
-import 'dart:convert';
-
 import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:smarter_sleep/app/api/api_service.dart';
 import 'package:smarter_sleep/app/models/sleep_review.dart';
+import 'package:smarter_sleep/app/utils/color_utils.dart';
 
 import 'sleepInsightScreen.dart';
 
@@ -24,17 +23,19 @@ class _SleepReviewScreenState extends State<SleepReviewScreen> {
   }
 
   Future<void> fetchReviews() async {
-    final user = await Amplify.Auth.getCurrentUser();
+    dynamic response = await ApiService.get('api/SleepReviews');
 
-    final response = await http.get(Uri.parse(
-        'http://ec2-54-87-139-255.compute-1.amazonaws.com/api/SleepReviews'));
+    if (response != null) {
+      final user = await Amplify.Auth.getCurrentUser();
 
-    if (response.statusCode == 200) {
-      List<dynamic> body = json.decode(response.body);
-      List<SleepReview> fetchedReviews = body
-          .map((json) => SleepReview.fromJson(json))
-          .where((review) => review.userId == user.userId)
-          .toList();
+      List<SleepReview> fetchedReviews = response
+          .where((reviewData) =>
+              reviewData['userId'] == user.userId &&
+              reviewData['survey'] != null &&
+              reviewData['wearableLog'] != null)
+          .map<SleepReview>((reviewData) {
+        return SleepReview.fromJson(reviewData);
+      }).toList();
       setState(() {
         sleepReviews = fetchedReviews;
       });
@@ -53,69 +54,63 @@ class _SleepReviewScreenState extends State<SleepReviewScreen> {
     }
   }
 
-  Color getSleepScoreColor(int score) {
-    if (score >= 0 && score <= 100) {
-      final colorTween = ColorTween(
-        begin: Colors.red,
-        end: Colors.green,
-      );
-      return colorTween.transform(score / 100)!;
-    } else {
-      return Colors.black;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Sleep Review'),
       ),
-      body: ListView.builder(
-        itemCount: sleepReviews.length,
-        itemBuilder: (context, index) {
-          SleepReview review = sleepReviews[index];
-          final sleepScore = review.smarterSleepScore;
-          final sleepDuration = review.survey.sleepDuration;
-          final sleepScoreColor = getSleepScoreColor(sleepScore);
-          final sleepIcon = getSleepIcon(sleepScore);
+      body: sleepReviews.isEmpty
+          ? const Center(
+              child: Text('No reviews available, complete a sleep cycle first'),
+            )
+          : ListView.builder(
+              itemCount: sleepReviews.length,
+              itemBuilder: (context, index) {
+                SleepReview review = sleepReviews[index];
+                final sleepScore = review.smarterSleepScore;
+                final sleepScoreColor = ColorUtils.getScoreColor(sleepScore);
+                final sleepIcon = getSleepIcon(sleepScore);
 
-          return Card(
-            margin: const EdgeInsets.all(8.0),
-            elevation: 4,
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              child: ListTile(
-                title: Text('Sleep Date: ${review.survey.surveyDate}'),
-                leading: Icon(sleepIcon, color: sleepScoreColor, size: 36),
-                trailing: Stack(
-                  alignment: Alignment.center,
-                  children: <Widget>[
-                    Transform.scale(
-                      scale: 0.8,
-                      child: CircularProgressIndicator(
-                        value: sleepScore / 100,
-                        valueColor:
-                            AlwaysStoppedAnimation<Color>(sleepScoreColor),
+                return Card(
+                  margin: const EdgeInsets.all(8.0),
+                  elevation: 4,
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    child: ListTile(
+                      title: Text('Sleep Date: ${review.survey.surveyDate}'),
+                      leading:
+                          Icon(sleepIcon, color: sleepScoreColor, size: 36),
+                      trailing: Stack(
+                        alignment: Alignment.center,
+                        children: <Widget>[
+                          Transform.scale(
+                            scale: 0.8,
+                            child: CircularProgressIndicator(
+                              value: sleepScore / 100,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                  sleepScoreColor),
+                            ),
+                          ),
+                          Text('$sleepScore',
+                              style: TextStyle(
+                                  fontSize: 14, color: sleepScoreColor)),
+                        ],
                       ),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                SleepInsightScreen(review: review),
+                          ),
+                        );
+                      },
                     ),
-                    Text('$sleepScore',
-                        style: TextStyle(fontSize: 14, color: sleepScoreColor)),
-                  ],
-                ),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => SleepInsightScreen(review: review),
-                    ),
-                  );
-                },
-              ),
+                  ),
+                );
+              },
             ),
-          );
-        },
-      ),
     );
   }
 }

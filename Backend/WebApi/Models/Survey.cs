@@ -27,5 +27,5 @@ public partial class Survey
     public DateOnly SurveyDate { get; set; }
 
     [JsonIgnore]
-    public virtual ICollection<SleepReview> SleepReviews { get; set; } = new List<SleepReview>();
+    public virtual SleepReview? SleepReview { get; set; }
 }

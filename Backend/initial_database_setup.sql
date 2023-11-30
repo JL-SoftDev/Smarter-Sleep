@@ -1,5 +1,4 @@
-DROP TABLE IF EXISTS app_user CASCADE;
-CREATE TABLE app_user (
+CREATE TABLE IF NOT EXISTS app_user (
     user_id UUID PRIMARY KEY,
     username VARCHAR(20) NOT NULL,
     created_at TIMESTAMP,
@@ -39,20 +38,6 @@ CREATE TABLE survey (
     survey_date DATE NOT NULL
 );
 
-
-DROP TABLE IF EXISTS sleep_review;
-CREATE TABLE sleep_review (
-    id SERIAL PRIMARY KEY,
-    user_id UUID NOT NULL,
-    wearable_log_id INT,
-    survey_id INT,
-    created_at TIMESTAMP NOT NULL,
-    smarter_sleep_score INT,
-    FOREIGN KEY (user_id) REFERENCES app_user(user_id) ON DELETE CASCADE,
-    FOREIGN KEY (wearable_log_id) REFERENCES wearable_data(id) ON DELETE CASCADE,
-    FOREIGN KEY (survey_id) REFERENCES survey(id) ON DELETE CASCADE
-);
-
 DROP TABLE IF EXISTS sleep_settings CASCADE;
 CREATE TABLE sleep_settings (
     id SERIAL PRIMARY KEY,
@@ -61,6 +46,21 @@ CREATE TABLE sleep_settings (
     scheduled_wake TIMESTAMP NOT NULL,
     scheduled_hypnogram VARCHAR,
     FOREIGN KEY (user_id) REFERENCES app_user(user_id) ON DELETE CASCADE
+);
+
+DROP TABLE IF EXISTS sleep_review;
+CREATE TABLE sleep_review (
+    id SERIAL PRIMARY KEY,
+    user_id UUID NOT NULL,
+    wearable_log_id INT,
+    survey_id INT,
+    sleep_settings_id INT,
+    created_at TIMESTAMP NOT NULL,
+    smarter_sleep_score INT,
+    FOREIGN KEY (user_id) REFERENCES app_user(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (wearable_log_id) REFERENCES wearable_data(id) ON DELETE CASCADE,
+    FOREIGN KEY (survey_id) REFERENCES survey(id) ON DELETE CASCADE,
+    FOREIGN KEY (sleep_settings_id) REFERENCES sleep_settings(id) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS device CASCADE;
