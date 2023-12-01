@@ -30,12 +30,6 @@ class _UserScheduleScreenState extends State<UserScheduleScreen> {
   }
 
   Future<void> fetchUserSchedule() async {
-    //TODO: Fetch schedules from API, expect the data shown below
-    //List<dynamic> body = [
-    //"UserId": "73b11e71-e9ac-4fb1-9b9b-f7b667d1e45a",
-    //"DayOfWeek": 1,
-    //"WakeTime": "08:00:00"
-
     dynamic response = await ApiService.get('api/CustomSchedules');
     if (response != null) {
       final user = await Amplify.Auth.getCurrentUser();
@@ -47,7 +41,10 @@ class _UserScheduleScreenState extends State<UserScheduleScreen> {
         return CustomSchedule.fromJson(scheduleData);
       }).toList();
       setState(() {
-        //TODO: Update timeList using fetchedSchedules
+        for(int i = 0; i < fetchedSchedules.length; i++){
+          timeList[i] == fetchedSchedules[i];
+          print(fetchedSchedules[i]);
+        }
       });
     }
 /*
@@ -60,7 +57,8 @@ class _UserScheduleScreenState extends State<UserScheduleScreen> {
 
     setState(() {
       schedule = fetchedSchedule;
-    });*/
+    });
+    */
   }
 
   @override
@@ -78,7 +76,8 @@ class _UserScheduleScreenState extends State<UserScheduleScreen> {
         ],
       ),
       //TODO: Add some way for the user to submit schedules, send a post request to the api with the new data
-      body: Padding(
+      body: 
+      Padding(
         padding: const EdgeInsets.all(40),
         child: ListView.builder(
           itemCount: 7,
@@ -99,35 +98,40 @@ class _UserScheduleScreenState extends State<UserScheduleScreen> {
                         );
                         if (pickedTime != null && pickedTime != selectedTime) {
                           setState(() {
+                            _saveCustomSchedule(getUserID(), index, pickedTime);
+                            fetchUserSchedule();
                             timeList[index] = pickedTime;
                           });
                         }
                       }),
+                       
                 ],
               ),
             );
           },
         ),
-      ),
+      ), 
+      
     );
   }
 }
+Future<String> getUserID() async{
+    final user = await Amplify.Auth.getCurrentUser();
+    final userId = user.userId;
 
-/*
-_saveCustomSchedule function {
-  CustomSchedule newSchedule = ...
-  .../api/CustomSchedules/${newSchedule.userId}/${newSchedule.dayOfWeek}
+    return userId;
+}
 
-  ApiService.put('api/CustomSchedules/${newSchedule.userId}/${newSchedule.dayOfWeek}', newSchedule.toJson())
+Future<void> _saveCustomSchedule(userID, dayOfWeek, wakeTime) async {
+  CustomSchedule newSchedule = CustomSchedule(userId: userID, dayOfWeek: dayOfWeek, wakeTime: wakeTime);
+  ApiService.put('api/CustomSchedules/${newSchedule.userId}/${newSchedule.dayOfWeek}/${newSchedule.wakeTime}', newSchedule.toJson())
             .then(
-          (response) {
+          (response) async {
             if (response != null) {
-              //TODO: New schedule submitted
             }
           },
         );
-        }
-*/
+  }
 
 //Can be moved to app/models however only used on this screen
 class CustomSchedule {
