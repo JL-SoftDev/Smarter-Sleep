@@ -29,12 +29,10 @@ exports.handler = async (event, context, callback) => {
                 VALUES ($1, 6, FALSE, CURRENT_TIMESTAMP, FALSE)
                 ON CONFLICT (user_id, challenge_id) DO NOTHING`, [userId]);
         }
-        callback(null, event);
     } catch (error) {
         console.error('Error inserting data:', error);
         callback(error);
     } finally {
-        pool.release(true);
         callback(null, event);
     }
 };
