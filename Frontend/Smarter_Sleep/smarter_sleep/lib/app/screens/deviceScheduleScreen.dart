@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:smarter_sleep/app/api/api_service.dart';
 import 'package:smarter_sleep/app/models/device.dart';
 
@@ -60,8 +61,9 @@ class _DeviceSchedulePageState extends State<DeviceSchedulePage> {
               itemBuilder: (context, index) {
                 final schedule = schedules[index];
                 return ListTile(
-                  title: Text('Trigger at ${schedule.scheduledTime.toLocal()}'),
-                  subtitle: _buildSettingsWidget(schedule),
+                  title: _buildSettingsWidget(schedule),
+                  subtitle: Text(
+                      'Trigger at ${DateFormat("HH:mm | MMM dd").format(schedule.scheduledTime.toLocal())}'),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -93,7 +95,7 @@ class _DeviceSchedulePageState extends State<DeviceSchedulePage> {
 
   Widget _buildSettingsWidget(DeviceSchedule schedule) {
     if (widget.device.type == 'alarm') {
-      return Text('Next Alarm: ${schedule.scheduledTime}');
+      return Text('Activate Alarm');
     } else if (widget.device.type == 'light') {
       return Text('Set brightness to ${schedule.settings!['Brightness']}%');
     } else if (widget.device.type == 'thermostat') {
