@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:intl/intl.dart';
 import 'package:smarter_sleep/app/models/device.dart';
 import 'package:smarter_sleep/app/models/device_schedule.dart';
 
@@ -37,7 +38,8 @@ class _SleepInsightScreenState extends State<SleepInsightScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Sleep Insight - ${widget.review.survey.surveyDate}'),
+        title: Text(
+            'Sleep Insight - ${DateFormat('MMM dd, yyyy').format(widget.review.createdAt)}'),
       ),
       body: ListView(
         children: [
