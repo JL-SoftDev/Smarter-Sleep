@@ -119,10 +119,10 @@ namespace WebApi.Controllers
         }
 
         [Route("progress")]
-        [HttpGet("{userId}")]
-        public async Task<ActionResult<IEnumerable<IChallengeProgressService.ChallengeReturn>>> GetChallengeProgress(Guid userId)
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<IChallengeProgressService.ChallengeReturn>>> GetChallengeProgress(Guid userId, DateTime? dateTime)
         {
-            var getChallengeProgressList = await _challengeProgressService.GetChallengeProgress(userId);
+            var getChallengeProgressList = await _challengeProgressService.GetChallengeProgress(userId, dateTime);
             List<IChallengeProgressService.ChallengeReturn> challengeProgressList = getChallengeProgressList.ToList();
             return challengeProgressList;
         }
