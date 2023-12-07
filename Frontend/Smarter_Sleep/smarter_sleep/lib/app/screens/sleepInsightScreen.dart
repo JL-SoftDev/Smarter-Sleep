@@ -352,7 +352,8 @@ class _SleepInsightScreenState extends State<SleepInsightScreen> {
                       Text(settingString),
                     ],
                   ),
-                  subtitle: Text("${deviceSchedule.scheduledTime.toLocal()}"),
+                  subtitle: Text(
+                      "at ${DateFormat("HH:mm").format(deviceSchedule.scheduledTime.toLocal())}"),
                 );
               },
             ),
