@@ -191,9 +191,7 @@ class _DeviceSchedulePageState extends State<DeviceSchedulePage> {
       ApiService.put('api/DeviceSettings/${initialData.id}', schedule.toJson())
           .then(
         (response) {
-          if (response != null) {
-            fetchDeviceSchedules(widget.device.id!);
-          }
+          fetchDeviceSchedules(widget.device.id!);
         },
       );
     }
