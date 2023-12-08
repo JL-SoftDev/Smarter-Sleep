@@ -14,8 +14,6 @@ class DeviceForm extends StatefulWidget {
 class _DeviceFormState extends State<DeviceForm> {
   final name = TextEditingController();
   String selectedType = 'light';
-  DateTime selectedDate = DateTime.now();
-  TimeOfDay selectedTime = TimeOfDay.now();
   int brightnessValue = 100;
   int temperatureValue = 72;
 
@@ -26,10 +24,7 @@ class _DeviceFormState extends State<DeviceForm> {
       final device = widget.initialData!;
       selectedType = device.type;
       name.text = device.name;
-      if (selectedType == 'alarm') {
-        selectedDate = DateTime.parse(device.status!);
-        selectedTime = TimeOfDay.fromDateTime(DateTime.parse(device.status!));
-      } else if (selectedType == 'light') {
+      if (selectedType == 'light') {
         brightnessValue = int.parse(device.status.toString());
       } else if (selectedType == 'thermostat') {
         temperatureValue = int.parse(device.status.toString());
@@ -41,35 +36,6 @@ class _DeviceFormState extends State<DeviceForm> {
   void dispose() {
     name.dispose();
     super.dispose();
-  }
-
-  Future<void> _showDatePicker() async {
-    final DateTime? pickedDate = await showDatePicker(
-      context: context,
-      initialDate:
-          selectedDate.isBefore(DateTime.now()) ? DateTime.now() : selectedDate,
-      firstDate: DateTime.now(),
-      lastDate: DateTime(2101),
-    );
-
-    if (pickedDate != null) {
-      setState(() {
-        selectedDate = pickedDate;
-      });
-    }
-  }
-
-  Future<void> _showTimePicker() async {
-    final TimeOfDay? pickedTime = await showTimePicker(
-      context: context,
-      initialTime: selectedTime,
-    );
-
-    if (pickedTime != null) {
-      setState(() {
-        selectedTime = pickedTime;
-      });
-    }
   }
 
   @override
@@ -110,34 +76,6 @@ class _DeviceFormState extends State<DeviceForm> {
               }).toList(),
             ),
             const SizedBox(height: 16),
-            if (selectedType == 'alarm')
-              Row(
-                children: <Widget>[
-                  Expanded(
-                    child: TextFormField(
-                      decoration:
-                          const InputDecoration(labelText: 'Scheduled Date'),
-                      readOnly: true,
-                      controller: TextEditingController(
-                        text: selectedDate.toLocal().toString().split(' ')[0],
-                      ),
-                      onTap: () => _showDatePicker(),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: TextFormField(
-                      decoration:
-                          const InputDecoration(labelText: 'Scheduled Time'),
-                      readOnly: true,
-                      controller: TextEditingController(
-                        text: selectedTime.format(context),
-                      ),
-                      onTap: () => _showTimePicker(),
-                    ),
-                  ),
-                ],
-              ),
             if (selectedType == 'light')
               Column(
                 children: <Widget>[
@@ -197,17 +135,9 @@ class _DeviceFormState extends State<DeviceForm> {
   }
 
   Device _saveDeviceSettings() {
-    String settings = '0';
+    String? settings;
 
-    if (selectedType == 'alarm') {
-      settings = DateTime(
-        selectedDate.year,
-        selectedDate.month,
-        selectedDate.day,
-        selectedTime.hour,
-        selectedTime.minute,
-      ).toIso8601String();
-    } else if (selectedType == 'light') {
+    if (selectedType == 'light') {
       settings = brightnessValue.toString();
     } else if (selectedType == 'thermostat') {
       settings = temperatureValue.toString();

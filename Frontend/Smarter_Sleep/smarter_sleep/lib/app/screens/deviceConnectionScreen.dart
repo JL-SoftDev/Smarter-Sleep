@@ -1,8 +1,13 @@
+//import 'dart:html';
+
 import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:smarter_sleep/app/api/api_service.dart';
 import 'package:smarter_sleep/app/models/device.dart';
+import 'package:smarter_sleep/app/models/device_schedule.dart';
+import 'package:smarter_sleep/app/models/sleep_schedule.dart';
 import 'package:smarter_sleep/app/screens/deviceScheduleScreen.dart';
+import 'package:smarter_sleep/main.dart';
 
 import 'deviceFormScreen.dart';
 import '../appFrame.dart';
@@ -17,6 +22,7 @@ class DeviceConnectionsScreen extends StatefulWidget {
 
 class _DeviceConnectionsScreenState extends State<DeviceConnectionsScreen> {
   List<Device> devices = [];
+  GlobalServices _globalServices = GlobalServices();
 
   @override
   void initState() {
@@ -35,10 +41,84 @@ class _DeviceConnectionsScreenState extends State<DeviceConnectionsScreen> {
           .map<Device>((deviceData) {
         return Device.fromJson(deviceData);
       }).toList();
+
+      //Generate a list of device IDs
+      var deviceIds = fetchedDevices.map((e) => e.id!).toList();
+
+      dynamic fetchedSchedules = await ApiService.get('api/DeviceSettings');
+      if (fetchedSchedules != null) {
+        List<DeviceSchedule> deviceSchedules = fetchedSchedules
+            .where(
+                (scheduleData) => deviceIds.contains(scheduleData['deviceId']))
+            .map<DeviceSchedule>((scheduleData) {
+          return DeviceSchedule.fromJson(scheduleData);
+        }).toList();
+
+        for (int i = 0; i < fetchedDevices.length; i++) {
+          var device = fetchedDevices[i];
+          List<DeviceSchedule> schedules;
+          //Find last schedule change for each schedule device (either before last time or before)
+          switch (device.type) {
+            case "alarm":
+              schedules = deviceSchedules
+                  .where((schedule) =>
+                      schedule.deviceId == device.id &&
+                      schedule.scheduledTime
+                          .isAfter(_globalServices.currentTime))
+                  .toList();
+              break;
+            default:
+              schedules = deviceSchedules
+                  .where((schedule) =>
+                      schedule.deviceId == device.id &&
+                      schedule.scheduledTime
+                          .isBefore(_globalServices.currentTime))
+                  .toList();
+              break;
+          }
+          //Sort by scheduled time
+          schedules.sort((a, b) => a.scheduledTime.compareTo(b.scheduledTime));
+
+          //Update status
+          if (schedules.isNotEmpty) {
+            switch (device.type) {
+              case "alarm":
+                var latestSchedule = schedules.first;
+                var newValue = latestSchedule.scheduledTime;
+                device.status = "${newValue.toIso8601String()}";
+                break;
+              case "light":
+                var latestSchedule = schedules.last;
+                var newValue = latestSchedule.settings?["Brightness"];
+                device.status = "${newValue}";
+                break;
+              case "thermostat":
+                var latestSchedule = schedules.last;
+                var newValue = latestSchedule.settings?["Temperature"];
+                device.status = "${newValue}";
+                break;
+              default:
+                break;
+            }
+            //Update device in database
+            await ApiService.put('api/Devices/${device.id}', device);
+          }
+        }
+      }
+      /*
+
+      */
+
       setState(() {
         devices = fetchedDevices;
       });
     }
+  }
+
+  Future<void> updateDevices() async {
+    //Iterate over devices
+    //Update based on sleepSetttings.deviceSettings
+    //Update status to database
   }
 
   @override

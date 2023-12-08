@@ -30,8 +30,8 @@ class DeviceSchedule {
         jsonId = jsonDevice.id!;
       }
     }
-    if (json['id'] != null) {
-      jsonId = json['id'];
+    if (json['deviceId'] != null) {
+      jsonId = json['deviceId'];
     }
 
     return DeviceSchedule(
@@ -50,7 +50,7 @@ class DeviceSchedule {
         'deviceId': deviceId,
         'sleepSettingId': sleepSettingId,
         'scheduledTime': scheduledTime.toIso8601String(),
-        'settings': settings,
+        'settings': jsonEncode(settings),
         'userModified': userModified,
       };
 
