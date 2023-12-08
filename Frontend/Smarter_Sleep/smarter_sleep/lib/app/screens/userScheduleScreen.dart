@@ -11,6 +11,7 @@ class UserScheduleScreen extends StatefulWidget {
 }
 
 class _UserScheduleScreenState extends State<UserScheduleScreen> {
+  var userID;
   List<CustomSchedule> schedule = [];
   List<String> daysOfWeek = [
     'Sunday',
@@ -34,31 +35,19 @@ class _UserScheduleScreenState extends State<UserScheduleScreen> {
     dynamic response = await ApiService.get('api/CustomSchedules');
     if (response != null) {
       final user = await Amplify.Auth.getCurrentUser();
-      final userId = user.userId;
+      userID = user.userId;
 
       List<CustomSchedule> fetchedSchedules = response
-          .where((scheduleData) => scheduleData['userId'] == userId)
+          .where((scheduleData) => scheduleData['userId'] == userID)
           .map<CustomSchedule>((scheduleData) {
         return CustomSchedule.fromJson(scheduleData);
       }).toList();
       setState(() {
         for(int i = 0; i < fetchedSchedules.length; i++){
-          timeList.add(fetchedSchedules[i].wakeTime);
+          timeList[fetchedSchedules[i].dayOfWeek] = fetchedSchedules[i].wakeTime;
         }
       });
     }
-/*
-    //TODO: Filter for logged in user through amplify
-    List<CustomSchedule> fetchedSchedule =
-        body.map((json) => CustomSchedule.fromJson(json)).toList();
-
-    //TODO: Account for not all DayOfWeeks being set(i.e. fetchedSchedule is empty or only has some days)
-    print("Time:${fetchedSchedule[0].wakeTime.toString()}");
-
-    setState(() {
-      schedule = fetchedSchedule;
-    });
-    */
   }
 
   @override
@@ -98,9 +87,8 @@ class _UserScheduleScreenState extends State<UserScheduleScreen> {
                         );
                         if (pickedTime != null && pickedTime != selectedTime) {
                           setState(() {
-                            _saveCustomSchedule(getUserID(), index, pickedTime);
+                            _saveCustomSchedule(userID, index, pickedTime);
                             fetchUserSchedule();
-                            timeList[index] = pickedTime;
                           });
                         }
                       }),
@@ -114,17 +102,9 @@ class _UserScheduleScreenState extends State<UserScheduleScreen> {
       
     );
   }
-}
-Future<String> getUserID() async{
-    final user = await Amplify.Auth.getCurrentUser();
-    final userId = user.userId;
-
-    return userId;
-}
-
 Future<void> _saveCustomSchedule(userID, dayOfWeek, wakeTime) async {
   CustomSchedule newSchedule = CustomSchedule(userId: userID, dayOfWeek: dayOfWeek, wakeTime: wakeTime);
-  ApiService.put('api/CustomSchedules/${newSchedule.userId}/${newSchedule.dayOfWeek}/${newSchedule.wakeTime}', newSchedule.toJson())
+  ApiService.put('api/CustomSchedules/${newSchedule.userId}/${newSchedule.dayOfWeek}', newSchedule.toJson())
             .then(
           (response) async {
             if (response != null) {
@@ -132,6 +112,7 @@ Future<void> _saveCustomSchedule(userID, dayOfWeek, wakeTime) async {
           },
         );
   }
+}
 
 //Can be moved to app/models however only used on this screen
 class CustomSchedule {
