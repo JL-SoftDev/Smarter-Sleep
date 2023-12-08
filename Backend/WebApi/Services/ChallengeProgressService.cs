@@ -33,6 +33,7 @@ namespace WebApi.Services
             {
                 typeList = await _databaseContext.Challenges.ToListAsync();
             }
+            List<Challenge> orderedTypeList = typeList.OrderBy(challenge => challenge.Id).ToList();
             List<UserChallenge> challengesList = new List<UserChallenge>();
             if (_databaseContext.UserChallenges != null)
             {
@@ -95,22 +96,22 @@ namespace WebApi.Services
                 switch (challengesList[i].ChallengeId)
                 {
                     case 1:
-                        newReturn = type1Progress(challengesList[i], orderedSleepReviews, (DateTime)dateTime);
+                        newReturn = type1Progress(challengesList[i], orderedSleepReviews, (DateTime)dateTime, orderedTypeList);
                         break;
                     case 2:
-                        newReturn = type2Progress(challengesList[i], orderedSleepReviews, (DateTime)dateTime);
+                        newReturn = type2Progress(challengesList[i], orderedSleepReviews, (DateTime)dateTime, orderedTypeList);
                         break;
                     case 3:
-                        newReturn = type3Progress(challengesList[i], orderedSleepReviews, (DateTime)dateTime);
+                        newReturn = type3Progress(challengesList[i], orderedSleepReviews, (DateTime)dateTime, orderedTypeList);
                         break;
                     case 4:
-                        newReturn = type4Progress(challengesList[i], orderedSleepReviews, (DateTime)dateTime);
+                        newReturn = type4Progress(challengesList[i], orderedSleepReviews, (DateTime)dateTime, orderedTypeList);
                         break;
                     case 5:
-                        newReturn = type5Progress(challengesList[i], orderedSleepReviews, (DateTime)dateTime);
+                        newReturn = type5Progress(challengesList[i], orderedSleepReviews, (DateTime)dateTime, orderedTypeList);
                         break;
                     case 6:
-                        newReturn = await type6Progress(challengesList[i], orderedSleepReviews, (DateTime)dateTime, userId);
+                        newReturn = await type6Progress(challengesList[i], orderedSleepReviews, (DateTime)dateTime, userId, orderedTypeList);
                         break;
                     default:
                         break;
@@ -120,11 +121,21 @@ namespace WebApi.Services
             return challengeReturns;
         }
 
-        private IChallengeProgressService.ChallengeReturn type1Progress(UserChallenge challenge, List<SleepReview> sleepReviews, DateTime dateTime)
+        private IChallengeProgressService.ChallengeReturn type1Progress(UserChallenge challenge, List<SleepReview> sleepReviews, DateTime dateTime, List<Challenge> orderedTypes)
         {
             IChallengeProgressService.ChallengeReturn newReturn = new IChallengeProgressService.ChallengeReturn();
             List<SleepReview> filteredReviewList = filterReviews(challenge, sleepReviews);
-            newReturn.ChallengeName = "Zzz Zoom";
+            newReturn.ChallengeId = 1;
+            if (orderedTypes.Count() > 0 && orderedTypes[0].Id == 1)
+            {
+                newReturn.ChallengeName = orderedTypes[0].Name;
+                newReturn.ChallengeDescription = orderedTypes[0].Description;
+            }
+            else
+            {
+                newReturn.ChallengeName = "Zzz Zoom";
+                newReturn.ChallengeDescription = "Zoom into bed earlier for a night of uninterrupted Zzz''s, setting the stage for a morning full of possibilities.";
+            }
             newReturn.StartDate = challenge.StartDate;
             newReturn.ExpireDate = challenge.ExpireDate;
             newReturn.UserSelected = challenge.UserSelected;
@@ -152,11 +163,21 @@ namespace WebApi.Services
             return newReturn;
         }
 
-        private IChallengeProgressService.ChallengeReturn type2Progress(UserChallenge challenge, List<SleepReview> sleepReviews, DateTime dateTime)
+        private IChallengeProgressService.ChallengeReturn type2Progress(UserChallenge challenge, List<SleepReview> sleepReviews, DateTime dateTime, List<Challenge> orderedTypes)
         {
             IChallengeProgressService.ChallengeReturn newReturn = new IChallengeProgressService.ChallengeReturn();
             List<SleepReview> filteredReviewList = filterReviews(challenge, sleepReviews);
-            newReturn.ChallengeName = "Dreamy Eight";
+            newReturn.ChallengeId = 2;
+            if (orderedTypes.Count() > 1 && orderedTypes[1].Id == 2)
+            {
+                newReturn.ChallengeName = orderedTypes[1].Name;
+                newReturn.ChallengeDescription = orderedTypes[1].Description;
+            }
+            else
+            {
+                newReturn.ChallengeName = "Dreamy Eight";
+                newReturn.ChallengeDescription = "Dive into a dreamy world with the challenge of securing a solid eight hours of sleep for ultimate rejuvenation.";
+            }
             newReturn.StartDate = challenge.StartDate;
             newReturn.ExpireDate = challenge.ExpireDate;
             newReturn.UserSelected = challenge.UserSelected;
@@ -179,11 +200,21 @@ namespace WebApi.Services
             return newReturn;
         }
 
-        private IChallengeProgressService.ChallengeReturn type3Progress(UserChallenge challenge, List<SleepReview> sleepReviews, DateTime dateTime)
+        private IChallengeProgressService.ChallengeReturn type3Progress(UserChallenge challenge, List<SleepReview> sleepReviews, DateTime dateTime, List<Challenge> orderedTypes)
         {
             IChallengeProgressService.ChallengeReturn newReturn = new IChallengeProgressService.ChallengeReturn();
             List<SleepReview> filteredReviewList = filterReviews(challenge, sleepReviews);
-            newReturn.ChallengeName = "Midnight Munch Ban";
+            newReturn.ChallengeId = 3;
+            if (orderedTypes.Count() > 2 && orderedTypes[2].Id == 3)
+            {
+                newReturn.ChallengeName = orderedTypes[2].Name;
+                newReturn.ChallengeDescription = orderedTypes[2].Description;
+            }
+            else
+            {
+                newReturn.ChallengeName = "Midnight Munch Ban";
+                newReturn.ChallengeDescription = "Avoid the temptation of a snack before bed, go 90 minutes without eating prior to sleep.";
+            }
             newReturn.StartDate = challenge.StartDate;
             newReturn.ExpireDate = challenge.ExpireDate;
             newReturn.UserSelected = challenge.UserSelected;
@@ -211,12 +242,22 @@ namespace WebApi.Services
             return newReturn;
         }
 
-        private IChallengeProgressService.ChallengeReturn type4Progress(UserChallenge challenge, List<SleepReview> sleepReviews, DateTime dateTime)
+        private IChallengeProgressService.ChallengeReturn type4Progress(UserChallenge challenge, List<SleepReview> sleepReviews, DateTime dateTime, List<Challenge> orderedTypes)
         {
             IChallengeProgressService.ChallengeReturn newReturn = new IChallengeProgressService.ChallengeReturn();
             List<SleepReview> filteredReviewList = filterReviews(challenge, sleepReviews);
             int startToNow = (dateTime - (DateTime)challenge.StartDate!).Days;
-            newReturn.ChallengeName = "Dynamic Dream Duo";
+            newReturn.ChallengeId = 4;
+            if (orderedTypes.Count() > 3 && orderedTypes[3].Id == 4)
+            {
+                newReturn.ChallengeName = orderedTypes[3].Name;
+                newReturn.ChallengeDescription = orderedTypes[3].Description;
+            }
+            else
+            {
+                newReturn.ChallengeName = "Dynamic Dream Duo";
+                newReturn.ChallengeDescription = "Interact with the Smarter Sleep app everyday for two weeks straight.";
+            }
             newReturn.StartDate = challenge.StartDate;
             newReturn.ExpireDate = challenge.ExpireDate;
             newReturn.UserSelected = challenge.UserSelected;
@@ -226,11 +267,21 @@ namespace WebApi.Services
             return newReturn;
         }
 
-        private IChallengeProgressService.ChallengeReturn type5Progress(UserChallenge challenge, List<SleepReview> sleepReviews, DateTime dateTime)
+        private IChallengeProgressService.ChallengeReturn type5Progress(UserChallenge challenge, List<SleepReview> sleepReviews, DateTime dateTime, List<Challenge> orderedTypes)
         {
             IChallengeProgressService.ChallengeReturn newReturn = new IChallengeProgressService.ChallengeReturn();
             List<SleepReview> filteredReviewList = filterReviews(challenge, sleepReviews);
-            newReturn.ChallengeName = "Seamless Sleep Automation";
+            newReturn.ChallengeId = 5;
+            if (orderedTypes.Count() > 4 && orderedTypes[4].Id == 5)
+            {
+                newReturn.ChallengeName = orderedTypes[4].Name;
+                newReturn.ChallengeDescription = orderedTypes[4].Description;
+            }
+            else
+            {
+                newReturn.ChallengeName = "Seamless Sleep Automation";
+                newReturn.ChallengeDescription = "Allow Smarter Sleep to schedule smart home devices without overriding any options.";
+            }
             newReturn.StartDate = challenge.StartDate;
             newReturn.ExpireDate = challenge.ExpireDate;
             newReturn.UserSelected = challenge.UserSelected;
@@ -272,10 +323,20 @@ namespace WebApi.Services
             return newReturn;
         }
 
-        private async Task<IChallengeProgressService.ChallengeReturn> type6Progress(UserChallenge challenge, List<SleepReview> sleepReviews, DateTime dateTime, Guid userId)
+        private async Task<IChallengeProgressService.ChallengeReturn> type6Progress(UserChallenge challenge, List<SleepReview> sleepReviews, DateTime dateTime, Guid userId, List<Challenge> orderedTypes)
         {
             IChallengeProgressService.ChallengeReturn newReturn = new IChallengeProgressService.ChallengeReturn();
-            newReturn.ChallengeName = "Sunrise Scheduler";
+            newReturn.ChallengeId = 6;
+            if (orderedTypes.Count() > 5 && orderedTypes[5].Id == 6)
+            {
+                newReturn.ChallengeName = orderedTypes[5].Name;
+                newReturn.ChallengeDescription = orderedTypes[5].Description;
+            }
+            else
+            {
+                newReturn.ChallengeName = "Sunrise Scheduler";
+                newReturn.ChallengeDescription = "Specify your non-negotiable wake-up times, allowing us to tailor your sleep routine to meet your daily commitments.";
+            }
             newReturn.UserSelected = challenge.UserSelected;
             newReturn.Goal = 7;
             var getCustomSchedules = await _userDataService.GetAllCustomSchedules();
