@@ -337,6 +337,7 @@ namespace WebApi.Services
                 newReturn.ChallengeName = "Sunrise Scheduler";
                 newReturn.ChallengeDescription = "Specify your non-negotiable wake-up times, allowing us to tailor your sleep routine to meet your daily commitments.";
             }
+            newReturn.StartDate = challenge.StartDate;
             newReturn.UserSelected = challenge.UserSelected;
             newReturn.Goal = 7;
             var getCustomSchedules = await _userDataService.GetAllCustomSchedules();
