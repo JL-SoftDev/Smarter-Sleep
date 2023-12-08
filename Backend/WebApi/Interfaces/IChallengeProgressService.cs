@@ -9,7 +9,9 @@ namespace WebApi.Interfaces
     {
         public struct ChallengeReturn
         {
+            public int ChallengeId { get; set; }
             public String ChallengeName { get; set; }
+            public String? ChallengeDescription { get; set; }
             public DateTime? StartDate { get; set; }
             public DateTime? ExpireDate { get; set; }
             public bool UserSelected { get; set; }
