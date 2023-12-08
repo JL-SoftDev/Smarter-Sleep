@@ -12,11 +12,13 @@ namespace WebApi.Services
     {
         private readonly postgresContext _databaseContext;
         private readonly ISleepDataService _sleepDataService;
+        private readonly IUserDataService _userDataService;
 
-        public ChallengeProgressService(postgresContext databaseContext, ISleepDataService sleepDataService)
+        public ChallengeProgressService(postgresContext databaseContext, ISleepDataService sleepDataService, IUserDataService userDataService)
         {
             _databaseContext = databaseContext;
             _sleepDataService = sleepDataService;
+            _userDataService = userDataService;
         }
 
         public async Task<IEnumerable<IChallengeProgressService.ChallengeReturn>> GetChallengeProgress(Guid userId, DateTime? dateTime)
@@ -107,6 +109,9 @@ namespace WebApi.Services
                     case 5:
                         newReturn = type5Progress(challengesList[i], orderedSleepReviews, (DateTime)dateTime);
                         break;
+                    case 6:
+                        newReturn = await type6Progress(challengesList[i], orderedSleepReviews, (DateTime)dateTime, userId);
+                        break;
                     default:
                         break;
                 }
@@ -119,7 +124,7 @@ namespace WebApi.Services
         {
             IChallengeProgressService.ChallengeReturn newReturn = new IChallengeProgressService.ChallengeReturn();
             List<SleepReview> filteredReviewList = filterReviews(challenge, sleepReviews);
-            newReturn.ChallengeName = "Sleep Earlier to Wake Earlier";
+            newReturn.ChallengeName = "Zzz Zoom";
             newReturn.StartDate = challenge.StartDate;
             newReturn.ExpireDate = challenge.ExpireDate;
             newReturn.UserSelected = challenge.UserSelected;
@@ -151,7 +156,7 @@ namespace WebApi.Services
         {
             IChallengeProgressService.ChallengeReturn newReturn = new IChallengeProgressService.ChallengeReturn();
             List<SleepReview> filteredReviewList = filterReviews(challenge, sleepReviews);
-            newReturn.ChallengeName = "Get 8 Hours";
+            newReturn.ChallengeName = "Dreamy Eight";
             newReturn.StartDate = challenge.StartDate;
             newReturn.ExpireDate = challenge.ExpireDate;
             newReturn.UserSelected = challenge.UserSelected;
@@ -178,7 +183,7 @@ namespace WebApi.Services
         {
             IChallengeProgressService.ChallengeReturn newReturn = new IChallengeProgressService.ChallengeReturn();
             List<SleepReview> filteredReviewList = filterReviews(challenge, sleepReviews);
-            newReturn.ChallengeName = "Don't Eat Within 90 Minutes of Sleep";
+            newReturn.ChallengeName = "Midnight Munch Ban";
             newReturn.StartDate = challenge.StartDate;
             newReturn.ExpireDate = challenge.ExpireDate;
             newReturn.UserSelected = challenge.UserSelected;
@@ -211,7 +216,7 @@ namespace WebApi.Services
             IChallengeProgressService.ChallengeReturn newReturn = new IChallengeProgressService.ChallengeReturn();
             List<SleepReview> filteredReviewList = filterReviews(challenge, sleepReviews);
             int startToNow = (dateTime - (DateTime)challenge.StartDate!).Days;
-            newReturn.ChallengeName = "Interact With Smarter Sleep Daily";
+            newReturn.ChallengeName = "Dynamic Dream Duo";
             newReturn.StartDate = challenge.StartDate;
             newReturn.ExpireDate = challenge.ExpireDate;
             newReturn.UserSelected = challenge.UserSelected;
@@ -225,7 +230,7 @@ namespace WebApi.Services
         {
             IChallengeProgressService.ChallengeReturn newReturn = new IChallengeProgressService.ChallengeReturn();
             List<SleepReview> filteredReviewList = filterReviews(challenge, sleepReviews);
-            newReturn.ChallengeName = "Don't Modift Device Schedules";
+            newReturn.ChallengeName = "Seamless Sleep Automation";
             newReturn.StartDate = challenge.StartDate;
             newReturn.ExpireDate = challenge.ExpireDate;
             newReturn.UserSelected = challenge.UserSelected;
@@ -263,6 +268,27 @@ namespace WebApi.Services
                     }
                 }
             }
+            newReturn.CompletionPercentage = (double)newReturn.Completed/(double)newReturn.Goal;
+            return newReturn;
+        }
+
+        private async Task<IChallengeProgressService.ChallengeReturn> type6Progress(UserChallenge challenge, List<SleepReview> sleepReviews, DateTime dateTime, Guid userId)
+        {
+            IChallengeProgressService.ChallengeReturn newReturn = new IChallengeProgressService.ChallengeReturn();
+            newReturn.ChallengeName = "Sunrise Scheduler";
+            newReturn.UserSelected = challenge.UserSelected;
+            newReturn.Goal = 7;
+            var getCustomSchedules = await _userDataService.GetAllCustomSchedules();
+            List<CustomSchedule> customSchedules = getCustomSchedules.ToList();
+            for (int i = 0; i < customSchedules.Count(); i ++)
+            {
+                if (customSchedules[i].UserId != userId)
+                {
+                    customSchedules.RemoveAt(i);
+                    i --;
+                }
+            }
+            newReturn.Completed = customSchedules.Count();
             newReturn.CompletionPercentage = (double)newReturn.Completed/(double)newReturn.Goal;
             return newReturn;
         }
