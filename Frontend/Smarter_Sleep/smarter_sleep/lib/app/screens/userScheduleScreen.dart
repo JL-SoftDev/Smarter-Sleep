@@ -22,7 +22,8 @@ class _UserScheduleScreenState extends State<UserScheduleScreen> {
     'Saturday'
   ];
   TimeOfDay selectedTime = TimeOfDay.now();
-  final timeList = List<TimeOfDay>.filled(7, TimeOfDay.now());
+  var fetchedTime;
+  var timeList = List<TimeOfDay>.filled(7, TimeOfDay.now());
   @override
   void initState() {
     super.initState();
@@ -42,8 +43,7 @@ class _UserScheduleScreenState extends State<UserScheduleScreen> {
       }).toList();
       setState(() {
         for(int i = 0; i < fetchedSchedules.length; i++){
-          timeList[i] == fetchedSchedules[i];
-          print(fetchedSchedules[i]);
+          timeList.add(fetchedSchedules[i].wakeTime);
         }
       });
     }
@@ -94,7 +94,7 @@ class _UserScheduleScreenState extends State<UserScheduleScreen> {
                       onPressed: () async {
                         final TimeOfDay? pickedTime = await showTimePicker(
                           context: context,
-                          initialTime: selectedTime,
+                          initialTime: timeList[index],
                         );
                         if (pickedTime != null && pickedTime != selectedTime) {
                           setState(() {
