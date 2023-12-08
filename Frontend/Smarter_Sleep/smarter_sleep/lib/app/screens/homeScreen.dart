@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -32,8 +31,8 @@ class _HomeScreenState extends State<HomeScreen> {
   late String userId;
 
   final List<Color> predefinedColors = [
-    Colors.indigo.shade400,
-    Colors.lightGreen,
+    Colors.yellow.shade300,
+    Colors.indigo.shade300,
     Colors.deepPurple.shade400,
   ];
 
@@ -60,30 +59,15 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _initializeUser() async {
     final user = await Amplify.Auth.getCurrentUser();
 
-    //TODO: Fetch challenges from API(awaiting implementation of challege-progress route)
-    List<UserChallenge> fetchedChallenges = [
-      UserChallenge(
-        challengeName: "Sleep On Schedule",
-        startDate: DateTime.now(),
-        expireDate: DateTime.now().add(const Duration(days: 4)),
-        userSelected: true,
-        completionPercentage: (Random().nextInt(4) + 1) / 5,
-      ),
-      UserChallenge(
-        challengeName: "No Lights 1 Hour",
-        startDate: DateTime.now(),
-        expireDate: DateTime.now().add(const Duration(days: 14)),
-        userSelected: true,
-        completionPercentage: (Random().nextInt(4) + 1) / 5,
-      ),
-      UserChallenge(
-        challengeName: "No Eating Before Bed",
-        startDate: DateTime.now(),
-        expireDate: DateTime.now().add(const Duration(days: 2)),
-        userSelected: true,
-        completionPercentage: (Random().nextInt(4) + 1) / 5,
-      ),
-    ];
+    dynamic challengesResponse = await ApiService.get(
+        'api/UserChallenges/progress?userId=${user.userId}&dateTime=${_globalServices.currentTime}');
+
+    List<UserChallenge> fetchedChallenges = [];
+    if (challengesResponse != null) {
+      fetchedChallenges = challengesResponse
+          .map<UserChallenge>((json) => UserChallenge.fromJson(json))
+          .toList();
+    }
 
     dynamic response = await ApiService.get('api/SleepReviews');
 
@@ -263,67 +247,98 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 10),
             Column(
-              children: userChallenges.map((userChallenge) {
-                final Duration remainingTime = userChallenge.expireDate
-                    .difference(_globalServices.currentTime);
+              children: List.generate(3, (index) {
+                if (index < userChallenges.length) {
+                  UserChallenge userChallenge = userChallenges[index];
+                  String remainingTime = userChallenge.expireDate != null
+                      ? "Expires in ${userChallenge.expireDate!.difference(_globalServices.currentTime).inDays} days"
+                      : "Permanent";
 
-                Color color = predefinedColors[colorIndex];
-                colorIndex = (colorIndex + 1) % predefinedColors.length;
+                  Color color = predefinedColors[colorIndex];
+                  colorIndex = (colorIndex + 1) % predefinedColors.length;
 
-                return Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    children: <Widget>[
-                      Stack(
-                        children: [
-                          LinearProgressIndicator(
-                            borderRadius: BorderRadius.circular(4),
-                            backgroundColor: Colors.blueGrey[100],
-                            color: color,
-                            value: userChallenge.completionPercentage,
-                            minHeight: 50,
-                          ),
-                          Positioned(
-                            left: 8,
-                            top: 5,
-                            child: Text(
-                              userChallenge.challengeName,
-                              style: const TextStyle(
-                                fontSize: 22,
-                                color: Colors.black,
+                  return Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      children: <Widget>[
+                        GestureDetector(
+                          onTap: () {
+                            //TODO: Check for complete/expired, popup description
+                            print("Tapped ${userChallenge.challengeName}");
+                          },
+                          child: Stack(
+                            children: [
+                              LinearProgressIndicator(
+                                borderRadius: BorderRadius.circular(4),
+                                backgroundColor: Colors.blueGrey[100],
+                                color: color,
+                                value: userChallenge.completionPercentage,
+                                minHeight: 50,
                               ),
-                            ),
-                          ),
-                          Positioned(
-                            left: 8,
-                            top: 30,
-                            child: Text(
-                              'Expires in ${remainingTime.inDays} days',
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold,
+                              Positioned(
+                                left: 8,
+                                top: 5,
+                                child: Text(
+                                  userChallenge.challengeName,
+                                  style: const TextStyle(
+                                    fontSize: 22,
+                                    color: Colors.black,
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
-                          Positioned(
-                            right: 10,
-                            top: 13,
-                            child: Text(
-                              "${(userChallenge.completionPercentage * 100).toInt()}%",
-                              style: const TextStyle(
-                                fontSize: 20,
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold,
+                              Positioned(
+                                left: 8,
+                                top: 30,
+                                child: Text(
+                                  remainingTime,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                               ),
-                            ),
+                              Positioned(
+                                right: 10,
+                                top: 13,
+                                child: Text(
+                                  "${(userChallenge.completionPercentage * 100).toInt()}%",
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
+                      ],
+                    ),
+                  );
+                } else {
+                  return Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Container(
+                      width: double.infinity,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey),
+                        borderRadius: BorderRadius.circular(8.0),
                       ),
-                    ],
-                  ),
-                );
-              }).toList(),
+                      child: Center(
+                        child: Text(
+                          "Empty Challenge Slot",
+                          style: const TextStyle(
+                            fontSize: 18,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }
+              }),
             ),
             Expanded(
                 child: Align(
