@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using WebApi.Interfaces;
 using WebApi.Models;
 
 namespace WebApi.Controllers
@@ -14,10 +15,12 @@ namespace WebApi.Controllers
     public class UserChallengesController : ControllerBase
     {
         private readonly postgresContext _context;
+        private readonly IChallengeProgressService _challengeProgressService;
 
-        public UserChallengesController(postgresContext context)
+        public UserChallengesController(postgresContext context, IChallengeProgressService challengeProgressService)
         {
             _context = context;
+            _challengeProgressService = challengeProgressService;
         }
 
         // GET: api/UserChallenges
@@ -113,6 +116,15 @@ namespace WebApi.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
+        }
+
+        [Route("progress")]
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<IChallengeProgressService.ChallengeReturn>>> GetChallengeProgress(Guid userId, DateTime? dateTime)
+        {
+            var getChallengeProgressList = await _challengeProgressService.GetChallengeProgress(userId, dateTime);
+            List<IChallengeProgressService.ChallengeReturn> challengeProgressList = getChallengeProgressList.ToList();
+            return challengeProgressList;
         }
 
         private bool UserChallengeExists(int id)
