@@ -125,6 +125,7 @@ namespace WebApi.Services
         {
             IChallengeProgressService.ChallengeReturn newReturn = new IChallengeProgressService.ChallengeReturn();
             List<SleepReview> filteredReviewList = filterReviews(challenge, sleepReviews);
+            newReturn.ChallengeLogId = challenge.Id;
             newReturn.ChallengeId = 1;
             if (orderedTypes.Count() > 0 && orderedTypes[0].Id == 1)
             {
@@ -167,6 +168,7 @@ namespace WebApi.Services
         {
             IChallengeProgressService.ChallengeReturn newReturn = new IChallengeProgressService.ChallengeReturn();
             List<SleepReview> filteredReviewList = filterReviews(challenge, sleepReviews);
+            newReturn.ChallengeLogId = challenge.Id;
             newReturn.ChallengeId = 2;
             if (orderedTypes.Count() > 1 && orderedTypes[1].Id == 2)
             {
@@ -204,6 +206,7 @@ namespace WebApi.Services
         {
             IChallengeProgressService.ChallengeReturn newReturn = new IChallengeProgressService.ChallengeReturn();
             List<SleepReview> filteredReviewList = filterReviews(challenge, sleepReviews);
+            newReturn.ChallengeLogId = challenge.Id;
             newReturn.ChallengeId = 3;
             if (orderedTypes.Count() > 2 && orderedTypes[2].Id == 3)
             {
@@ -246,6 +249,7 @@ namespace WebApi.Services
         {
             IChallengeProgressService.ChallengeReturn newReturn = new IChallengeProgressService.ChallengeReturn();
             List<SleepReview> filteredReviewList = filterReviews(challenge, sleepReviews);
+            newReturn.ChallengeLogId = challenge.Id;
             int startToNow = (dateTime - (DateTime)challenge.StartDate!).Days;
             newReturn.ChallengeId = 4;
             if (orderedTypes.Count() > 3 && orderedTypes[3].Id == 4)
@@ -271,6 +275,7 @@ namespace WebApi.Services
         {
             IChallengeProgressService.ChallengeReturn newReturn = new IChallengeProgressService.ChallengeReturn();
             List<SleepReview> filteredReviewList = filterReviews(challenge, sleepReviews);
+            newReturn.ChallengeLogId = challenge.Id;
             newReturn.ChallengeId = 5;
             if (orderedTypes.Count() > 4 && orderedTypes[4].Id == 5)
             {
@@ -326,6 +331,7 @@ namespace WebApi.Services
         private async Task<IChallengeProgressService.ChallengeReturn> type6Progress(UserChallenge challenge, List<SleepReview> sleepReviews, DateTime dateTime, Guid userId, List<Challenge> orderedTypes)
         {
             IChallengeProgressService.ChallengeReturn newReturn = new IChallengeProgressService.ChallengeReturn();
+            newReturn.ChallengeLogId = challenge.Id;
             newReturn.ChallengeId = 6;
             if (orderedTypes.Count() > 5 && orderedTypes[5].Id == 6)
             {

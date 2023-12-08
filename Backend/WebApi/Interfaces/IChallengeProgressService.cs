@@ -9,6 +9,7 @@ namespace WebApi.Interfaces
     {
         public struct ChallengeReturn
         {
+            public int ChallengeLogId { get; set; }
             public int ChallengeId { get; set; }
             public String ChallengeName { get; set; }
             public String? ChallengeDescription { get; set; }
