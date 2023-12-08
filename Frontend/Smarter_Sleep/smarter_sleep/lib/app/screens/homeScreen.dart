@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -60,13 +59,13 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _initializeUser() async {
     final user = await Amplify.Auth.getCurrentUser();
 
-    dynamic challengesResponse =
-        await ApiService.get('api/UserChallenges/progress/${user.userId}');
+    dynamic challengesResponse = await ApiService.get(
+        'api/UserChallenges/progress?userId=${user.userId}&dateTime=${_globalServices.currentTime}');
 
     List<UserChallenge> fetchedChallenges = [];
     if (challengesResponse != null) {
       fetchedChallenges = challengesResponse
-          .map<SleepReview>((json) => UserChallenge.fromJson(json))
+          .map<UserChallenge>((json) => UserChallenge.fromJson(json))
           .toList();
     }
 

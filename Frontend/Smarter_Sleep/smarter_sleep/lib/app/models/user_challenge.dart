@@ -1,4 +1,6 @@
 class UserChallenge {
+  final int id;
+  final int challengeId;
   final String challengeName;
   final String? challengeDesc;
   final DateTime? startDate;
@@ -9,9 +11,11 @@ class UserChallenge {
   final int numTargetted;
 
   UserChallenge({
+    required this.id,
+    required this.challengeId,
     required this.challengeName,
     this.challengeDesc,
-    required this.startDate,
+    this.startDate,
     this.expireDate,
     required this.userSelected,
     required this.completionPercentage,
@@ -20,6 +24,8 @@ class UserChallenge {
   });
   factory UserChallenge.fromJson(Map<String, dynamic> json) {
     return UserChallenge(
+      id: json['challengeLogId'],
+      challengeId: json['challengeId'],
       challengeName: json['challengeName'],
       challengeDesc: json['challengeDescription'],
       startDate: DateTime.parse(json['startDate']),
