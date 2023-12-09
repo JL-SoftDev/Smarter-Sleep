@@ -31,9 +31,13 @@ class _HomeScreenState extends State<HomeScreen> {
   late String userId;
 
   final List<Color> predefinedColors = [
-    Colors.yellow.shade300,
     Colors.indigo.shade300,
     Colors.deepPurple.shade400,
+    Colors.deepPurple.shade400,
+    Colors.deepPurple.shade400,
+    Colors.deepPurple.shade400,
+    Colors.deepPurple.shade400,
+    Colors.yellow.shade300,
   ];
 
   int colorIndex = 0;
@@ -67,6 +71,8 @@ class _HomeScreenState extends State<HomeScreen> {
       fetchedChallenges = challengesResponse
           .map<UserChallenge>((json) => UserChallenge.fromJson(json))
           .toList();
+
+      fetchedChallenges.sort((a, b) => a.startDate.compareTo(b.startDate));
     }
 
     dynamic response = await ApiService.get('api/SleepReviews');
@@ -180,7 +186,7 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(
             icon: const Icon(Icons.schedule),
             onPressed: () {
-              //mainNavigatorKey.currentState!.pushNamed("/schedule");
+              mainNavigatorKey.currentState!.pushNamed("/schedule");
             },
           ),
           IconButton(
@@ -254,8 +260,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       ? "Expires in ${userChallenge.expireDate!.difference(_globalServices.currentTime).inDays} days"
                       : "Permanent";
 
-                  Color color = predefinedColors[colorIndex];
-                  colorIndex = (colorIndex + 1) % predefinedColors.length;
+                  Color color = predefinedColors[
+                      userChallenge.challengeId % predefinedColors.length];
 
                   return Padding(
                     padding: const EdgeInsets.all(8.0),
@@ -263,7 +269,30 @@ class _HomeScreenState extends State<HomeScreen> {
                       children: <Widget>[
                         GestureDetector(
                           onTap: () {
-                            //TODO: Check for complete/expired, popup description
+                            // User completed the challenge or challenge expired
+                            if (userChallenge.numCompleted ==
+                                    userChallenge.numTargetted ||
+                                (userChallenge.expireDate != null &&
+                                    _globalServices.currentTime
+                                        .isAfter(userChallenge.expireDate!))) {
+                              ApiService.delete(
+                                      'api/UserChallenges/${userChallenge.id}')
+                                  .then((_) => {
+                                        if (userChallenge.numCompleted ==
+                                            userChallenge.numTargetted)
+                                          {
+                                            _displayChallengeCompletion(
+                                                userChallenge)
+                                          }
+                                        else
+                                          {
+                                            _displayChallengeExpired(
+                                                userChallenge)
+                                          }
+                                      });
+                            } else {
+                              _checkChallenge(userChallenge);
+                            }
                             print("Tapped ${userChallenge.challengeName}");
                           },
                           child: Stack(
@@ -458,5 +487,68 @@ class _HomeScreenState extends State<HomeScreen> {
       );
       submitSleepData(survey, wearableData);
     }
+  }
+
+  void _displayChallengeCompletion(UserChallenge userChallenge) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Congratulations!'),
+          content: Text(
+              'You completed the ${userChallenge.challengeName} challenge! Get assigned another by completing another sleep cycle.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _displayChallengeExpired(UserChallenge userChallenge) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Challenge Expired'),
+          content: Text(
+              'You were unable to complete this challenge, to get a new one complete another sleep cycle.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _checkChallenge(UserChallenge userChallenge) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(userChallenge.challengeName),
+          content: Text(
+              "${userChallenge.challengeDesc ?? "No description"}\n\nCompleted: ${userChallenge.numCompleted} | Required: ${userChallenge.numTargetted}"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
   }
 }
