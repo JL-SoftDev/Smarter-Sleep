@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:smarter_sleep/app/api/api_service.dart';
 import 'package:smarter_sleep/app/models/device.dart';
 import 'package:smarter_sleep/app/models/device_schedule.dart';
-import 'package:smarter_sleep/app/models/sleep_schedule.dart';
 import 'package:smarter_sleep/app/screens/deviceScheduleScreen.dart';
 import 'package:smarter_sleep/main.dart';
 
@@ -113,12 +112,6 @@ class _DeviceConnectionsScreenState extends State<DeviceConnectionsScreen> {
         devices = fetchedDevices;
       });
     }
-  }
-
-  Future<void> updateDevices() async {
-    //Iterate over devices
-    //Update based on sleepSetttings.deviceSettings
-    //Update status to database
   }
 
   @override
