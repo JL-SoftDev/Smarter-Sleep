@@ -203,8 +203,8 @@ class _DeviceConnectionsScreenState extends State<DeviceConnectionsScreen> {
     if (device.type == 'alarm') {
       final nextAlarm = DateTime.tryParse(device.status!);
       if (nextAlarm != null) {
-        final now = DateTime.now();
-        final timeDifference = nextAlarm.difference(now);
+        Duration timeDifference =
+            nextAlarm.difference(_globalServices.currentTime);
 
         if (timeDifference.inDays > 1) {
           final days = timeDifference.inDays;
