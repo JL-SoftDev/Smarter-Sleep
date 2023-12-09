@@ -65,41 +65,39 @@ class _UserScheduleScreenState extends State<UserScheduleScreen> {
         ],
       ),
       //TODO: Add some way for the user to submit schedules, send a post request to the api with the new data
-      body: 
-      Padding(
-        padding: const EdgeInsets.all(40),
-        child: ListView.builder(
-          itemCount: 7,
-          itemBuilder: (context, index) {
-            final day = daysOfWeek[index];
-            return ListTile(
-              title: Text(day),
-              subtitle: Text(timeList[index].format(context)),
-              trailing: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                      icon: const Icon(Icons.edit),
-                      onPressed: () async {
-                        final TimeOfDay? pickedTime = await showTimePicker(
-                          context: context,
-                          initialTime: timeList[index],
-                        );
-                        if (pickedTime != null && pickedTime != selectedTime) {
-                          setState(() {
-                            _saveCustomSchedule(userID, index, pickedTime);
-                            fetchUserSchedule();
-                          });
-                        }
-                      }),
-                       
-                ],
-              ),
-            );
-          },
-        ),
-      ), 
-      
+      body:
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ListView.builder(
+              itemCount: 7,
+              itemBuilder: (context, index) {
+                final day = daysOfWeek[index];
+                return ListTile(
+                  title: Text(day),
+                  subtitle: Text(timeList[index].format(context)),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                          icon: const Icon(Icons.edit),
+                          onPressed: () async {
+                            final TimeOfDay? pickedTime = await showTimePicker(
+                              context: context,
+                              initialTime: timeList[index],
+                            );
+                            if (pickedTime != null && pickedTime != selectedTime) {
+                              setState(() {
+                                _saveCustomSchedule(userID, index, pickedTime);
+                                fetchUserSchedule();
+                              });
+                            }
+                          }),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
     );
   }
 Future<void> _saveCustomSchedule(userID, dayOfWeek, wakeTime) async {
@@ -107,8 +105,7 @@ Future<void> _saveCustomSchedule(userID, dayOfWeek, wakeTime) async {
   ApiService.put('api/CustomSchedules/${newSchedule.userId}/${newSchedule.dayOfWeek}', newSchedule.toJson())
             .then(
           (response) async {
-            if (response != null) {
-            }
+            fetchUserSchedule();
           },
         );
   }
@@ -128,17 +125,17 @@ class CustomSchedule {
 
   factory CustomSchedule.fromJson(Map<String, dynamic> json) {
     return CustomSchedule(
-      userId: json['UserId'],
-      dayOfWeek: json['DayOfWeek'] as int,
+      userId: json['userId'],
+      dayOfWeek: json['dayOfWeek'] as int,
       wakeTime: TimeOfDay.fromDateTime(
-          DateTime.parse("1970-01-01 ${json['WakeTime']}")),
+          DateTime.parse("1970-01-01 ${json['wakeTime']}")),
     );
   }
 
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'UserId': userId,
-        'DayOfWeek': dayOfWeek,
-        'WakeTime':
-            "${wakeTime.hour}:${wakeTime.minute.toString().padLeft(2, '0')}:00",
+        'userId': userId,
+        'dayOfWeek': dayOfWeek,
+        'wakeTime':
+            "${wakeTime.hour.toString().padLeft(2, '0')}:${wakeTime.minute.toString().padLeft(2, '0')}:00",
       };
 }
