@@ -180,7 +180,7 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(
             icon: const Icon(Icons.schedule),
             onPressed: () {
-              //mainNavigatorKey.currentState!.pushNamed("/schedule");
+              mainNavigatorKey.currentState!.pushNamed("/schedule");
             },
           ),
           IconButton(

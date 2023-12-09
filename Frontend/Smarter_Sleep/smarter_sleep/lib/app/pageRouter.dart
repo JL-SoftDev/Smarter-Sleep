@@ -6,6 +6,7 @@ import 'package:smarter_sleep/app/screens/deviceConnectionScreen.dart';
 import 'package:smarter_sleep/app/screens/homeScreen.dart';
 import 'package:smarter_sleep/app/screens/accountScreen.dart';
 import 'package:smarter_sleep/app/screens/reviewScreen.dart';
+import 'package:smarter_sleep/app/screens/userScheduleScreen.dart';
 
 class PageRouter {
   static MaterialPageRoute getRouteBuilder(RouteSettings settings) {
@@ -28,6 +29,9 @@ class PageRouter {
         break;
       case '/account':
         builder = (BuildContext _) => const AccountScreen();
+        break;
+      case '/schedule':
+        builder = (BuildContext _) => const UserScheduleScreen();
         break;
 
       //DEBUG SCREENS
