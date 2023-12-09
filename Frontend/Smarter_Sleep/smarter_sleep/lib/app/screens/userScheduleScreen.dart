@@ -64,7 +64,6 @@ class _UserScheduleScreenState extends State<UserScheduleScreen> {
           ),
         ],
       ),
-      //TODO: Add some way for the user to submit schedules, send a post request to the api with the new data
       body:
           Padding(
             padding: const EdgeInsets.all(8.0),

@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:smarter_sleep/app/api/api_service.dart';
 import 'package:smarter_sleep/app/models/device.dart';
 import 'package:smarter_sleep/app/models/device_schedule.dart';
-import 'package:smarter_sleep/app/models/sleep_schedule.dart';
 import 'package:smarter_sleep/app/screens/deviceScheduleScreen.dart';
 import 'package:smarter_sleep/main.dart';
 
@@ -115,12 +114,6 @@ class _DeviceConnectionsScreenState extends State<DeviceConnectionsScreen> {
     }
   }
 
-  Future<void> updateDevices() async {
-    //Iterate over devices
-    //Update based on sleepSetttings.deviceSettings
-    //Update status to database
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -210,8 +203,8 @@ class _DeviceConnectionsScreenState extends State<DeviceConnectionsScreen> {
     if (device.type == 'alarm') {
       final nextAlarm = DateTime.tryParse(device.status!);
       if (nextAlarm != null) {
-        final now = DateTime.now();
-        final timeDifference = nextAlarm.difference(now);
+        Duration timeDifference =
+            nextAlarm.difference(_globalServices.currentTime);
 
         if (timeDifference.inDays > 1) {
           final days = timeDifference.inDays;

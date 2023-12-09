@@ -6,6 +6,7 @@ import 'package:smarter_sleep/app/api/api_service.dart';
 import 'package:smarter_sleep/app/appFrame.dart';
 import 'package:smarter_sleep/app/models/sleep_review.dart';
 import 'package:smarter_sleep/app/utils/color_utils.dart';
+import 'package:smarter_sleep/main.dart';
 
 import 'sleepInsightScreen.dart';
 
@@ -17,6 +18,7 @@ class SleepReviewScreen extends StatefulWidget {
 }
 
 class _SleepReviewScreenState extends State<SleepReviewScreen> {
+  final GlobalServices _globalServices = GlobalServices();
   List<SleepReview> sleepReviews = [];
 
   @override
@@ -172,12 +174,16 @@ class _SleepReviewScreenState extends State<SleepReviewScreen> {
   }
 
   LineChartData sleepScores() {
+    double minX = _globalServices.currentTime
+        .subtract(Duration(days: 14))
+        .millisecondsSinceEpoch
+        .toDouble();
     List<FlSpot> data = sleepReviews
         .map((review) => FlSpot(
             review.createdAt.millisecondsSinceEpoch.toDouble(),
             review.smarterSleepScore.toDouble()))
+        .where((spot) => spot.x >= minX)
         .toList();
-
     return LineChartData(
       gridData: const FlGridData(show: false),
       titlesData: FlTitlesData(
@@ -191,11 +197,11 @@ class _SleepReviewScreenState extends State<SleepReviewScreen> {
         bottomTitles: AxisTitles(
           sideTitles: SideTitles(
             showTitles: true,
-            interval: 86400000,
+            interval: 86400000 * 2,
             getTitlesWidget: (double value, TitleMeta meta) {
               final dateTime =
                   DateTime.fromMillisecondsSinceEpoch(value.toInt());
-              if (value == meta.min) {
+              if (value == meta.min || value == meta.max) {
                 return Text("");
               }
               return Text(DateFormat('MM/dd').format(dateTime));

@@ -45,7 +45,6 @@ class _DebugScreenState extends State<DebugScreen> {
   }
 
   _onChangeTimePressed() async {
-    //TODO - Popup allowing the user to set the time
     var newDate = await selectDate(context, _globalServices.currentTime);
     var newTime = await selectTime(
         context, TimeOfDay.fromDateTime(_globalServices.currentTime));

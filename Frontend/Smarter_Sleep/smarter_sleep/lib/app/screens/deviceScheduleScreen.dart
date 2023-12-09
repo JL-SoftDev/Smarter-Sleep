@@ -5,6 +5,7 @@ import 'package:smarter_sleep/app/models/device.dart';
 
 import 'package:smarter_sleep/app/screens/ScheduleFormScreen.dart';
 import 'package:smarter_sleep/app/models/device_schedule.dart';
+import 'package:smarter_sleep/main.dart';
 
 class DeviceSchedulePage extends StatefulWidget {
   final Device device;
@@ -16,6 +17,7 @@ class DeviceSchedulePage extends StatefulWidget {
 }
 
 class _DeviceSchedulePageState extends State<DeviceSchedulePage> {
+  GlobalServices _globalServices = GlobalServices();
   List<DeviceSchedule> schedules = [];
 
   @override
@@ -27,11 +29,11 @@ class _DeviceSchedulePageState extends State<DeviceSchedulePage> {
   Future<void> fetchDeviceSchedules(int deviceId) async {
     dynamic fetchedSchedules = await ApiService.get('api/DeviceSettings');
     if (fetchedSchedules != null) {
-      final now = DateTime.now();
       List<DeviceSchedule> deviceSchedules = fetchedSchedules
           .where((scheduleData) =>
               scheduleData['deviceId'] == deviceId &&
-              DateTime.parse(scheduleData['scheduledTime']).isAfter(now))
+              DateTime.parse(scheduleData['scheduledTime'])
+                  .isAfter(_globalServices.currentTime))
           .map<DeviceSchedule>((scheduleData) {
         return DeviceSchedule.fromJson(scheduleData);
       }).toList();

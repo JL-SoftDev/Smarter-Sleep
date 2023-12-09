@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:smarter_sleep/app/models/device.dart';
 import 'package:smarter_sleep/app/models/device_schedule.dart';
+import 'package:smarter_sleep/main.dart';
 
 class ScheduleForm extends StatefulWidget {
   final Device device;
@@ -13,22 +14,25 @@ class ScheduleForm extends StatefulWidget {
 }
 
 class _ScheduleFormState extends State<ScheduleForm> {
-  DateTime selectedDate = DateTime.now();
-  TimeOfDay selectedTime = TimeOfDay.now();
+  GlobalServices _globalServices = GlobalServices();
+  late DateTime selectedDate;
+  late TimeOfDay selectedTime;
   int brightnessValue = 100;
   int temperatureValue = 72;
 
   @override
   void initState() {
     super.initState();
+    selectedDate = _globalServices.currentTime;
+    selectedTime = TimeOfDay.fromDateTime(selectedDate);
     if (widget.initialData != null) {
       setState(() {
         selectedDate = widget.initialData!.scheduledTime;
         selectedTime =
             TimeOfDay.fromDateTime(widget.initialData!.scheduledTime);
 
-        if (selectedDate.isBefore(DateTime.now())) {
-          selectedDate = DateTime.now();
+        if (selectedDate.isBefore(_globalServices.currentTime)) {
+          selectedDate = _globalServices.currentTime;
         }
 
         final settings = widget.initialData!.settings;
@@ -66,7 +70,7 @@ class _ScheduleFormState extends State<ScheduleForm> {
                       final DateTime? pickedDate = await showDatePicker(
                         context: context,
                         initialDate: selectedDate,
-                        firstDate: DateTime.now(),
+                        firstDate: _globalServices.currentTime,
                         lastDate: DateTime(2101),
                       );
 
