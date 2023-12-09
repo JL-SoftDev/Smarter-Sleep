@@ -55,8 +55,8 @@ namespace WebApi.Services
                     }
                 }
             }
-            DateTime earliestDate = DateTime.Now;
-            DateTime latestDate = DateTime.Now;
+            DateTime earliestDate = (DateTime)dateTime;
+            DateTime latestDate = (DateTime)dateTime;
             for (int i = 0; i < challengesList.Count(); i++)
             {
                 if (challengesList[i].StartDate != null)
