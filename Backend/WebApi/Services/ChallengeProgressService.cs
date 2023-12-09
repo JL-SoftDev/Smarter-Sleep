@@ -363,7 +363,7 @@ namespace WebApi.Services
 
         private List<SleepReview> filterReviews(UserChallenge challenge, List<SleepReview> sleepReviews, DateTime dateTime)
         {
-            List<SleepReview> filteredReviewList = sleepReviews;
+            List<SleepReview> filteredReviewList = new List<SleepReview>(sleepReviews);
             for (int i = 0; i < filteredReviewList.Count(); i++)
             {
                 if (filteredReviewList[i].CreatedAt < challenge.StartDate || filteredReviewList[i].CreatedAt > challenge.ExpireDate || filteredReviewList[i].CreatedAt > dateTime)
