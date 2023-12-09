@@ -29,23 +29,25 @@ namespace WebApi.Controllers
             return customSchedules.ToList();
         }
 
-        // GET: api/CustomSchedules/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<CustomSchedule>> GetCustomSchedule(Guid id)
+        // GET: api/CustomSchedules/.../1
+        [HttpGet("{userId}/{dayOfWeek}")]
+        public async Task<ActionResult<CustomSchedule>> GetCustomSchedule(Guid userId, int dayOfWeek)
         {
-            var customSchedule = await _userDataService.GetCustomSchedule(id);
+            var customSchedule = await _userDataService.GetCustomSchedule(userId, dayOfWeek);
             if (customSchedule == null) NotFound();
             return customSchedule!;
         }
 
-        // PUT: api/CustomSchedules/5
+        // PUT: api/CustomSchedules/5/1
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutCustomSchedule(Guid id, CustomSchedule customSchedule)
+        [HttpPut("{userId}/{dayOfWeek}")]
+        public async Task<IActionResult> PutCustomSchedule(Guid userId, int dayOfWeek, CustomSchedule updatedSchedule)
         {
-            var success = await _userDataService.PutCustomSchedule(id, customSchedule);
+            var success = await _userDataService.PutCustomSchedule(userId, dayOfWeek, updatedSchedule);
             switch(success)
             {
+                case 201:
+                    return CreatedAtAction("GetCustomSchedule", new { userId, dayOfWeek }, updatedSchedule);
                 case 204:
                     return NoContent();
                 case 400:
@@ -68,10 +70,10 @@ namespace WebApi.Controllers
         }
 
         // DELETE: api/CustomSchedules/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCustomSchedule(Guid id)
+        [HttpDelete("{userId}/{dayOfWeek}")]
+        public async Task<IActionResult> DeleteCustomSchedule(Guid userId, int dayOfWeek)
         {
-            var statusCode = await _userDataService.DeleteCustomSchedule(id);
+            var statusCode = await _userDataService.DeleteCustomSchedule(userId, dayOfWeek);
             switch(statusCode)
             {
                 case 204:

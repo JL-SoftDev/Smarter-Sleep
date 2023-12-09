@@ -53,17 +53,19 @@ namespace WebApi.Interfaces
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="userId"></param>
+        /// <param name="dayOfWeek"></param>
         /// <returns></returns>
-        Task<CustomSchedule?> GetCustomSchedule(Guid id);
+        Task<CustomSchedule?> GetCustomSchedule(Guid userId, int dayOfWeek);
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="id"></param>
-        /// <param name="customSchedule"></param>
+        /// <param name="userId"></param>
+        /// <param name="dayOfWeek"></param>
+        /// <param name="updatedSchedule"></param>
         /// <returns></returns>
-        Task<int> PutCustomSchedule(Guid id, CustomSchedule customSchedule);
+        Task<int> PutCustomSchedule(Guid userId, int dayOfWeek, CustomSchedule updatedSchedule);
 
         /// <summary>
         /// 
@@ -75,8 +77,9 @@ namespace WebApi.Interfaces
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="userId"></param>
+        /// <param name="dayOfWeek"></param>
         /// <returns></returns>
-        Task<int> DeleteCustomSchedule(Guid id);
+        Task<int> DeleteCustomSchedule(Guid userId, int dayOfWeek);
     }
 }
