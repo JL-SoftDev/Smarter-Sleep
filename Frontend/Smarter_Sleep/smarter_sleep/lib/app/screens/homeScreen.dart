@@ -81,6 +81,8 @@ class _HomeScreenState extends State<HomeScreen> {
     if (challengesResponse != null) {
       fetchedChallenges = challengesResponse
           .map<UserChallenge>((json) => UserChallenge.fromJson(json))
+          .where((UserChallenge chl) =>
+              chl.startDate.isBefore(_globalServices.currentTime))
           .toList();
 
       fetchedChallenges.sort((a, b) => b.startDate.compareTo(a.startDate));
