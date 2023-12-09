@@ -30,12 +30,12 @@ class _HomeScreenState extends State<HomeScreen> {
   int? _sleepScore;
   late String userId;
 
-  final List<Color> predefinedColors = [
+  final List<Color> barColors = [
     /// Zzz Zoom
     Colors.indigo.shade400,
 
     /// Dreamy Eight
-    Colors.deepPurple.shade400,
+    Colors.blue.shade700,
 
     /// Midnight Munch Ban
     Colors.deepPurple.shade700,
@@ -48,6 +48,26 @@ class _HomeScreenState extends State<HomeScreen> {
 
     /// Sunrise Scheduler
     Colors.yellow.shade300,
+  ];
+
+  final List<Color> backgroundColors = [
+    /// Zzz Zoom
+    Colors.indigo.shade100,
+
+    /// Dreamy Eight
+    Colors.blue.shade200,
+
+    /// Midnight Munch Ban
+    Colors.deepPurple.shade300,
+
+    /// Dynamic Dream Duo
+    Colors.lightGreen.shade300,
+
+    /// Seamless Sleep Automation
+    Colors.orange.shade100,
+
+    /// Sunrise Scheduler
+    Colors.yellow.shade100,
   ];
 
   int colorIndex = 0;
@@ -266,12 +286,12 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 10),
             Column(
-              children: List.generate(3, (index) {
+              children: List.generate(4, (index) {
                 if (index < userChallenges.length) {
                   UserChallenge chl = userChallenges[index];
 
                   /// -1 : Expired, 0 : In Progress, 1 : Completed
-                  int status = (chl.numCompleted == chl.numTargeted)
+                  int status = (chl.numCompleted >= chl.numTargeted)
                       ? 1
                       : (chl.expireDate != null
                           ? (_globalServices.currentTime
@@ -286,10 +306,23 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   double barSize = chl.completionPercentage;
                   late Color barColor;
-                  late Color fontColor = Colors.black;
+                  Color bgColor = Colors.blueGrey.shade300;
+                  Color fontColor = Colors.white;
                   Icon? statusIcon;
 
+                  if (chl.challengeId == 6) {
+                    fontColor = Colors.black;
+                  }
+
                   switch (status) {
+                    case 1:
+                      barColor = Colors.green;
+                      statusIcon = Icon(
+                        Icons.check_circle_outlined,
+                        size: 25,
+                        color: Colors.white,
+                      );
+                      break;
                     case -1:
                       remainingTime = "Expired";
                       barColor = Colors.red.shade300;
@@ -299,18 +332,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       );
                       barSize = 100.0;
                       break;
-                    case 1:
-                      barColor = Colors.green;
-                      fontColor = Colors.white;
-                      statusIcon = Icon(
-                        Icons.check_circle_outlined,
-                        size: 25,
-                        color: Colors.white,
-                      );
-                      break;
                     default:
-                      barColor = predefinedColors[
-                          (chl.challengeId - 1) % predefinedColors.length];
+                      bgColor = backgroundColors[
+                          (chl.challengeId - 1) % backgroundColors.length];
+                      barColor =
+                          barColors[(chl.challengeId - 1) % barColors.length];
                   }
 
                   return Padding(
@@ -337,7 +363,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             children: [
                               LinearProgressIndicator(
                                 borderRadius: BorderRadius.circular(4),
-                                backgroundColor: Colors.blueGrey[100],
+                                backgroundColor: bgColor,
                                 color: barColor,
                                 value: barSize,
                                 minHeight: 50,
