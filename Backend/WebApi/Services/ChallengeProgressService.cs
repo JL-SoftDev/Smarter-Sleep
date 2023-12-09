@@ -124,7 +124,7 @@ namespace WebApi.Services
         private IChallengeProgressService.ChallengeReturn type1Progress(UserChallenge challenge, List<SleepReview> sleepReviews, DateTime dateTime, List<Challenge> orderedTypes)
         {
             IChallengeProgressService.ChallengeReturn newReturn = new IChallengeProgressService.ChallengeReturn();
-            List<SleepReview> filteredReviewList = filterReviews(challenge, sleepReviews);
+            List<SleepReview> filteredReviewList = filterReviews(challenge, sleepReviews, dateTime);
             newReturn.ChallengeLogId = challenge.Id;
             newReturn.ChallengeId = 1;
             if (orderedTypes.Count() > 0 && orderedTypes[0].Id == 1)
@@ -167,7 +167,7 @@ namespace WebApi.Services
         private IChallengeProgressService.ChallengeReturn type2Progress(UserChallenge challenge, List<SleepReview> sleepReviews, DateTime dateTime, List<Challenge> orderedTypes)
         {
             IChallengeProgressService.ChallengeReturn newReturn = new IChallengeProgressService.ChallengeReturn();
-            List<SleepReview> filteredReviewList = filterReviews(challenge, sleepReviews);
+            List<SleepReview> filteredReviewList = filterReviews(challenge, sleepReviews, dateTime);
             newReturn.ChallengeLogId = challenge.Id;
             newReturn.ChallengeId = 2;
             if (orderedTypes.Count() > 1 && orderedTypes[1].Id == 2)
@@ -205,7 +205,7 @@ namespace WebApi.Services
         private IChallengeProgressService.ChallengeReturn type3Progress(UserChallenge challenge, List<SleepReview> sleepReviews, DateTime dateTime, List<Challenge> orderedTypes)
         {
             IChallengeProgressService.ChallengeReturn newReturn = new IChallengeProgressService.ChallengeReturn();
-            List<SleepReview> filteredReviewList = filterReviews(challenge, sleepReviews);
+            List<SleepReview> filteredReviewList = filterReviews(challenge, sleepReviews, dateTime);
             newReturn.ChallengeLogId = challenge.Id;
             newReturn.ChallengeId = 3;
             if (orderedTypes.Count() > 2 && orderedTypes[2].Id == 3)
@@ -248,7 +248,7 @@ namespace WebApi.Services
         private IChallengeProgressService.ChallengeReturn type4Progress(UserChallenge challenge, List<SleepReview> sleepReviews, DateTime dateTime, List<Challenge> orderedTypes)
         {
             IChallengeProgressService.ChallengeReturn newReturn = new IChallengeProgressService.ChallengeReturn();
-            List<SleepReview> filteredReviewList = filterReviews(challenge, sleepReviews);
+            List<SleepReview> filteredReviewList = filterReviews(challenge, sleepReviews, dateTime);
             newReturn.ChallengeLogId = challenge.Id;
             int startToNow = (dateTime - (DateTime)challenge.StartDate!).Days;
             newReturn.ChallengeId = 4;
@@ -274,7 +274,7 @@ namespace WebApi.Services
         private IChallengeProgressService.ChallengeReturn type5Progress(UserChallenge challenge, List<SleepReview> sleepReviews, DateTime dateTime, List<Challenge> orderedTypes)
         {
             IChallengeProgressService.ChallengeReturn newReturn = new IChallengeProgressService.ChallengeReturn();
-            List<SleepReview> filteredReviewList = filterReviews(challenge, sleepReviews);
+            List<SleepReview> filteredReviewList = filterReviews(challenge, sleepReviews, dateTime);
             newReturn.ChallengeLogId = challenge.Id;
             newReturn.ChallengeId = 5;
             if (orderedTypes.Count() > 4 && orderedTypes[4].Id == 5)
@@ -361,12 +361,12 @@ namespace WebApi.Services
             return newReturn;
         }
 
-        private List<SleepReview> filterReviews(UserChallenge challenge, List<SleepReview> sleepReviews)
+        private List<SleepReview> filterReviews(UserChallenge challenge, List<SleepReview> sleepReviews, DateTime dateTime)
         {
             List<SleepReview> filteredReviewList = sleepReviews;
             for (int i = 0; i < filteredReviewList.Count(); i++)
             {
-                if (filteredReviewList[i].CreatedAt < challenge.StartDate && filteredReviewList[i].CreatedAt > challenge.ExpireDate)
+                if (filteredReviewList[i].CreatedAt < challenge.StartDate || filteredReviewList[i].CreatedAt > challenge.ExpireDate || filteredReviewList[i].CreatedAt > dateTime)
                 {
                     filteredReviewList.RemoveAt(i);
                     i --;
