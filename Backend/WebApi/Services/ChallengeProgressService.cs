@@ -55,8 +55,8 @@ namespace WebApi.Services
                     }
                 }
             }
-            DateTime earliestDate = DateTime.Now;
-            DateTime latestDate = DateTime.Now;
+            DateTime earliestDate = (DateTime)dateTime;
+            DateTime latestDate = (DateTime)dateTime;
             for (int i = 0; i < challengesList.Count(); i++)
             {
                 if (challengesList[i].StartDate != null)
@@ -124,7 +124,7 @@ namespace WebApi.Services
         private IChallengeProgressService.ChallengeReturn type1Progress(UserChallenge challenge, List<SleepReview> sleepReviews, DateTime dateTime, List<Challenge> orderedTypes)
         {
             IChallengeProgressService.ChallengeReturn newReturn = new IChallengeProgressService.ChallengeReturn();
-            List<SleepReview> filteredReviewList = filterReviews(challenge, sleepReviews);
+            List<SleepReview> filteredReviewList = filterReviews(challenge, sleepReviews, dateTime);
             newReturn.ChallengeLogId = challenge.Id;
             newReturn.ChallengeId = 1;
             if (orderedTypes.Count() > 0 && orderedTypes[0].Id == 1)
@@ -160,14 +160,14 @@ namespace WebApi.Services
                 }
             }
             newReturn.Completed = filteredReviewList.Count();
-            newReturn.CompletionPercentage = (double)newReturn.Completed/(double)newReturn.Goal;
+            newReturn.CompletionPercentage = Math.Min(1.0, ((double)newReturn.Completed/(double)newReturn.Goal));
             return newReturn;
         }
 
         private IChallengeProgressService.ChallengeReturn type2Progress(UserChallenge challenge, List<SleepReview> sleepReviews, DateTime dateTime, List<Challenge> orderedTypes)
         {
             IChallengeProgressService.ChallengeReturn newReturn = new IChallengeProgressService.ChallengeReturn();
-            List<SleepReview> filteredReviewList = filterReviews(challenge, sleepReviews);
+            List<SleepReview> filteredReviewList = filterReviews(challenge, sleepReviews, dateTime);
             newReturn.ChallengeLogId = challenge.Id;
             newReturn.ChallengeId = 2;
             if (orderedTypes.Count() > 1 && orderedTypes[1].Id == 2)
@@ -198,14 +198,14 @@ namespace WebApi.Services
                 }
             }
             newReturn.Completed = filteredReviewList.Count();
-            newReturn.CompletionPercentage = (double)newReturn.Completed/(double)newReturn.Goal;
+            newReturn.CompletionPercentage = Math.Min(1.0, ((double)newReturn.Completed/(double)newReturn.Goal));
             return newReturn;
         }
 
         private IChallengeProgressService.ChallengeReturn type3Progress(UserChallenge challenge, List<SleepReview> sleepReviews, DateTime dateTime, List<Challenge> orderedTypes)
         {
             IChallengeProgressService.ChallengeReturn newReturn = new IChallengeProgressService.ChallengeReturn();
-            List<SleepReview> filteredReviewList = filterReviews(challenge, sleepReviews);
+            List<SleepReview> filteredReviewList = filterReviews(challenge, sleepReviews, dateTime);
             newReturn.ChallengeLogId = challenge.Id;
             newReturn.ChallengeId = 3;
             if (orderedTypes.Count() > 2 && orderedTypes[2].Id == 3)
@@ -241,14 +241,14 @@ namespace WebApi.Services
                 }
             }
             newReturn.Completed = filteredReviewList.Count();
-            newReturn.CompletionPercentage = (double)newReturn.Completed/(double)newReturn.Goal;
+            newReturn.CompletionPercentage = Math.Min(1.0, ((double)newReturn.Completed/(double)newReturn.Goal));
             return newReturn;
         }
 
         private IChallengeProgressService.ChallengeReturn type4Progress(UserChallenge challenge, List<SleepReview> sleepReviews, DateTime dateTime, List<Challenge> orderedTypes)
         {
             IChallengeProgressService.ChallengeReturn newReturn = new IChallengeProgressService.ChallengeReturn();
-            List<SleepReview> filteredReviewList = filterReviews(challenge, sleepReviews);
+            List<SleepReview> filteredReviewList = filterReviews(challenge, sleepReviews, dateTime);
             newReturn.ChallengeLogId = challenge.Id;
             int startToNow = (dateTime - (DateTime)challenge.StartDate!).Days;
             newReturn.ChallengeId = 4;
@@ -267,14 +267,14 @@ namespace WebApi.Services
             newReturn.UserSelected = challenge.UserSelected;
             newReturn.Goal = 14;
             newReturn.Completed = filteredReviewList.Count();
-            newReturn.CompletionPercentage = (double)newReturn.Completed/(double)newReturn.Goal;
+            newReturn.CompletionPercentage = Math.Min(1.0, ((double)newReturn.Completed/(double)newReturn.Goal));
             return newReturn;
         }
 
         private IChallengeProgressService.ChallengeReturn type5Progress(UserChallenge challenge, List<SleepReview> sleepReviews, DateTime dateTime, List<Challenge> orderedTypes)
         {
             IChallengeProgressService.ChallengeReturn newReturn = new IChallengeProgressService.ChallengeReturn();
-            List<SleepReview> filteredReviewList = filterReviews(challenge, sleepReviews);
+            List<SleepReview> filteredReviewList = filterReviews(challenge, sleepReviews, dateTime);
             newReturn.ChallengeLogId = challenge.Id;
             newReturn.ChallengeId = 5;
             if (orderedTypes.Count() > 4 && orderedTypes[4].Id == 5)
@@ -324,7 +324,7 @@ namespace WebApi.Services
                     }
                 }
             }
-            newReturn.CompletionPercentage = (double)newReturn.Completed/(double)newReturn.Goal;
+            newReturn.CompletionPercentage = Math.Min(1.0, ((double)newReturn.Completed/(double)newReturn.Goal));
             return newReturn;
         }
 
@@ -357,16 +357,16 @@ namespace WebApi.Services
                 }
             }
             newReturn.Completed = customSchedules.Count();
-            newReturn.CompletionPercentage = (double)newReturn.Completed/(double)newReturn.Goal;
+            newReturn.CompletionPercentage = Math.Min(1.0, ((double)newReturn.Completed/(double)newReturn.Goal));
             return newReturn;
         }
 
-        private List<SleepReview> filterReviews(UserChallenge challenge, List<SleepReview> sleepReviews)
+        private List<SleepReview> filterReviews(UserChallenge challenge, List<SleepReview> sleepReviews, DateTime dateTime)
         {
-            List<SleepReview> filteredReviewList = sleepReviews;
+            List<SleepReview> filteredReviewList = new List<SleepReview>(sleepReviews);
             for (int i = 0; i < filteredReviewList.Count(); i++)
             {
-                if (filteredReviewList[i].CreatedAt < challenge.StartDate && filteredReviewList[i].CreatedAt > challenge.ExpireDate)
+                if (filteredReviewList[i].CreatedAt < challenge.StartDate || filteredReviewList[i].CreatedAt > challenge.ExpireDate || filteredReviewList[i].CreatedAt > dateTime)
                 {
                     filteredReviewList.RemoveAt(i);
                     i --;
