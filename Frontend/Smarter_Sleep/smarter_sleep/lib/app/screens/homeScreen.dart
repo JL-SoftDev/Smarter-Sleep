@@ -31,12 +31,22 @@ class _HomeScreenState extends State<HomeScreen> {
   late String userId;
 
   final List<Color> predefinedColors = [
-    Colors.indigo.shade300,
+    /// Zzz Zoom
+    Colors.indigo.shade400,
+
+    /// Dreamy Eight
     Colors.deepPurple.shade400,
-    Colors.deepPurple.shade400,
-    Colors.deepPurple.shade400,
-    Colors.deepPurple.shade400,
-    Colors.deepPurple.shade400,
+
+    /// Midnight Munch Ban
+    Colors.deepPurple.shade700,
+
+    /// Dynamic Dream Duo
+    Colors.lightGreen,
+
+    /// Seamless Sleep Automation
+    Colors.orange.shade300,
+
+    /// Sunrise Scheduler
     Colors.yellow.shade300,
   ];
 
@@ -62,7 +72,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _initializeUser() async {
     final user = await Amplify.Auth.getCurrentUser();
-
+    print(
+        'api/UserChallenges/progress?userId=${user.userId}&dateTime=${_globalServices.currentTime}');
     dynamic challengesResponse = await ApiService.get(
         'api/UserChallenges/progress?userId=${user.userId}&dateTime=${_globalServices.currentTime}');
 
@@ -72,7 +83,7 @@ class _HomeScreenState extends State<HomeScreen> {
           .map<UserChallenge>((json) => UserChallenge.fromJson(json))
           .toList();
 
-      fetchedChallenges.sort((a, b) => a.startDate.compareTo(b.startDate));
+      fetchedChallenges.sort((a, b) => b.startDate.compareTo(a.startDate));
     }
 
     dynamic response = await ApiService.get('api/SleepReviews');
@@ -255,13 +266,50 @@ class _HomeScreenState extends State<HomeScreen> {
             Column(
               children: List.generate(3, (index) {
                 if (index < userChallenges.length) {
-                  UserChallenge userChallenge = userChallenges[index];
-                  String remainingTime = userChallenge.expireDate != null
-                      ? "Expires in ${userChallenge.expireDate!.difference(_globalServices.currentTime).inDays} days"
+                  UserChallenge chl = userChallenges[index];
+
+                  /// -1 : Expired, 0 : In Progress, 1 : Completed
+                  int status = (chl.numCompleted == chl.numTargeted)
+                      ? 1
+                      : (chl.expireDate != null
+                          ? (_globalServices.currentTime
+                                  .isAfter(chl.expireDate!)
+                              ? -1
+                              : 0)
+                          : 0);
+
+                  String remainingTime = chl.expireDate != null
+                      ? "Expires in ${chl.expireDate!.difference(_globalServices.currentTime).inDays} days"
                       : "Permanent";
 
-                  Color color = predefinedColors[
-                      userChallenge.challengeId % predefinedColors.length];
+                  double barSize = chl.completionPercentage;
+                  late Color barColor;
+                  late Color fontColor = Colors.black;
+                  Icon? statusIcon;
+
+                  switch (status) {
+                    case -1:
+                      remainingTime = "Expired";
+                      barColor = Colors.red.shade300;
+                      statusIcon = Icon(
+                        Icons.warning_amber,
+                        size: 25,
+                      );
+                      barSize = 100.0;
+                      break;
+                    case 1:
+                      barColor = Colors.green;
+                      fontColor = Colors.white;
+                      statusIcon = Icon(
+                        Icons.check_circle_outlined,
+                        size: 25,
+                        color: Colors.white,
+                      );
+                      break;
+                    default:
+                      barColor = predefinedColors[
+                          (chl.challengeId - 1) % predefinedColors.length];
+                  }
 
                   return Padding(
                     padding: const EdgeInsets.all(8.0),
@@ -270,48 +318,36 @@ class _HomeScreenState extends State<HomeScreen> {
                         GestureDetector(
                           onTap: () {
                             // User completed the challenge or challenge expired
-                            if (userChallenge.numCompleted ==
-                                    userChallenge.numTargetted ||
-                                (userChallenge.expireDate != null &&
-                                    _globalServices.currentTime
-                                        .isAfter(userChallenge.expireDate!))) {
-                              ApiService.delete(
-                                      'api/UserChallenges/${userChallenge.id}')
+                            if (status != 0) {
+                              ApiService.delete('api/UserChallenges/${chl.id}')
                                   .then((_) => {
-                                        if (userChallenge.numCompleted ==
-                                            userChallenge.numTargetted)
-                                          {
-                                            _displayChallengeCompletion(
-                                                userChallenge)
-                                          }
+                                        if (status == 1)
+                                          {_displayChallengeCompletion(chl)}
                                         else
-                                          {
-                                            _displayChallengeExpired(
-                                                userChallenge)
-                                          }
+                                          {_displayChallengeExpired(chl)},
+                                        _initializeUser(),
                                       });
                             } else {
-                              _checkChallenge(userChallenge);
+                              _checkChallenge(chl);
                             }
-                            print("Tapped ${userChallenge.challengeName}");
                           },
                           child: Stack(
                             children: [
                               LinearProgressIndicator(
                                 borderRadius: BorderRadius.circular(4),
                                 backgroundColor: Colors.blueGrey[100],
-                                color: color,
-                                value: userChallenge.completionPercentage,
+                                color: barColor,
+                                value: barSize,
                                 minHeight: 50,
                               ),
                               Positioned(
                                 left: 8,
                                 top: 5,
                                 child: Text(
-                                  userChallenge.challengeName,
-                                  style: const TextStyle(
+                                  chl.challengeName,
+                                  style: TextStyle(
                                     fontSize: 22,
-                                    color: Colors.black,
+                                    color: fontColor,
                                   ),
                                 ),
                               ),
@@ -320,9 +356,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                 top: 30,
                                 child: Text(
                                   remainingTime,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 12,
-                                    color: Colors.black,
+                                    color: fontColor,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -330,13 +366,22 @@ class _HomeScreenState extends State<HomeScreen> {
                               Positioned(
                                 right: 10,
                                 top: 13,
-                                child: Text(
-                                  "${(userChallenge.completionPercentage * 100).toInt()}%",
-                                  style: const TextStyle(
-                                    fontSize: 20,
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                child: Row(
+                                  children: [
+                                    if (statusIcon != null)
+                                      Padding(
+                                        padding: EdgeInsets.only(right: 5),
+                                        child: statusIcon,
+                                      ),
+                                    Text(
+                                      "${(chl.completionPercentage * 100).toInt()}%",
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        color: fontColor,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
@@ -538,7 +583,7 @@ class _HomeScreenState extends State<HomeScreen> {
         return AlertDialog(
           title: Text(userChallenge.challengeName),
           content: Text(
-              "${userChallenge.challengeDesc ?? "No description"}\n\nCompleted: ${userChallenge.numCompleted} | Required: ${userChallenge.numTargetted}"),
+              "${userChallenge.challengeDesc ?? "No description"}\n\nCompleted: ${userChallenge.numCompleted} | Required: ${userChallenge.numTargeted}"),
           actions: [
             TextButton(
               onPressed: () {

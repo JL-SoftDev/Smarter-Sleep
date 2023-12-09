@@ -8,7 +8,7 @@ class UserChallenge {
   final bool userSelected;
   final double completionPercentage;
   final int numCompleted;
-  final int numTargetted;
+  final int numTargeted;
 
   UserChallenge({
     required this.id,
@@ -20,7 +20,7 @@ class UserChallenge {
     required this.userSelected,
     required this.completionPercentage,
     required this.numCompleted,
-    required this.numTargetted,
+    required this.numTargeted,
   });
   factory UserChallenge.fromJson(Map<String, dynamic> json) {
     return UserChallenge(
@@ -33,7 +33,7 @@ class UserChallenge {
       userSelected: json['userSelected'],
       completionPercentage: json['completionPercentage'] / 1.0,
       numCompleted: json['completed'],
-      numTargetted: json['goal'],
+      numTargeted: json['goal'],
     );
   }
 }
