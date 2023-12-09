@@ -160,7 +160,7 @@ namespace WebApi.Services
                 }
             }
             newReturn.Completed = filteredReviewList.Count();
-            newReturn.CompletionPercentage = Math.Max(1.0, ((double)newReturn.Completed/(double)newReturn.Goal));
+            newReturn.CompletionPercentage = Math.Min(1.0, ((double)newReturn.Completed/(double)newReturn.Goal));
             return newReturn;
         }
 
@@ -198,7 +198,7 @@ namespace WebApi.Services
                 }
             }
             newReturn.Completed = filteredReviewList.Count();
-            newReturn.CompletionPercentage = Math.Max(1.0, ((double)newReturn.Completed/(double)newReturn.Goal));
+            newReturn.CompletionPercentage = Math.Min(1.0, ((double)newReturn.Completed/(double)newReturn.Goal));
             return newReturn;
         }
 
@@ -241,7 +241,7 @@ namespace WebApi.Services
                 }
             }
             newReturn.Completed = filteredReviewList.Count();
-            newReturn.CompletionPercentage = Math.Max(1.0, ((double)newReturn.Completed/(double)newReturn.Goal));
+            newReturn.CompletionPercentage = Math.Min(1.0, ((double)newReturn.Completed/(double)newReturn.Goal));
             return newReturn;
         }
 
@@ -267,7 +267,7 @@ namespace WebApi.Services
             newReturn.UserSelected = challenge.UserSelected;
             newReturn.Goal = 14;
             newReturn.Completed = filteredReviewList.Count();
-            newReturn.CompletionPercentage = Math.Max(1.0, ((double)newReturn.Completed/(double)newReturn.Goal));
+            newReturn.CompletionPercentage = Math.Min(1.0, ((double)newReturn.Completed/(double)newReturn.Goal));
             return newReturn;
         }
 
@@ -324,7 +324,7 @@ namespace WebApi.Services
                     }
                 }
             }
-            newReturn.CompletionPercentage = Math.Max(1.0, ((double)newReturn.Completed/(double)newReturn.Goal));
+            newReturn.CompletionPercentage = Math.Min(1.0, ((double)newReturn.Completed/(double)newReturn.Goal));
             return newReturn;
         }
 
@@ -357,7 +357,7 @@ namespace WebApi.Services
                 }
             }
             newReturn.Completed = customSchedules.Count();
-            newReturn.CompletionPercentage = Math.Max(1.0, ((double)newReturn.Completed/(double)newReturn.Goal));
+            newReturn.CompletionPercentage = Math.Min(1.0, ((double)newReturn.Completed/(double)newReturn.Goal));
             return newReturn;
         }
 
