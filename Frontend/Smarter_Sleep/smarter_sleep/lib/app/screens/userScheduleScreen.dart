@@ -24,7 +24,7 @@ class _UserScheduleScreenState extends State<UserScheduleScreen> {
   ];
   TimeOfDay selectedTime = TimeOfDay.now();
   var fetchedTime;
-  var timeList = List<TimeOfDay>.filled(7, TimeOfDay.now());
+  var timeList = List<TimeOfDay>.filled(7, TimeOfDay(hour: 6, minute: 0));
   @override
   void initState() {
     super.initState();
@@ -66,37 +66,47 @@ class _UserScheduleScreenState extends State<UserScheduleScreen> {
       ),
       //TODO: Add some way for the user to submit schedules, send a post request to the api with the new data
       body:
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: ListView.builder(
-              itemCount: 7,
-              itemBuilder: (context, index) {
-                final day = daysOfWeek[index];
-                return ListTile(
-                  title: Text(day),
-                  subtitle: Text(timeList[index].format(context)),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                          icon: const Icon(Icons.edit),
-                          onPressed: () async {
-                            final TimeOfDay? pickedTime = await showTimePicker(
-                              context: context,
-                              initialTime: timeList[index],
-                            );
-                            if (pickedTime != null && pickedTime != selectedTime) {
-                              setState(() {
-                                _saveCustomSchedule(userID, index, pickedTime);
-                                fetchUserSchedule();
-                              });
-                            }
-                          }),
-                    ],
+          Column(
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.only(top: 25),
+                child: Text("Edit Your Wake Times Below:", textAlign: TextAlign.center, style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color:Colors.blue)),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: ListView.builder(
+                    itemCount: 7,
+                    itemBuilder: (context, index) {
+                      final day = daysOfWeek[index];
+                      return ListTile(
+                        title: Text(day, style: TextStyle(fontSize: 18),),
+                        subtitle: Text(timeList[index].format(context)),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                                icon: const Icon(Icons.edit),
+                                onPressed: () async {
+                                  final TimeOfDay? pickedTime = await showTimePicker(
+                                    context: context,
+                                    initialTime: timeList[index],
+                                  );
+                                  if (pickedTime != null) {
+                                    setState(() {
+                                      _saveCustomSchedule(userID, index, pickedTime);
+                                      fetchUserSchedule();
+                                    });
+                                  }
+                                }),
+                          ],
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
-            ),
+                ),
+              ),
+            ],
           ),
     );
   }
