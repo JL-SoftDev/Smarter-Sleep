@@ -11,7 +11,6 @@ class UserScheduleScreen extends StatefulWidget {
 }
 
 class _UserScheduleScreenState extends State<UserScheduleScreen> {
-  var userID;
   List<CustomSchedule> schedule = [];
   List<String> daysOfWeek = [
     'Sunday',
@@ -25,6 +24,8 @@ class _UserScheduleScreenState extends State<UserScheduleScreen> {
   TimeOfDay selectedTime = TimeOfDay.now();
   var fetchedTime;
   var timeList = List<TimeOfDay>.filled(7, TimeOfDay(hour: 6, minute: 0));
+  var userID;
+  var intDate;
   @override
   void initState() {
     super.initState();
@@ -94,8 +95,7 @@ class _UserScheduleScreenState extends State<UserScheduleScreen> {
                                   );
                                   if (pickedTime != null) {
                                     setState(() {
-                                      _saveCustomSchedule(userID, index, pickedTime);
-                                      fetchUserSchedule();
+                                      timeList[index] = pickedTime;
                                     });
                                   }
                                 }),
@@ -106,10 +106,42 @@ class _UserScheduleScreenState extends State<UserScheduleScreen> {
                   ),
                 ),
               ),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(3),
+                child: Stack(
+                children: <Widget>[
+                Positioned.fill(
+                  child: Container(
+                    decoration: const BoxDecoration(
+                    color: Colors.blue
+                    ),
+                  ),
+                ),
+                TextButton(
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.all(10.0),
+                    textStyle: const TextStyle(fontSize: 20),
+                  ),
+                  onPressed: () {
+                    _saveAllSchedules();
+                  },
+                  child: const Text('Save All Schedules'),
+                ),
+              ],
+            ),
+              ),
+              const SizedBox(height: 20),
             ],
           ),
     );
   }
+  void _saveAllSchedules(){
+      for (int index = 0; index <= daysOfWeek.length; index++){
+        var time = timeList[index];
+        _saveCustomSchedule(userID, index, time);
+    }
+   }
 Future<void> _saveCustomSchedule(userID, dayOfWeek, wakeTime) async {
   CustomSchedule newSchedule = CustomSchedule(userId: userID, dayOfWeek: dayOfWeek, wakeTime: wakeTime);
   ApiService.put('api/CustomSchedules/${newSchedule.userId}/${newSchedule.dayOfWeek}', newSchedule.toJson())
@@ -120,6 +152,7 @@ Future<void> _saveCustomSchedule(userID, dayOfWeek, wakeTime) async {
         );
   }
 }
+
 
 //Can be moved to app/models however only used on this screen
 class CustomSchedule {
