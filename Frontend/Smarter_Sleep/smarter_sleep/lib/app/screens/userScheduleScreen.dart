@@ -49,6 +49,9 @@ class _UserScheduleScreenState extends State<UserScheduleScreen> {
         }
       });
     }
+    else if (response == null){
+      //fetchUserSchedule();
+    }
   }
 
   @override
@@ -71,7 +74,7 @@ class _UserScheduleScreenState extends State<UserScheduleScreen> {
             children: <Widget>[
               Padding(
                 padding: const EdgeInsets.only(top: 25),
-                child: Text("Edit Your Wake Times Below:", textAlign: TextAlign.center, style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold, color:Colors.blue)),
+                child: Text("Edit Wake Times Below:", textAlign: TextAlign.center, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color:Color.fromARGB(255, 18, 86, 143))),
               ),
               Expanded(
                 child: Padding(
@@ -81,24 +84,33 @@ class _UserScheduleScreenState extends State<UserScheduleScreen> {
                     itemBuilder: (context, index) {
                       final day = daysOfWeek[index];
                       return ListTile(
-                        title: Text(day, style: TextStyle(fontSize: 18),),
-                        subtitle: Text(timeList[index].format(context)),
+                        title: Text(day, style: TextStyle(fontSize: 19, fontWeight:FontWeight.bold),),
+                        subtitle: Text(timeList[index].format(context), style: TextStyle(fontSize: 18),),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            IconButton(
-                                icon: const Icon(Icons.edit),
-                                onPressed: () async {
-                                  final TimeOfDay? pickedTime = await showTimePicker(
-                                    context: context,
-                                    initialTime: timeList[index],
-                                  );
-                                  if (pickedTime != null) {
-                                    setState(() {
-                                      timeList[index] = pickedTime;
-                                    });
-                                  }
-                                }),
+                            Ink(
+                              width: 40,
+                              decoration: const ShapeDecoration(
+                              color: Colors.blue,
+                              shape: CircleBorder()
+                             ),
+                              child: IconButton(
+                                  icon: const Icon(Icons.edit),
+                                  color: Colors.white,
+                                  iconSize: 25,
+                                  onPressed: () async {
+                                    final TimeOfDay? pickedTime = await showTimePicker(
+                                      context: context,
+                                      initialTime: timeList[index],
+                                    );
+                                    if (pickedTime != null) {
+                                      setState(() {
+                                        timeList[index] = pickedTime;
+                                      });
+                                    }
+                                  }),
+                            ),
                           ],
                         ),
                       );
@@ -117,7 +129,7 @@ class _UserScheduleScreenState extends State<UserScheduleScreen> {
                     ),
                   ),
                 ),
-                TextButton(
+                ElevatedButton(
                   style: TextButton.styleFrom(
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.all(10.0),
@@ -126,7 +138,7 @@ class _UserScheduleScreenState extends State<UserScheduleScreen> {
                   onPressed: () {
                     _saveAllSchedules();
                   },
-                  child: const Text('Save All Schedules'),
+                  child: const Text('Save All Schedules', style: TextStyle(fontWeight:FontWeight.bold),),
                 ),
               ],
             ),
@@ -137,7 +149,7 @@ class _UserScheduleScreenState extends State<UserScheduleScreen> {
     );
   }
   void _saveAllSchedules(){
-      for (int index = 0; index <= daysOfWeek.length; index++){
+      for (int index = 0; index < daysOfWeek.length; index++){
         var time = timeList[index];
         _saveCustomSchedule(userID, index, time);
     }
