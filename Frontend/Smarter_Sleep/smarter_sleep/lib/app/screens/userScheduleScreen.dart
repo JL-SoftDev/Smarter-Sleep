@@ -11,7 +11,6 @@ class UserScheduleScreen extends StatefulWidget {
 }
 
 class _UserScheduleScreenState extends State<UserScheduleScreen> {
-  var userID;
   List<CustomSchedule> schedule = [];
   List<String> daysOfWeek = [
     'Sunday',
@@ -24,7 +23,9 @@ class _UserScheduleScreenState extends State<UserScheduleScreen> {
   ];
   TimeOfDay selectedTime = TimeOfDay.now();
   var fetchedTime;
-  var timeList = List<TimeOfDay>.filled(7, TimeOfDay.now());
+  var timeList = List<TimeOfDay>.filled(7, TimeOfDay(hour: 6, minute: 0));
+  var userID;
+  var intDate;
   @override
   void initState() {
     super.initState();
@@ -48,6 +49,9 @@ class _UserScheduleScreenState extends State<UserScheduleScreen> {
         }
       });
     }
+    else if (response == null){
+      //fetchUserSchedule();
+    }
   }
 
   @override
@@ -65,40 +69,90 @@ class _UserScheduleScreenState extends State<UserScheduleScreen> {
         ],
       ),
       body:
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: ListView.builder(
-              itemCount: 7,
-              itemBuilder: (context, index) {
-                final day = daysOfWeek[index];
-                return ListTile(
-                  title: Text(day),
-                  subtitle: Text(timeList[index].format(context)),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                          icon: const Icon(Icons.edit),
-                          onPressed: () async {
-                            final TimeOfDay? pickedTime = await showTimePicker(
-                              context: context,
-                              initialTime: timeList[index],
-                            );
-                            if (pickedTime != null && pickedTime != selectedTime) {
-                              setState(() {
-                                _saveCustomSchedule(userID, index, pickedTime);
-                                fetchUserSchedule();
-                              });
-                            }
-                          }),
-                    ],
+          Column(
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.only(top: 25),
+                child: Text("Edit Wake Times Below:", textAlign: TextAlign.center, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color:Color.fromARGB(255, 18, 86, 143))),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: ListView.builder(
+                    itemCount: 7,
+                    itemBuilder: (context, index) {
+                      final day = daysOfWeek[index];
+                      return ListTile(
+                        title: Text(day, style: TextStyle(fontSize: 19, fontWeight:FontWeight.bold),),
+                        subtitle: Text(timeList[index].format(context), style: TextStyle(fontSize: 18),),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Ink(
+                              width: 40,
+                              decoration: const ShapeDecoration(
+                              color: Colors.blue,
+                              shape: CircleBorder()
+                             ),
+                              child: IconButton(
+                                  icon: const Icon(Icons.edit),
+                                  color: Colors.white,
+                                  iconSize: 25,
+                                  onPressed: () async {
+                                    final TimeOfDay? pickedTime = await showTimePicker(
+                                      context: context,
+                                      initialTime: timeList[index],
+                                    );
+                                    if (pickedTime != null) {
+                                      setState(() {
+                                        timeList[index] = pickedTime;
+                                      });
+                                    }
+                                  }),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
+                ),
+              ),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(3),
+                child: Stack(
+                children: <Widget>[
+                Positioned.fill(
+                  child: Container(
+                    decoration: const BoxDecoration(
+                    color: Colors.blue
+                    ),
+                  ),
+                ),
+                ElevatedButton(
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.all(10.0),
+                    textStyle: const TextStyle(fontSize: 20),
+                  ),
+                  onPressed: () {
+                    _saveAllSchedules();
+                  },
+                  child: const Text('Save All Schedules', style: TextStyle(fontWeight:FontWeight.bold),),
+                ),
+              ],
             ),
+              ),
+              const SizedBox(height: 20),
+            ],
           ),
     );
   }
+  void _saveAllSchedules(){
+      for (int index = 0; index < daysOfWeek.length; index++){
+        var time = timeList[index];
+        _saveCustomSchedule(userID, index, time);
+    }
+   }
 Future<void> _saveCustomSchedule(userID, dayOfWeek, wakeTime) async {
   CustomSchedule newSchedule = CustomSchedule(userId: userID, dayOfWeek: dayOfWeek, wakeTime: wakeTime);
   ApiService.put('api/CustomSchedules/${newSchedule.userId}/${newSchedule.dayOfWeek}', newSchedule.toJson())
@@ -109,6 +163,7 @@ Future<void> _saveCustomSchedule(userID, dayOfWeek, wakeTime) async {
         );
   }
 }
+
 
 //Can be moved to app/models however only used on this screen
 class CustomSchedule {
