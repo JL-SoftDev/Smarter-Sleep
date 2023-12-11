@@ -197,7 +197,6 @@ class _SleepReviewScreenState extends State<SleepReviewScreen> {
         bottomTitles: AxisTitles(
           sideTitles: SideTitles(
             showTitles: true,
-            interval: 86400000 * 2,
             getTitlesWidget: (double value, TitleMeta meta) {
               final dateTime =
                   DateTime.fromMillisecondsSinceEpoch(value.toInt());
