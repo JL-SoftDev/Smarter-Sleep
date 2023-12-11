@@ -101,12 +101,14 @@ class _DeviceConnectionsScreenState extends State<DeviceConnectionsScreen> {
             }
             //Update device in database
             await ApiService.put('api/Devices/${device.id}', device);
+
+            /// If there are no upcoming alarms then set alarm to no status
+          } else if (device.type == "alarm") {
+            device.status = null;
+            await ApiService.put('api/Devices/${device.id}', device);
           }
         }
       }
-      /*
-
-      */
 
       setState(() {
         devices = fetchedDevices;
@@ -198,7 +200,12 @@ class _DeviceConnectionsScreenState extends State<DeviceConnectionsScreen> {
 
   Widget _buildStatusWidget(Device device) {
     if (device.status == null) {
-      return const Text('No Status');
+      switch (device.type) {
+        case 'alarm':
+          return const Text("No Alarm Set");
+        default:
+          return const Text("No Status");
+      }
     }
     if (device.type == 'alarm') {
       final nextAlarm = DateTime.tryParse(device.status!);
