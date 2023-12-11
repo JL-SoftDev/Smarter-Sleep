@@ -599,7 +599,7 @@ class _HomeScreenState extends State<HomeScreen> {
         return AlertDialog(
           title: Text('Congratulations!'),
           content: Text(
-              'You completed the ${userChallenge.challengeName} challenge! Get assigned another by completing another sleep cycle.'),
+              'You completed the ${userChallenge.challengeName} challenge! Get assigned another by completing a sleep cycle.'),
           actions: [
             TextButton(
               onPressed: () {
