@@ -2,6 +2,7 @@
 
 import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:smarter_sleep/app/api/api_service.dart';
 import 'package:smarter_sleep/app/models/device.dart';
 import 'package:smarter_sleep/app/models/device_schedule.dart';
@@ -145,7 +146,7 @@ class _DeviceConnectionsScreenState extends State<DeviceConnectionsScreen> {
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      _buildStatusWidget(device),
+                      Text(_getStatus(device)),
                       IconButton(
                         icon: const Icon(Icons.edit),
                         onPressed: () {
@@ -198,36 +199,25 @@ class _DeviceConnectionsScreenState extends State<DeviceConnectionsScreen> {
     return Icon(iconData);
   }
 
-  Widget _buildStatusWidget(Device device) {
+  String _getStatus(Device device) {
     if (device.status == null) {
-      switch (device.type) {
-        case 'alarm':
-          return const Text("No Alarm Set");
-        default:
-          return const Text("No Status");
-      }
+      return device.type == 'alarm' ? "No Alarm Set" : "No Status";
     }
-    if (device.type == 'alarm') {
-      final nextAlarm = DateTime.tryParse(device.status!);
-      if (nextAlarm != null) {
-        Duration timeDifference =
-            nextAlarm.difference(_globalServices.currentTime);
 
-        if (timeDifference.inDays > 1) {
-          final days = timeDifference.inDays;
-          return Text('Next Alarm: in $days days');
-        } else {
-          final formattedTime = "${nextAlarm.hour}h ${nextAlarm.minute}m";
-          return Text('Next Alarm: $formattedTime');
+    switch (device.type) {
+      case 'alarm':
+        final nextAlarm = DateTime.tryParse(device.status!);
+        if (nextAlarm != null) {
+          return "Next Alarm: ${DateFormat("HH:mm").format(nextAlarm)}";
         }
-      }
-      return Text('Next Alarm\n ${device.status}');
-    } else if (device.type == 'light') {
-      return Text('Brightness: ${device.status}%');
-    } else if (device.type == 'thermostat') {
-      return Text('Temperature: ${device.status}°F');
+        return "No Alarm Set";
+      case 'light':
+        return 'Brightness: ${device.status}%';
+      case 'thermostat':
+        return 'Temperature: ${device.status}°F';
+      default:
+        return 'Status: ${device.status}';
     }
-    return Text('Status: ${device.status}');
   }
 
   Future<void> _navigateToAddDevice(BuildContext context) async {
