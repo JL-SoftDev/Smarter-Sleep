@@ -326,13 +326,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   double barSize = chl.completionPercentage;
                   late Color barColor;
-                  Color bgColor = Colors.blueGrey.shade300;
+                  Color bgColor = Colors.blueGrey.shade100;
                   Color fontColor = Colors.white;
                   Icon? statusIcon;
-
-                  if (chl.challengeId == 6) {
-                    fontColor = Colors.black;
-                  }
 
                   switch (status) {
                     case 1:
@@ -359,6 +355,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           barColors[(chl.challengeId - 1) % barColors.length];
                   }
 
+                  /// Due to the color used, challenge 6 needs to use black text
+                  if (chl.challengeId == 6 && status == 0) {
+                    fontColor = Colors.black;
+                  }
+
                   return Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Column(
@@ -381,12 +382,21 @@ class _HomeScreenState extends State<HomeScreen> {
                           },
                           child: Stack(
                             children: [
-                              LinearProgressIndicator(
-                                borderRadius: BorderRadius.circular(4),
-                                backgroundColor: bgColor,
-                                color: barColor,
-                                value: barSize,
-                                minHeight: 50,
+                              TweenAnimationBuilder<double>(
+                                duration: const Duration(seconds: 1),
+                                curve: Curves.ease,
+                                tween: Tween<double>(
+                                  begin: 0.0,
+                                  end: barSize,
+                                ),
+                                builder: (context, value, _) =>
+                                    LinearProgressIndicator(
+                                  borderRadius: BorderRadius.circular(4),
+                                  backgroundColor: bgColor,
+                                  color: barColor,
+                                  value: value,
+                                  minHeight: 50,
+                                ),
                               ),
                               Positioned(
                                 left: 8,
