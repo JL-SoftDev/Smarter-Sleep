@@ -90,11 +90,9 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
-  Future<void> _initializeUser() async {
-    final user = await Amplify.Auth.getCurrentUser();
+  Future<List<UserChallenge>> _fetchChallenges(String userId) async {
     dynamic challengesResponse = await ApiService.get(
-        'api/UserChallenges/progress?userId=${user.userId}&dateTime=${_globalServices.currentTime}');
-
+        'api/UserChallenges/progress?userId=${userId}&dateTime=${_globalServices.currentTime}');
     List<UserChallenge> fetchedChallenges = [];
     if (challengesResponse != null) {
       fetchedChallenges = challengesResponse
@@ -106,15 +104,18 @@ class _HomeScreenState extends State<HomeScreen> {
           .toList();
 
       fetchedChallenges.sort((a, b) => b.startDate.compareTo(a.startDate));
+      return fetchedChallenges;
     }
+    return [];
+  }
 
+  Future<int> _fetchSleepScore(String userId) async {
     dynamic response = await ApiService.get('api/SleepReviews');
 
-    int fetchedSleepScore = 0;
     if (response != null) {
       List<SleepReview> reviews = response
           .where((reviewData) =>
-              reviewData['userId'] == user.userId &&
+              reviewData['userId'] == userId &&
               reviewData['survey'] != null &&
               reviewData['wearableLog'] != null)
           .map<SleepReview>((json) => SleepReview.fromJson(json))
@@ -122,9 +123,17 @@ class _HomeScreenState extends State<HomeScreen> {
       if (reviews.isNotEmpty) {
         SleepReview lastReview =
             reviews.reduce((a, b) => a.createdAt.isAfter(b.createdAt) ? a : b);
-        fetchedSleepScore = lastReview.smarterSleepScore;
+        return lastReview.smarterSleepScore;
       }
     }
+    return 0;
+  }
+
+  Future<void> _initializeUser() async {
+    final user = await Amplify.Auth.getCurrentUser();
+
+    List<UserChallenge> fetchedChallenges = await _fetchChallenges(user.userId);
+    int fetchedSleepScore = await _fetchSleepScore(user.userId);
 
     setState(() {
       userId = user.userId;
@@ -219,7 +228,18 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(
             icon: const Icon(Icons.schedule),
             onPressed: () {
-              mainNavigatorKey.currentState!.pushNamed("/schedule");
+              mainNavigatorKey.currentState!
+                  .pushNamed("/schedule")
+                  .then((_) async {
+                /// Check if user is assigned sunrise scheduler
+                if (userChallenges.any((chl) => chl.challengeId == 6)) {
+                  List<UserChallenge> fetchedChallenges =
+                      await _fetchChallenges(userId);
+                  setState(() {
+                    userChallenges = fetchedChallenges;
+                  });
+                }
+              });
             },
           ),
           IconButton(
