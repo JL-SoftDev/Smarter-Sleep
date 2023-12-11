@@ -12,7 +12,7 @@ As the project is a prototype, there are no official releases and the project mu
   - Stored on an AWS RDS PostgreSQL Database
 - Node.js Lambda Script • **[Source Code](Backend/LambdaFunctions/UserRegistration)** • [README](Backend/LambdaFunctions/UserRegistration/README.md)
   - Connected to a `Post Confirmation Lambda Trigger` attached to a AWS Cognito User Pool.
-- Flutter Application • **[Source Code](Frontend/SmarterSleep/smarter_sleep)** • [README](Frontend/Smarter_Sleep/smarter_sleep/README.md)
+- Flutter Application • **[Source Code](Frontend/SmarterSleep/smarter_sleep)** • [README](Frontend/README.md)
   - Executed on physical or emulated mobile devices.
 
 ## Team Blue Fall 2023
