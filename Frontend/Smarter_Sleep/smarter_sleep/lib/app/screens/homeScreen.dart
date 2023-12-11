@@ -90,31 +90,32 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
-  Future<void> _initializeUser() async {
-    final user = await Amplify.Auth.getCurrentUser();
-    print(
-        'api/UserChallenges/progress?userId=${user.userId}&dateTime=${_globalServices.currentTime}');
+  Future<List<UserChallenge>> _fetchChallenges(String userId) async {
     dynamic challengesResponse = await ApiService.get(
-        'api/UserChallenges/progress?userId=${user.userId}&dateTime=${_globalServices.currentTime}');
-
+        'api/UserChallenges/progress?userId=${userId}&dateTime=${_globalServices.currentTime}');
     List<UserChallenge> fetchedChallenges = [];
     if (challengesResponse != null) {
       fetchedChallenges = challengesResponse
           .map<UserChallenge>((json) => UserChallenge.fromJson(json))
-          .where((UserChallenge chl) =>
-              chl.startDate.isBefore(_globalServices.currentTime))
+
+          /// Filter challenges that don't begin for another day or more.
+          .where((UserChallenge chl) => chl.startDate
+              .isBefore(_globalServices.currentTime.add(Duration(days: 1))))
           .toList();
 
       fetchedChallenges.sort((a, b) => b.startDate.compareTo(a.startDate));
+      return fetchedChallenges;
     }
+    return [];
+  }
 
+  Future<int> _fetchSleepScore(String userId) async {
     dynamic response = await ApiService.get('api/SleepReviews');
 
-    int fetchedSleepScore = 0;
     if (response != null) {
       List<SleepReview> reviews = response
           .where((reviewData) =>
-              reviewData['userId'] == user.userId &&
+              reviewData['userId'] == userId &&
               reviewData['survey'] != null &&
               reviewData['wearableLog'] != null)
           .map<SleepReview>((json) => SleepReview.fromJson(json))
@@ -122,9 +123,17 @@ class _HomeScreenState extends State<HomeScreen> {
       if (reviews.isNotEmpty) {
         SleepReview lastReview =
             reviews.reduce((a, b) => a.createdAt.isAfter(b.createdAt) ? a : b);
-        fetchedSleepScore = lastReview.smarterSleepScore;
+        return lastReview.smarterSleepScore;
       }
     }
+    return 0;
+  }
+
+  Future<void> _initializeUser() async {
+    final user = await Amplify.Auth.getCurrentUser();
+
+    List<UserChallenge> fetchedChallenges = await _fetchChallenges(user.userId);
+    int fetchedSleepScore = await _fetchSleepScore(user.userId);
 
     setState(() {
       userId = user.userId;
@@ -219,7 +228,18 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(
             icon: const Icon(Icons.schedule),
             onPressed: () {
-              mainNavigatorKey.currentState!.pushNamed("/schedule");
+              mainNavigatorKey.currentState!
+                  .pushNamed("/schedule")
+                  .then((_) async {
+                /// Check if user is assigned sunrise scheduler
+                if (userChallenges.any((chl) => chl.challengeId == 6)) {
+                  List<UserChallenge> fetchedChallenges =
+                      await _fetchChallenges(userId);
+                  setState(() {
+                    userChallenges = fetchedChallenges;
+                  });
+                }
+              });
             },
           ),
           IconButton(
@@ -306,13 +326,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   double barSize = chl.completionPercentage;
                   late Color barColor;
-                  Color bgColor = Colors.blueGrey.shade300;
+                  Color bgColor = Colors.blueGrey.shade100;
                   Color fontColor = Colors.white;
                   Icon? statusIcon;
-
-                  if (chl.challengeId == 6) {
-                    fontColor = Colors.black;
-                  }
 
                   switch (status) {
                     case 1:
@@ -339,6 +355,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           barColors[(chl.challengeId - 1) % barColors.length];
                   }
 
+                  /// Due to the color used, challenge 6 needs to use black text
+                  if (chl.challengeId == 6 && status == 0) {
+                    fontColor = Colors.black;
+                  }
+
                   return Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Column(
@@ -361,12 +382,21 @@ class _HomeScreenState extends State<HomeScreen> {
                           },
                           child: Stack(
                             children: [
-                              LinearProgressIndicator(
-                                borderRadius: BorderRadius.circular(4),
-                                backgroundColor: bgColor,
-                                color: barColor,
-                                value: barSize,
-                                minHeight: 50,
+                              TweenAnimationBuilder<double>(
+                                duration: const Duration(seconds: 1),
+                                curve: Curves.ease,
+                                tween: Tween<double>(
+                                  begin: 0.0,
+                                  end: barSize,
+                                ),
+                                builder: (context, value, _) =>
+                                    LinearProgressIndicator(
+                                  borderRadius: BorderRadius.circular(4),
+                                  backgroundColor: bgColor,
+                                  color: barColor,
+                                  value: value,
+                                  minHeight: 50,
+                                ),
                               ),
                               Positioned(
                                 left: 8,
@@ -489,8 +519,11 @@ class _HomeScreenState extends State<HomeScreen> {
         SleepReview review = SleepReview.fromJson(response);
         _popupReview(review);
         scheduleDevices();
+        List<UserChallenge> newChallengeProgress =
+            await _fetchChallenges(userId);
         setState(() {
           _sleepScore = review.smarterSleepScore;
+          userChallenges = newChallengeProgress;
         });
       }
     }
@@ -569,7 +602,7 @@ class _HomeScreenState extends State<HomeScreen> {
         return AlertDialog(
           title: Text('Congratulations!'),
           content: Text(
-              'You completed the ${userChallenge.challengeName} challenge! Get assigned another by completing another sleep cycle.'),
+              'You completed the ${userChallenge.challengeName} challenge! Get assigned another by completing a sleep cycle.'),
           actions: [
             TextButton(
               onPressed: () {

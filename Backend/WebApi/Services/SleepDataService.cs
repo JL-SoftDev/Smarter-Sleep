@@ -163,7 +163,7 @@ namespace WebApi.Services
 
 			//TODO: Check if the sleep setting has already been applied to a SleepReview
 			//Fetch first sleep setting where ScheduledSleep is equal to when user took the survey -1 day
-			SleepSetting sleepSetting = _databaseContext.SleepSettings.FirstOrDefault(e => e.UserId == userId && DateOnly.FromDateTime(e.ScheduledSleep) == survey.SurveyDate.AddDays(-1));
+			SleepSetting sleepSetting = _databaseContext.SleepSettings.Include(ss => ss.DeviceSettings).FirstOrDefault(e => e.UserId == userId && DateOnly.FromDateTime(e.ScheduledSleep) == survey.SurveyDate.AddDays(-1));
 			if(sleepSetting != null){
 				int modCounter = 0;
 				foreach(DeviceSetting deviceSetting in sleepSetting.DeviceSettings){
