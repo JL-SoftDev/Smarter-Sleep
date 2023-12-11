@@ -136,6 +136,7 @@ class _UserScheduleScreenState extends State<UserScheduleScreen> {
                   ),
                   onPressed: () {
                     _saveAllSchedules();
+                    Navigator.pop(context);
                   },
                   child: const Text('Save All Schedules', style: TextStyle(fontWeight:FontWeight.bold),),
                 ),
