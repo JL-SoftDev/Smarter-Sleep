@@ -201,13 +201,8 @@ class _UserScheduleScreenState extends State<UserScheduleScreen> {
     CustomSchedule newSchedule = CustomSchedule(
         userId: userID, dayOfWeek: dayOfWeek, wakeTime: wakeTime);
     ApiService.put(
-            'api/CustomSchedules/${newSchedule.userId}/${newSchedule.dayOfWeek}',
-            newSchedule.toJson())
-        .then(
-      (response) async {
-        fetchUserSchedule();
-      },
-    );
+        'api/CustomSchedules/${newSchedule.userId}/${newSchedule.dayOfWeek}',
+        newSchedule.toJson());
   }
 }
 
