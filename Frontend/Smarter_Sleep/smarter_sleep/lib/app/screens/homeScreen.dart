@@ -519,8 +519,11 @@ class _HomeScreenState extends State<HomeScreen> {
         SleepReview review = SleepReview.fromJson(response);
         _popupReview(review);
         scheduleDevices();
+        List<UserChallenge> newChallengeProgress =
+            await _fetchChallenges(userId);
         setState(() {
           _sleepScore = review.smarterSleepScore;
+          userChallenges = newChallengeProgress;
         });
       }
     }
