@@ -92,8 +92,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _initializeUser() async {
     final user = await Amplify.Auth.getCurrentUser();
-    print(
-        'api/UserChallenges/progress?userId=${user.userId}&dateTime=${_globalServices.currentTime}');
     dynamic challengesResponse = await ApiService.get(
         'api/UserChallenges/progress?userId=${user.userId}&dateTime=${_globalServices.currentTime}');
 
@@ -101,8 +99,10 @@ class _HomeScreenState extends State<HomeScreen> {
     if (challengesResponse != null) {
       fetchedChallenges = challengesResponse
           .map<UserChallenge>((json) => UserChallenge.fromJson(json))
-          .where((UserChallenge chl) =>
-              chl.startDate.isBefore(_globalServices.currentTime))
+
+          /// Filter challenges that don't begin for another day or more.
+          .where((UserChallenge chl) => chl.startDate
+              .isBefore(_globalServices.currentTime.add(Duration(days: 1))))
           .toList();
 
       fetchedChallenges.sort((a, b) => b.startDate.compareTo(a.startDate));
