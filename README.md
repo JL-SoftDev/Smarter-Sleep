@@ -7,9 +7,13 @@ by managing smart home devices to improve sleep quality. For more information ab
 ## Installing
 As the project is a prototype, there are no official releases and the project must be compiled to execute. The structure of the code is divided into four sections which run entirely seperated, for more information go to the associated README file.
 - ASP.NET RESTful Api • **[Source Code](Backend/WebApi)** • [README](Backend/WebApi/README.md)
+  - Hosted Remotely on an AWS EC2 Instance
 - PostgreSQL Database • **[Source Code](Backend/initial_database_setup.sql)**
+  - Stored on an AWS RDS PostgreSQL Database
 - Node.js Lambda Script • **[Source Code](Backend/LambdaFunctions/UserRegistration)** • [README](Backend/LambdaFunctions/UserRegistration/README.md)
+  - Connected to a `Post Confirmation Lambda Trigger` attached to a AWS Cognito User Pool.
 - Flutter Application • **[Source Code](Frontend/SmarterSleep/smarter_sleep)** • [README](Frontend/Smarter_Sleep/smarter_sleep/README.md)
+  - Executed on physical or emulated mobile devices.
 
 ## Team Blue Fall 2023
 Team Positions
